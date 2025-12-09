@@ -1,0 +1,67 @@
+# Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Example configuration for Shattered Pixel Dungeon Invoke Utilities
+# Copy it to invoke.yaml and modify it to override default settings.
+
+# SPDIU config namespace:
+# At least one setting has to be set in it for merging to function correctly.
+# Otherwise you're just overriding the defaults with an empty dictionary.
+spdiu:
+
+  ## Game directory and binaries:
+
+  ## By default, the script assumes it is located in the game directory,
+  ## and initializes the value based on the location of tasks.py.
+  ## Set it to an absolute path if you wish to override it. Don't leave it empty.
+  # game_dir: ''
+
+  ## The command to run the game, relative to game_dir.
+  # game_cmd: 'bin/Shattered Pixel Dungeon'
+
+
+  ## Game data:
+
+  ## The parent directory
+  # data_dir: '~/.local/share/.shatteredpixel'
+
+  ## The save folder
+  # active_save: 'shattered-pixel-dungeon',
+
+  ## The profile files contained in the data folder
+  ## Might be useful for adapting to forks, otherwise leave alone.
+  # data_files:
+  #   - 'settings.xml'
+  #   - 'badges.dat'
+  #   - 'bones.dat'
+  #   - 'journal.dat'
+  #   - 'rankings.dat'
+
+
+  ## SPDIU config:
+  ## The script's working directory.
+  ## Ideally on the same physical drive as the data.
+  # work_dir: '~/.local/share/.shatteredpixel/saves'
+
+  ## The name of the default save slot
+  # default_slot: 'default'
+  ## The base name of the backup slots
+  # backup_slot: 'bak'
+
+
+  ## Fancy decorations:
+
+  # time_format: '🗓️ %Y %b %d 🕰️ %H:%M:%S'
+
+  # bullet_a: ' ||> '
+  bullet_a: '~~> '
+  # bullet_b: '  |> '
+  bullet_b: ' ~> '
+
+  # disc_a: '📀'
+  # disc_b: '💿'
+
+  # i_bak: '💾',
+  # i_game: '🕹️',
+  # i_data: '🗂️',
+  # i_clean: '🧹',

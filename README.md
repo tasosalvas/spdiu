@@ -1,22 +1,11 @@
 <!-- Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com> -->
-<!-- AGPL-3.0-or-later -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 # Shattered Pixel Dungeon Invoke Utility
 
 > SPDIU is a collection of [Invoke](https://www.pyinvoke.org/) tasks that manage [Shattered Pixel Dungeon](https://shatteredpixel.com/) game data.
 
+It's a library of tricks to make your SPD CLI experience as comfortable as the rest of your awesome terminal!
 
-## Tools and goals
-
-**Why Invoke?** Because it's fun to do it in Python, and I already use it and [Fabric](https://www.fabfile.org/) for work stuff. It makes it easy to add and chain little local tasks and keep them structured as they pile up.
-
-**Why Python?** Because it's very readable, and I think it's great for self-documenting automation.
-
-**Why no UI?** Because obviously **IU** is the opposite of UI, duh.
-
-**Windows when?** Uh, send patches? Python/Invoke shouldn't be hard to get to work. The basic linux commands used in tasks would need to be handled somehow, and I'm not sure I'd want it if it's not pretty. I certainly wouldn't have a machine to test it.
-
-
-# Features
 
 ## Save slots
 
@@ -28,7 +17,6 @@ Saved states are copies of the game's data folder. They each may contain multipl
 ## Game data parsing
 
 - `inv show` displays an overview of a save slot, or `-a` the active game data.
-
 
 
 # Quick Start
@@ -44,10 +32,11 @@ $ sudo apt install gzip git pipx
 $ pipx install invoke
 ```
 
-Then `git clone` **spdiu** into the directory you are going to run it from.
+Then clone the `spdiu` project into the directory you are going to run it from.
 The directory must be either non-existent or empty for the initial clone, but afterwards you can place your SPD installation in there.
 
 ```sh
+# this will clone the main branch
 $ git clone https://github.com/tasosalvas/spdiu.git ~/games/spdiu
 ```
 
@@ -60,10 +49,14 @@ SPDIU is primarily meant to live in a terminal you keep open while you play.
 
 
 ```sh
-# The tasks load when there's a tasks.py in our current or parent directory.
-# Being in ~/games/spdiu/bin/bar/foo would also work.
 $ cd ~/games/spdiu
+```
 
+The tasks load when there's a tasks.py in our current or parent directory.
+Being in `~/games/spdiu/bin/bar/foo` would also work.
+
+
+```sh
 $ inv show -a
 > Showing 📀 Active game data
 > [...]
@@ -81,8 +74,13 @@ $ inv save
 # Save slots can have alphanumeric names.
 $ inv save -s goo
 > State saved! 💿 goo
+```
 
-# Loading preserves the active data it substituted.
+Save slots by default are kept in a `saves` directory next to your active game data in `~/.local/share/.shatteredpixel/`, but can be configured through the `work_dir` setting.
+
+Loading preserves the active data it substituted in the special `backup_slot`, in case you fat-fingered it and need to undo.
+
+```sh
 $ inv load
 > Active state backup created! 💾 bak
 > State loaded! 📀 default
@@ -90,17 +88,23 @@ $ inv load
 # oops
 $ inv load -s bak
 > State loaded! 📀 bak
+```
 
-# List all save slots
+You can list save slots with `ls`.
+
+```sh
 $ inv ls
 > Displaying 3 save slots, oldest to newest:
 > [...]
+```
+And you can clean up after you're done.
 
-# Done with this run
+```sh
 $ inv clean
 > 🧹 3 saved states deleted.
 > Active state backup created! 💾 bak
 ```
+
 
 ## Interactive help
 
@@ -108,7 +112,7 @@ This documentation is intended to be an overview and will be kept accurate, but 
 
 ```sh
 $ inv info
-> [Basic tips and reminders common commands.]
+> [Basic tips and reminders for common commands.]
 # With '-c' it can also list your active SPDIU configuration
 
 $ inv -l
@@ -118,7 +122,8 @@ $ inv -h save
 > [Full description and parameters of the 'save' task.]
 ```
 
-These help texts are the Python docstrings in [tasks.py](./tasks.py).
+The task help texts are the Python docstrings in [tasks.py](./tasks.py).
+Their accepted parameters are the arguments in each task's definition.
 
 While all of the utility's function is exposed through the interactive help system, it also aims to be easy to read so it can act as a reference for how each task is accomplished.
 
@@ -159,7 +164,7 @@ The default configuration assumes the following directory structure:
 spd/
 ├── bin          # SPD binary
 ├── lib          # SPD lib folder
-├── invoke.yaml  # user config modified from .example
+├── invoke.yaml  # local user config
 ├── .git
 ├── .gitignore
 ├── invoke.yaml.example
@@ -170,6 +175,40 @@ spd/
 
 If you wish to keep the script in different location, be sure to configure the `game_dir` and `game_cmd` variables in `invoke.yaml`.
 
+Different flavors of SPD distribute the game in their own ways, so in those cases configuration will be required anyway.
+
+
+# Philosophy and Goals
+
+I love Pixel Dungeon and SPD as free software cultural staples now spanning decades. I think they're worth nerding out on, and the abundance of forks sharing the same core makes these recipes applicable to many of them with very little effort.
+
+- Features that **can apply to most forks** are preferred to digging into a single flavor's specifics
+
+Currently the project is _developed_ for my own use, more during playtime than work time. I might have fun getting into save editing or refactoring and structuring just to make things pretty. Or I might be playing something else. I'll be around, though
+
+- I can make **no promises of frequent updates**, but I hope to develop and maintain this code in a way that allows the user to adapt to future changes in the games through configuration
+
+SPDIU is _published_ more with the intention to be educational than to achieve any specific function. Following that:
+
+- **Form** matters. For this project it's more important to do it properly than to get the thing to work at all. This includes complying with FOSS standards and following best practices for any tools involved
+- **Readability** is a primary goal. This includes having a structure that can be easily reasoned about, but also allows a user peeking into the source to quickly audit the part they're interested in without digging into layers of architecture
+- **Documentation** aims to be welcoming and be comprehensive on _intention_, _utility_ and _structure_, but to ultimately guide the user to the interactive help system for specifics, and to the (purposefully readable) code for implementation details
+
+I consider messing around with the game a great entryway to the nuances of the relationship a user can have with free software, and SPD a shining example of remix culture. Let's have fun in the terminal.
+
+I'm not saying that any of this is perfect, and I'll be happy to consider and curate improvements that align with these specific goals.
+
+
+## On Tools
+
+**Why Python?** Because it's very expressive and readable and we're not building rocket kernels.
+
+**Why Invoke?** Because it's fun to do it in Python, and I already use it and [Fabric](https://www.fabfile.org/) for work stuff. It makes it easy to add and chain little local tasks and keep them structured as they pile up. Self-documenting automation. It does have internals we sometimes need to know about, but it's generally good at getting out of the way and letting task logic be business logic.
+
+**Why no UI?** Because obviously **IU** is the opposite of UI, duh.
+
+**Windows when?** Uh, send patches? Python/Invoke shouldn't be hard to get to work and document. The basic linux commands used in tasks would need to be handled somehow, and I'm not sure I'd want it if it's not pretty. I certainly won't have a machine to test it.
+
 
 # Changelog
 
@@ -178,13 +217,47 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 
 ## [Unrelased]
 
-Planned before the first release:
-- [ ] Walking save dirs to find the true last modification time
-- [ ] Selectively loading games while leaving profile stats untouched
-- [ ] Parsing saved games and providing summaries
+
+### Planned before the first release
+
+- [x] Initial project structure and doc
+- [x] Config hierarchy, allowing user configuration
 - [ ] Allowing user-defined tasks without messing with the core `tasks.py`
+- [x] Saving and loading
+- [ ] Selectively loading games while leaving profile stats untouched
+- [ ] Walking save dirs to find the true last modification time
+- [x] Parsing profiles (journal etc) in slots and providing summaries
+- [ ] Parsing saved games in slots and providing summaries
+- [ ] CONTRIBUTING document
 - [ ] Readme: Screenshots
-- [ ] Readme: Example of editing vars to work with forks, i.e. ReARrangedPD
+- [ ] Readme: Example of editing config to work with forks, i.e. ReARrangedPD
+
+
+### Cool future ideas
+
+Not planned yet but viable, loosely in the order I'm considering them.
+
+- [ ] Checking for self updates
+- [ ] Logo n stuff
+- [ ] Game binary management
+    - [ ] Getting all releases from the SPD github
+    - [ ] Installing a chosen version of SPD in the spdiu folder
+    - [ ] Checking for SPD updates
+- [ ] OOP refactoring of saves and slots, encapsulating all game-specific code
+- [ ] Extra Flavor management
+    - [ ] Presets for installing common SPD forks
+- [ ] linting (maybe black?)
+- [ ] unit tests  while things are small
+- [ ] Save editing
+
+
+### Far future ideas
+
+Maybe if there's collaboration and I don't run out of steam.
+
+- [ ] Cloning the SPD code to get the complete mob and item lists for journal
+- [ ] Adapting the process for SPD forks
+- [ ] Templating a starter codebase for a fork from SPD source, documenting best practices
 
 
 ### Added

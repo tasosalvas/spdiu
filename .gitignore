@@ -1,6 +1,7 @@
 /*
 !/tasks.py
 !/invoke.yaml.example
+!/local_tasks.py.example
 !/.gitignore
 !/README.md
 !/LICENSE

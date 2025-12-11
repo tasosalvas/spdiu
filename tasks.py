@@ -538,3 +538,22 @@ ns.add_task(show)
 ns.add_task(backup)
 ns.add_task(clean)
 ns.add_task(info)
+
+
+# Conditionally import local project tasks
+try:
+    import local_tasks
+
+    if 'ns' in dir(local_tasks):
+        ns.add_collection(local_tasks.ns)
+
+    else:
+        if 'collection_name' in dir(local_tasks):
+            col_name = local_tasks.collection_name
+        else:
+            col_name = 'u'
+
+        ns.add_collection(Collection.from_module(local_tasks, col_name))
+
+except ModuleNotFoundError:
+    pass

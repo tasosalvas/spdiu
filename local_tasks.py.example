@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+# Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+This is an example for adding your own local tasks to SPDIU.
+
+See https://docs.pyinvoke.org/en/stable/ for invoke documentation.
+"""
+
+
+from invoke import task
+
+# You can access the main tasks.py and run tasks from it.
+import tasks
+
+## An automatically detected user collection will use the 'u' prefix.
+## If an 'ns' object is detected, SPDIU will add it as-is instead.
+
+## If you wish to manage the collection's namespace, you need to declare it explicitly.
+## If you do this, you will also need to add the tasks to the collection manually.
+
+# from invoke import Collection
+# ns = Collection('myname')
+
+
+@task
+def config(c):
+    """
+    Accesses a config value from the same context.
+    """
+    cfg = c.config.spdiu
+
+    print(f"Here's a config value: \"{cfg.bullet_a}\".")
+
+
+@task(pre=[tasks.save])
+def chain(c):
+    """
+    Chains tasks from the main tasks.py. Saves and displays info.
+    """
+    print("\nThe above task was loaded and ran as an invoke pre-task.\n")
+
+    tasks.show(c)
+
+    print("\nThis task called the 'show' function directly.")
+
+
+## Adding tasks manually, required if the collection was explicitly declared.
+# ns.add_task(config)
+# ns.add_task(chain)
+
+## Happy Hacking!

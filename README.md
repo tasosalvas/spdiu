@@ -16,7 +16,7 @@ Saved states are copies of the game's data folder. They each may contain multipl
 
 ## Game data parsing
 
-- `inv show` displays an overview of a save slot, or `-a` the active game data.
+- `inv show` displays an overview of a save slot (or with `-a`, the active game data).
 
 
 # Quick Start
@@ -65,8 +65,6 @@ $ inv show -a
 ## Saving and Loading
 The game automatically saves when taking certain actions, such as changing floors. The easiest way to force a save is to quit to menu. Afterwards you can use the script to back that state up.
 
-Loading can be done while the game is on the main menu, unless your character just died, in which case you will need to restart SPD for it to look up the loaded game.
-
 ```sh
 $ inv save
 > State saved! 💿 default
@@ -78,7 +76,7 @@ $ inv save -s goo
 
 Save slots by default are kept in a `saves` directory next to your active game data in `~/.local/share/.shatteredpixel/`, but can be configured through the `work_dir` setting.
 
-Loading preserves the active data it substituted in the special `backup_slot`, in case you fat-fingered it and need to undo.
+Loading can be done while the game is on the main menu, unless your character just died, in which case you will need to restart SPD for it to look up the loaded game.
 
 ```sh
 $ inv load
@@ -89,6 +87,8 @@ $ inv load
 $ inv load -s bak
 > State loaded! 📀 bak
 ```
+
+Loading preserves the active data it substituted in the special `backup_slot`, in case you fat-fingered it and need to undo.
 
 You can list save slots with `ls`.
 
@@ -137,7 +137,7 @@ SPDIU uses [invoke's config system](https://docs.pyinvoke.org/en/stable/concepts
 - The _Collection configuration_, defined near the top of `tasks.py`, contains the default values
 - A project-level `invoke.yaml` may contain user overrides
 
-All other config levels invoke supports may be used, this is just a recommended setup for this application.
+All other config levels Invoke supports may be used, this is just a recommended setup for this project.
 
 `inv info -c` displays all configuration variables as seen by the tasks.
 
@@ -162,20 +162,96 @@ The default configuration assumes the following directory structure:
 
 ```sh
 spd/
-├── bin          # SPD binary
-├── lib          # SPD lib folder
-├── invoke.yaml  # local user config
+├── bin             # SPD binary
+├── lib             # SPD lib folder
+├── invoke.yaml     # local user config
+├── invoke.yaml.example
+├── local_tasks.py  # local user tasks
+├── local_tasks.py.example
 ├── .git
 ├── .gitignore
-├── invoke.yaml.example
 ├── LICENSE
 ├── README.md
 └── tasks.py
 ```
 
+The project's `git` configuration only includes its own files explicitly, so it will not touch any other files you put in there.
+
 If you wish to keep the script in different location, be sure to configure the `game_dir` and `game_cmd` variables in `invoke.yaml`.
 
 Different flavors of SPD distribute the game in their own ways, so in those cases configuration will be required anyway.
+
+
+# Defining your own tasks
+
+The utility of some of the functionality of SPDIU, such as unpacking save data, is not the couple of lines it prints by default, but the fact that it makes the contents of a save available as Python objects.
+
+Some obligatory links:
+- The [Invoke documentation](https://docs.pyinvoke.org/en/stable/getting-started.html), for usage not covered in SPDIU's documentation and examples
+- The [Python documentation](https://docs.python.org), the main and most important reference while we're working with it
+
+[local_tasks.py.example](./local_tasks.py.example) contains an annotated demo, which experienced users might find enough to get started. [tasks.py](./tasks.py) itself is meant to be easy to read and borrow things from.
+
+> A refactoring exposing a stable API for dealing with game files is planned.
+>
+> Currently you can call existing tasks and utility functions from your own tasks, or borrow code from them to get you started.
+>
+> After version `1.0.0`, potentially breaking changes will only happen on major releases (i.e. `2.0.0`) and will be listed on the changelog.
+
+
+## Namespaces
+
+SPDIU needs `tasks.py` as an entry point and updates are going to overwrite it with a newer version, so a `local_tasks.py` meant for your own tasks will be imported if found.
+
+Minimal example of `local_tasks.py`:
+```py
+#!/usr/bin/env python
+from invoke import task
+
+@task
+def explosion(c):
+    """
+    A nice docstring is easy to show off in Invoke.
+
+    These later lines will only appear with 'inv -h u.explosion'
+    """
+    # 'c' is the Context. It's passed to tasks on execution.
+
+    # It contains the config,
+    cfg = c.config.spdiu
+
+    # and provides api calls, such as running terminal commands.
+    c.run(f"du -h {cfg.work_dir}")
+
+    print(f"Your {cfg.work_dir} just went BOOM!")
+```
+
+The above file will be automatically turned into a task collection and imported with a default namespace of `u` (for "user"), so our task will be included and can be ran with `inv u.explosion`.
+
+If a `collection_name` variable is set in `local_tasks`, `tasks.py` will call it by than name instead. Note that future SPDIU collections might use obvious short names too, so if you can live with the default it might be more convenient to keep it.
+
+
+### Explicit namespaces
+
+Finally, if a collection is _explicitly_ declared and `tasks.py` detects an `ns` variable in your module, it is imported as it is, ignoring the `collection_name` variable above and using the one declared in it instead.
+
+```py
+from invoke import task, Collection
+
+# Create a new collection named 'my'
+ns = Collection('my')
+
+@task
+def greeting(c):
+    """ It's only an example but we don't like skipping docstrings. """
+    print('Well, hello.')
+
+# an explicit collection needs its tasks added to it
+ns.add_task(greeting)
+```
+
+You might want to use this option if you're importing more collections from your local tasks, as it will allow you to structure them just the way you want them. The Invoke [namespace](https://docs.pyinvoke.org/en/stable/concepts/namespaces.html) documentation can help you take full advantage of this.
+
 
 
 # Philosophy and Goals
@@ -222,7 +298,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 
 - [x] Initial project structure and doc
 - [x] Config hierarchy, allowing user configuration
-- [ ] Allowing user-defined tasks without messing with the core `tasks.py`
+- [x] Allowing user-defined tasks without messing with the core `tasks.py`
 - [x] Saving and loading
 - [ ] Selectively loading games while leaving profile stats untouched
 - [ ] Walking save dirs to find the true last modification time
@@ -239,11 +315,11 @@ Not planned yet but viable, loosely in the order I'm considering them.
 
 - [ ] Checking for self updates
 - [ ] Logo n stuff
+- [ ] OOP refactoring of saves and slots, encapsulating all save-reading code and decoupling it from tasks
 - [ ] Game binary management
     - [ ] Getting all releases from the SPD github
     - [ ] Installing a chosen version of SPD in the spdiu folder
     - [ ] Checking for SPD updates
-- [ ] OOP refactoring of saves and slots, encapsulating all game-specific code
 - [ ] Extra Flavor management
     - [ ] Presets for installing common SPD forks
 - [ ] linting (maybe black?)
@@ -262,6 +338,11 @@ Maybe if there's collaboration and I don't run out of steam.
 
 ### Added
 
+Tasks:
 - `save`, `load`, `ls`, `backup` and `clean` tasks create and manage save state slots
 - `show` task reads saves or active game data and displays details on their contents
 - `info` task provides introductory documentation, `-c` displays config
+
+Customization:
+- Configuration overrides can be set in an `invoke.yaml` in the project folder
+- Local user tasks can be defined in a `local_tasks.py`.

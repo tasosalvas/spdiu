@@ -14,13 +14,18 @@ from invoke import task
 import tasks
 
 ## An automatically detected user collection will use the 'u' prefix.
-## If an 'ns' object is detected, SPDIU will add it as-is instead.
+## If a 'collection_name' is found in an implicit collection, it will be used instead.
+# collection_name = 'myname'
 
-## If you wish to manage the collection's namespace, you need to declare it explicitly.
-## If you do this, you will also need to add the tasks to the collection manually.
+## An 'ns' object can be used to declare the collection explicitly.
+## If it is detected, SPDIU will add it as-is instead, ignoring 'collection_name'
+
+## If you wish to manage the collection's namespace, you need to declare it.
+## If you do this, you will need to add the tasks to the collection manually,
+## but it can allow you to load a whole hierarchy of collections from local_tasks.
 
 # from invoke import Collection
-# ns = Collection('myname')
+# ns = Collection('mycollection')
 
 
 @task

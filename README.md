@@ -63,6 +63,7 @@ $ inv show -a
 ```
 
 ## Saving and Loading
+
 The game automatically saves when taking certain actions, such as changing floors. The easiest way to force a save is to quit to menu. Afterwards you can use the script to back that state up.
 
 ```sh
@@ -89,6 +90,14 @@ $ inv load -s bak
 ```
 
 Loading preserves the active data it substituted in the special `backup_slot`, in case you fat-fingered it and need to undo.
+
+You can also selectively load a game, while keeping the player profile untouched.
+
+```sh
+$ inv load -g game1
+> Active state backup created! 💾 bak
+> Game loaded! 📀 default 🕹️ game1
+```
 
 You can list save slots with `ls`.
 
@@ -253,7 +262,6 @@ ns.add_task(greeting)
 You might want to use this option if you're importing more collections from your local tasks, as it will allow you to structure them just the way you want them. The Invoke [namespace](https://docs.pyinvoke.org/en/stable/concepts/namespaces.html) documentation can help you take full advantage of this.
 
 
-
 # Philosophy and Goals
 
 I love Pixel Dungeon and SPD as free software cultural staples now spanning decades. I think they're worth nerding out on, and the abundance of forks sharing the same core makes these recipes applicable to many of them with very little effort.
@@ -293,14 +301,13 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 
 ## [Unrelased]
 
-
 ### Planned before the first release
 
 - [x] Initial project structure and doc
 - [x] Config hierarchy, allowing user configuration
 - [x] Allowing user-defined tasks without messing with the core `tasks.py`
 - [x] Saving and loading
-- [ ] Selectively loading games while leaving profile stats untouched
+- [x] Selectively loading games while leaving profile stats untouched
 - [ ] Walking save dirs to find the true last modification time
 - [x] Parsing profiles (journal etc) in slots and providing summaries
 - [ ] Parsing saved games in slots and providing summaries

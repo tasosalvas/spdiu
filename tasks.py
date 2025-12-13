@@ -290,9 +290,15 @@ def save(c, slot=None):
 
 
 @task
-def load(c, slot=None, last=False):
+def load(c, slot=None, last=False, game=None):
     """
-    Restores a backup of the savegame folder. -s [slot], or -l for last save
+    Loads a save. -s [slot], -l for last save, -g [game] to only load a game.
+
+    The --game [game name] flag allows loading only a specific game,
+    while leaving the player profile untouched (i.e. keeping unlocks).
+
+    Loading will save a backup of the active save in the backup slot,
+    unless the backup slot itself is being loaded.
     """
     cfg = c.config.spdiu
     data_dir = os.path.expanduser(cfg.data_dir)
@@ -312,20 +318,41 @@ def load(c, slot=None, last=False):
         slot = slots[0][2]
 
 
-    src = os.path.join(work_dir, slot)
-    dest = os.path.join(data_dir, cfg.active_save)
+    src_slot = os.path.join(work_dir, slot)
+    dest_slot = os.path.join(data_dir, cfg.active_save)
 
-    if not os.path.exists(src):
-        print("Invalid save name. 'inv ls' to list existing slots.")
+    if not os.path.exists(src_slot):
+        print("Invalid slot name. 'inv ls' to list existing slots.")
         return
+
+
+    if game == None:
+        if slot != cfg.backup_slot:
+            backup(c)
+
+        c.run(f"rm -rf {dest_slot}")
+        c.run(f"cp -a {src_slot} {dest_slot}")
+
+        print(f"State loaded! {cfg.disc_a} {slot}")
+        return
+
+
+    src_game = os.path.join(src_slot, game)
+    dest_game = os.path.join(dest_slot, game)
+
+    if not os.path.exists(src_game):
+        print('Game not found in slot.')
+        print(f"'inv show -s {slot}' to list existing games.")
+        return
+
 
     if slot != cfg.backup_slot:
         backup(c)
 
-    c.run(f"rm -rf {dest}")
-    c.run(f"cp -a {src} {dest}")
+    c.run(f"rm -rf {dest_game}")
+    c.run(f"cp -a {src_game} {dest_game}")
 
-    print(f"State loaded! {cfg.disc_a} {slot}")
+    print(f"Game loaded! {cfg.disc_a} {slot} {cfg.i_game} {game}")
 
 
 # Informational tasks

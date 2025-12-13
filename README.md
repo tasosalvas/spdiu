@@ -23,12 +23,11 @@ Saved states are copies of the game's data folder. They each may contain multipl
 
 I build and use this on [Debian](https://www.debian.org/). The installation process should be identical for any `.deb` based distribution, and very similar for other package managers.
 
-- **gzip** is used by the collection to unpack data files.
 - **git** is the way you get (or maybe even contribute to) _SPDIU_.
 - **Invoke** (and by extension Python) needs to be installed on your system. My preferred method is `pipx`.
 
 ```sh
-$ sudo apt install gzip git pipx
+$ sudo apt install git pipx
 $ pipx install invoke
 ```
 
@@ -121,14 +120,14 @@ This documentation is intended to be an overview and will be kept accurate, but 
 
 ```sh
 $ inv info
-> [Basic tips and reminders for common commands.]
+> ["Basic tips and reminders for common commands."]
 # With '-c' it can also list your active SPDIU configuration
 
 $ inv -l
-> [Lists all available tasks with a short help text.]
+> ["Lists all available tasks with a short help text"]
 
 $ inv -h save
-> [Full description and parameters of the 'save' task.]
+> ["Full description and parameters of the 'save' task"]
 ```
 
 The task help texts are the Python docstrings in [tasks.py](./tasks.py).
@@ -230,6 +229,8 @@ def explosion(c):
     cfg = c.config.spdiu
 
     # and provides api calls, such as running terminal commands.
+    # Ideally we want to do stuff in python, to be compatible wherever it runs.
+    # i.e. this would probably only work on linux. But it's your task.
     c.run(f"du -h {cfg.work_dir}")
 
     print(f"Your {cfg.work_dir} just went BOOM!")
@@ -291,7 +292,7 @@ I'm not saying that any of this is perfect, and I'll be happy to consider and cu
 
 **Why no UI?** Because obviously **IU** is the opposite of UI, duh.
 
-**Windows when?** Uh, send patches? Python/Invoke shouldn't be hard to get to work and document. The basic linux commands used in tasks would need to be handled somehow, and I'm not sure I'd want it if it's not pretty. I certainly won't have a machine to test it.
+**Windows when?** Uh, send patches? Python/Invoke shouldn't be hard to get to work and document. There's also a chance the way windows file access works will make the tool clunkier to use. I'll be happy to add instructions, if you figure them out. I certainly won't have a machine to test it.
 
 
 # Changelog
@@ -311,6 +312,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [ ] Walking save dirs to find the true last modification time
 - [x] Parsing profiles (journal etc) in slots and providing summaries
 - [ ] Parsing saved games in slots and providing summaries
+- [ ] Save editing API
 - [ ] CONTRIBUTING document
 - [ ] Readme: Screenshots
 - [ ] Readme: Example of editing config to work with forks, i.e. ReARrangedPD
@@ -330,8 +332,7 @@ Not planned yet but viable, loosely in the order I'm considering them.
 - [ ] Extra Flavor management
     - [ ] Presets for installing common SPD forks
 - [ ] linting (maybe black?)
-- [ ] unit tests  while things are small
-- [ ] Save editing
+- [ ] unit tests while things are small
 
 
 ### Far future ideas

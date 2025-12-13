@@ -13,9 +13,9 @@ Usage:
 """
 
 
-import os
+import os, shutil
 
-import json
+import gzip, json
 import xml.etree.ElementTree as ET
 
 from time import gmtime, strftime
@@ -183,15 +183,18 @@ def _get_profile(c, dir_name):
     cfg = c.config.spdiu
     profile = {}
 
-    for f in cfg.data_files:
-        f_path = os.path.join(dir_name, f)
+    for fn in cfg.data_files:
+        f_path = os.path.join(dir_name, fn)
 
-        f_parts = f.split('.')
+        f_parts = fn.split('.')
         f_ext = f_parts[1].lower() if len(f_parts) > 1 else ""
 
         if f_ext == "dat":
-            result = c.run(f"gzip -cd {f_path}", hide=True)
-            profile[f] = json.loads(result.stdout)
+            with gzip.open(f_path, 'rb') as f:
+                content = f.read()
+
+            profile[fn] = json.loads(content)
+
 
         elif f_ext == "xml":
             options = {}
@@ -200,7 +203,7 @@ def _get_profile(c, dir_name):
             for i in root:
                 options[i.attrib['key']] = i.text
 
-            profile[f] = options
+            profile[fn] = options
 
     return profile
 
@@ -224,9 +227,14 @@ def backup(c):
         print('Aborting! There seems to be no active data folder.')
         return
 
-    c.run(f"mkdir -p {work_dir}")
-    c.run(f"rm -rf {dest}")
-    c.run(f"cp -a {src} {dest}")
+    os.makedirs(work_dir, exist_ok=True)
+
+    try:
+        shutil.rmtree(dest)
+    except FileNotFoundError:
+        pass
+
+    shutil.copytree(src, dest)
 
     print(f"Active state backup created! {cfg.i_bak} {cfg.backup_slot}")
 
@@ -245,7 +253,11 @@ def clean(c):
 
     slots = _get_slots(c)
     for (fn, mtime, slot) in slots:
-        c.run(f"rm -rf {fn}")
+        try:
+            shutil.rmtree(fn)
+        except FileNotFoundError:
+            pass
+
 
     print(f"{cfg.i_clean} {len(slots)} saved states deleted.")
 
@@ -278,14 +290,26 @@ def save(c, slot=None):
     bak = os.path.join(work_dir, f"{cfg.backup_slot}.{slot}")
 
     if os.path.exists(dest):
-        c.run(f"rm -rf {bak}")
-        c.run(f"cp -a {dest} {bak}")
+
+        try:
+            shutil.rmtree(bak)
+        except FileNotFoundError:
+            pass
+
+        shutil.copytree(dest, bak)
+
         print(f"Previous save preserved as {cfg.i_bak} {cfg.backup_slot}.{slot}")
 
 
-    c.run(f"mkdir -p {work_dir}")
-    c.run(f"rm -rf {dest}")
-    c.run(f"cp -R {src} {dest}")
+    os.makedirs(work_dir, exist_ok=True)
+
+    try:
+        shutil.rmtree(dest)
+    except FileNotFoundError:
+        pass
+
+    shutil.copytree(src, dest)
+
     print(f"State saved! {cfg.disc_b} {slot}")
 
 
@@ -330,8 +354,12 @@ def load(c, slot=None, last=False, game=None):
         if slot != cfg.backup_slot:
             backup(c)
 
-        c.run(f"rm -rf {dest_slot}")
-        c.run(f"cp -a {src_slot} {dest_slot}")
+        try:
+            shutil.rmtree(dest_slot)
+        except FileNotFoundError:
+            pass
+
+        shutil.copytree(src_slot, dest_slot)
 
         print(f"State loaded! {cfg.disc_a} {slot}")
         return
@@ -349,8 +377,12 @@ def load(c, slot=None, last=False, game=None):
     if slot != cfg.backup_slot:
         backup(c)
 
-    c.run(f"rm -rf {dest_game}")
-    c.run(f"cp -a {src_game} {dest_game}")
+    try:
+        shutil.rmtree(dest_game)
+    except FileNotFoundError:
+        pass
+
+    shutil.copytree(src_game, dest_game)
 
     print(f"Game loaded! {cfg.disc_a} {slot} {cfg.i_game} {game}")
 

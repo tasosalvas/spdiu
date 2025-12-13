@@ -12,16 +12,14 @@ Usage:
 'inv -h [task]' for a task's full docstring.
 """
 
+import os
 
-import os, shutil
-
-import gzip, json
-import xml.etree.ElementTree as ET
-
-from time import gmtime, strftime
+from time import strftime
 from operator import itemgetter
 
 from invoke import Collection, task
+
+import spdiu
 
 
 # Default (Collection level) configuration. Override values in invoke.yaml.
@@ -67,13 +65,6 @@ ns.configure({
 
 
 # Helper functions, no context
-def _get_ts(dir_name):
-    """
-    Returns a gmtime (seconds: float since epoch) for a path.
-    """
-    return gmtime(os.stat(dir_name).st_mtime)
-
-
 def _get_games(save_dir):
     """
     Returns a list of game tuples: (path, last mod, game) for a data dir.
@@ -88,7 +79,7 @@ def _get_games(save_dir):
 
         id_file = os.path.join(save_dir, i, 'game.dat')  # Used to detect a game
         if os.path.isdir(i_path) and os.path.isfile(id_file):
-            games.append((i_path, _get_ts(i_path), i))
+            games.append((i_path, spdiu.get_ts(i_path), i))
 
     return games
 
@@ -151,7 +142,7 @@ def _get_slot(c, slot):
 
     return (
         slot_path,
-        _get_ts(slot_path),
+        spdiu.get_ts(slot_path),
         slot,
     )
 
@@ -190,20 +181,10 @@ def _get_profile(c, dir_name):
         f_ext = f_parts[1].lower() if len(f_parts) > 1 else ""
 
         if f_ext == "dat":
-            with gzip.open(f_path, 'rb') as f:
-                content = f.read()
-
-            profile[fn] = json.loads(content)
-
+            profile[fn] = spdiu.read_dat(f_path)
 
         elif f_ext == "xml":
-            options = {}
-
-            root = ET.parse(f_path).getroot()
-            for i in root:
-                options[i.attrib['key']] = i.text
-
-            profile[fn] = options
+            profile[fn] = spdiu.read_xml(f_path)
 
     return profile
 
@@ -217,24 +198,15 @@ def backup(c):
     Automatically called by load and clean.
     """
     cfg = c.config.spdiu
-    data_dir = os.path.expanduser(cfg.data_dir)
-    work_dir = os.path.expanduser(cfg.work_dir)
-
-    src = os.path.join(data_dir, cfg.active_save)
-    dest = os.path.join(work_dir, cfg.backup_slot)
-
-    if not os.path.exists(src):
-        print('Aborting! There seems to be no active data folder.')
-        return
-
-    os.makedirs(work_dir, exist_ok=True)
+    src = os.path.join(cfg.data_dir, cfg.active_save)
+    dest = os.path.join(cfg.work_dir, cfg.backup_slot)
 
     try:
-        shutil.rmtree(dest)
-    except FileNotFoundError:
-        pass
+        spdiu.replace(src, dest)
 
-    shutil.copytree(src, dest)
+    except FileNotFoundError:
+        print('Aborting! There seems to be no active data folder.')
+        return
 
     print(f"Active state backup created! {cfg.i_bak} {cfg.backup_slot}")
 
@@ -245,19 +217,13 @@ def clean(c):
     Removes all saved states, leaves a backup of the active data folder.
     """
     cfg = c.config.spdiu
-    data_dir = os.path.expanduser(cfg.data_dir)
-
-    if not os.path.exists(os.path.join(data_dir, cfg.active_save)):
+    if not spdiu.exists(os.path.join(data_dir, cfg.active_save)):
         print('Aborting! There seems to be no active data folder.')
         return
 
     slots = _get_slots(c)
     for (fn, mtime, slot) in slots:
-        try:
-            shutil.rmtree(fn)
-        except FileNotFoundError:
-            pass
-
+        spdiu.remove(fn)
 
     print(f"{cfg.i_clean} {len(slots)} saved states deleted.")
 
@@ -275,8 +241,6 @@ def save(c, slot=None):
     Saves are kept in the game's data folder, with their slot as an extension.
     """
     cfg = c.config.spdiu
-    data_dir = os.path.expanduser(cfg.data_dir)
-    work_dir = os.path.expanduser(cfg.work_dir)
 
     if slot == None:
         slot = cfg.default_slot
@@ -285,30 +249,18 @@ def save(c, slot=None):
         print("Aborting! Names can only contain alphanumeric characters.")
         return
 
-    src = os.path.join(data_dir, cfg.active_save)
-    dest = os.path.join(work_dir, slot)
-    bak = os.path.join(work_dir, f"{cfg.backup_slot}.{slot}")
+    src = os.path.join(cfg.data_dir, cfg.active_save)
+    dest = os.path.join(cfg.work_dir, slot)
+    bak = os.path.join(cfg.work_dir, f"{cfg.backup_slot}.{slot}")
 
-    if os.path.exists(dest):
-
-        try:
-            shutil.rmtree(bak)
-        except FileNotFoundError:
-            pass
-
-        shutil.copytree(dest, bak)
-
+    if spdiu.exists(dest):
+        spdiu.replace(dest, bak)
         print(f"Previous save preserved as {cfg.i_bak} {cfg.backup_slot}.{slot}")
 
-
-    os.makedirs(work_dir, exist_ok=True)
-
     try:
-        shutil.rmtree(dest)
+        spdiu.replace(src, dest)
     except FileNotFoundError:
-        pass
-
-    shutil.copytree(src, dest)
+        print("No game data found to save!")
 
     print(f"State saved! {cfg.disc_b} {slot}")
 
@@ -325,9 +277,6 @@ def load(c, slot=None, last=False, game=None):
     unless the backup slot itself is being loaded.
     """
     cfg = c.config.spdiu
-    data_dir = os.path.expanduser(cfg.data_dir)
-    work_dir = os.path.expanduser(cfg.work_dir)
-
 
     if slot == None:
         slot = cfg.default_slot
@@ -342,10 +291,10 @@ def load(c, slot=None, last=False, game=None):
         slot = slots[0][2]
 
 
-    src_slot = os.path.join(work_dir, slot)
-    dest_slot = os.path.join(data_dir, cfg.active_save)
+    src_slot = os.path.join(cfg.work_dir, slot)
+    dest_slot = os.path.join(cfg.data_dir, cfg.active_save)
 
-    if not os.path.exists(src_slot):
+    if not spdiu.exists(src_slot):
         print("Invalid slot name. 'inv ls' to list existing slots.")
         return
 
@@ -354,12 +303,7 @@ def load(c, slot=None, last=False, game=None):
         if slot != cfg.backup_slot:
             backup(c)
 
-        try:
-            shutil.rmtree(dest_slot)
-        except FileNotFoundError:
-            pass
-
-        shutil.copytree(src_slot, dest_slot)
+        spdiu.replace(src_slot, dest_slot)
 
         print(f"State loaded! {cfg.disc_a} {slot}")
         return
@@ -368,22 +312,15 @@ def load(c, slot=None, last=False, game=None):
     src_game = os.path.join(src_slot, game)
     dest_game = os.path.join(dest_slot, game)
 
-    if not os.path.exists(src_game):
+    if not spdiu.exists(src_game):
         print('Game not found in slot.')
         print(f"'inv show -s {slot}' to list existing games.")
         return
 
-
     if slot != cfg.backup_slot:
         backup(c)
 
-    try:
-        shutil.rmtree(dest_game)
-    except FileNotFoundError:
-        pass
-
-    shutil.copytree(src_game, dest_game)
-
+    spdiu.replace(src_game, dest_game)
     print(f"Game loaded! {cfg.disc_a} {slot} {cfg.i_game} {game}")
 
 
@@ -419,7 +356,7 @@ def show(c, slot=None, active=False):
 
     if active:
         s_dir = os.path.join(os.path.expanduser(cfg.data_dir), cfg.active_save)
-        s_mtime = _get_ts(s_dir)
+        s_mtime = spdiu.get_ts(s_dir)
         print(f"Showing {cfg.disc_a} Active game data")
 
     else:
@@ -552,7 +489,7 @@ def ls(c):
     slots = sorted(_get_slots(c), key=itemgetter(1))
 
     # active save vars
-    a_ts = _get_ts(os.path.join(os.path.expanduser(cfg.data_dir), cfg.active_save))
+    a_ts = spdiu.get_ts(os.path.join(cfg.data_dir, cfg.active_save))
     a_bullet = cfg.bullet_a
     a_disc = cfg.disc_a
 

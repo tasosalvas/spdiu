@@ -312,7 +312,8 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [ ] Walking save dirs to find the true last modification time
 - [x] Parsing profiles (journal etc) in slots and providing summaries
 - [ ] Parsing saved games in slots and providing summaries
-- [ ] Save editing API
+- [x] Save editing API
+- [ ] OOP refactoring of saves and slots, encapsulating all save-reading code and decoupling it from tasks
 - [ ] CONTRIBUTING document
 - [ ] Readme: Screenshots
 - [ ] Readme: Example of editing config to work with forks, i.e. ReARrangedPD
@@ -324,7 +325,6 @@ Not planned yet but viable, loosely in the order I'm considering them.
 
 - [ ] Checking for self updates
 - [ ] Logo n stuff
-- [ ] OOP refactoring of saves and slots, encapsulating all save-reading code and decoupling it from tasks
 - [ ] Game binary management
     - [ ] Getting all releases from the SPD github
     - [ ] Installing a chosen version of SPD in the spdiu folder

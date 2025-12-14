@@ -481,6 +481,44 @@ def ls(c):
 
 # Cheating tasks
 @task
+def identify(c, game_name='game1'):
+    """
+    Returns all consumable identities. -g [game]
+    """
+    cfg = c.config.spdiu
+    a_slot = os.path.join(cfg.data_dir, cfg.active_save)
+
+    p = Profile(a_slot)
+    g = p.get_game(game_name)
+    gd = g.get_dat('game.dat')
+
+    labels = {k: v for k, v in gd.items() if '_label' in k}
+
+    print('\nPotions:')
+    potions = {k: v for k, v in labels.items() if 'PotionOf' in k}
+
+    for k, v in potions.items():
+        name = k.split('_')[0][len('PotionOf'):]
+        print(f"  {name}: {v}")
+
+
+    print('\nRings:')
+    rings = {k: v for k, v in labels.items() if 'RingOf' in k}
+
+    for k, v in rings.items():
+        name = k.split('_')[0][len('RingOf'):]
+        print(f"  {name}: {v}")
+
+
+    print('\nScrolls:')
+    scrolls = {k: v for k, v in labels.items() if 'ScrollOf' in k}
+
+    for k, v in scrolls.items():
+        name = k.split('_')[0][len('ScrollOf'):]
+        print(f"  {name}: {v}")
+
+
+@task
 def bones(c):
     """
     Sets your bones to a nice pick-me-up.
@@ -522,6 +560,7 @@ ns.add_task(info)
 
 ns_cheat = Collection('ch')
 ns_cheat.add_task(bones)
+ns_cheat.add_task(identify)
 
 ns.add_collection(ns_cheat)
 

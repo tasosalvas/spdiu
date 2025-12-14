@@ -31,7 +31,10 @@ SPDIU keeps a directory of save slots, containing copies of the game's full data
 
 There isn't some big library of cheats (yet), but the `ch` namespace is where they live:
 
-- `inv ch.bones` can bless your next run with an item up to +3 in your pile of bones. More to come!
+- `inv ch.bones` can bless your next run with an item up to +3 in your pile of bones.
+- `inv ch.identify (-g [game])` gets you all consumable identities for the active save
+
+More to come!
 
 
 ## A bit deeper: Write your own
@@ -69,7 +72,7 @@ $ git clone https://github.com/tasosalvas/spdiu.git ~/games/spdiu
 And that's it. Assuming the `inv` command has been installed and your SPD saves are in the default location, you can try things out.
 
 
-# Usage
+# Usage tutorial
 
 SPDIU is primarily meant to live in a terminal you keep open while you play.
 

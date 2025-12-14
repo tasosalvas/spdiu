@@ -88,17 +88,6 @@ class Profile(DataDir):
     An SPD data folder. Includes settings, profile stats, and games.
     """
 
-    def get_settings(self):
-        """
-        Returns the values from settings.xml as a dict.
-        """
-        try:
-            return util.read_xml(os.path.join(self.root_dir, 'settings.xml'))
-
-        except FileNotFoundError:
-            return {}
-
-
     def _get_games(self):
         """
         Returns a list of Game objects for the Profile.
@@ -113,6 +102,28 @@ class Profile(DataDir):
                 games.append(Game(i_path))
 
         return games
+
+
+    def get_settings(self):
+        """
+        Returns the values from settings.xml as a dict.
+        """
+        try:
+            return util.read_xml(os.path.join(self.root_dir, 'settings.xml'))
+
+        except FileNotFoundError:
+            return {}
+
+
+    def get_game(self, game_name):
+        """
+        Returns a game by the requested name.
+        """
+        for g in self.games:
+            if g.name == game_name:
+                return g
+
+        return None
 
 
     def __init__(self, base_dir):

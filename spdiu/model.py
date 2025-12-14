@@ -9,12 +9,44 @@ import os
 from . import util
 
 
+class Item():
+    """
+    An inventory item with an initialized dict.
+    """
+
+    def __init__(self, itemdict={}):
+        self.item = {
+            'cursedKnown': True,
+            'quantity': 1,
+            'levelKnown': False,
+            'cursed': False,
+            'level': 0,
+            'uses_left_to_id': 0,
+            '__className': 'com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor',
+            'kept_lost': False,
+            'curse_infusion_bonus': False,
+            'augment': 'NONE',
+            'glyph_hardened': False,
+            'mastery_potion_bonus': False,
+            'available_uses': 5
+        }
+
+        for k, v in itemdict.items():
+            self.item[k] = v
+
+
 class DataDir():
     """
     A directory of game data. Inherited by Profile and Game.
 
     It knows its last modification time and the .dat files it contains.
     """
+    def set_dat(self, dat_file, contents):
+        """
+        Writes a python object into a dat file.
+        """
+        util.write_dat(os.path.join(self.root_dir, dat_file), contents)
+
 
     def get_dat(self, dat_file):
         """
@@ -90,4 +122,3 @@ class Profile(DataDir):
 
     def __repr__(self):
         return f"<{self.__class__.__name__}> {self.name}"
-

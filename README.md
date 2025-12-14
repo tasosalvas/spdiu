@@ -6,17 +6,44 @@
 
 It's a library of tricks to make your SPD CLI experience as comfortable as the rest of your awesome terminal!
 
-
-## Save slots
-
-Saved states are copies of the game's data folder. They each may contain multiple games.
-
-- `inv save`, `load`, `ls`, `backup` and `clean` tasks create and manage save state slots
+- Run common tasks out of the box from your console
+- Hook up your own Python tasks, leveraging the `spdiu` library
 
 
-## Game data parsing
+## Quick and easy: Tasks
 
-- `inv show` displays an overview of a save slot (or with `-a`, the active game data).
+
+### Save and Load the game
+
+SPDIU keeps a directory of save slots, containing copies of the game's full data folder.
+
+- `inv save` and `load` are all the commands you need to save-scum your way to 9-challenge
+- Safety backups give you a chance to un-wreck your save if you fat-finger it
+- `inv ls` will list your slots, and `clean` will wipe them all
+
+
+### Display Profile and Game data
+
+`inv show` displays an overview of a save slot (or with `-a`, the active game data).
+
+
+### Cheat like it's 1989
+
+There isn't some big library of cheats (yet), but the `ch` namespace is where they live:
+
+- `inv ch.bones` can bless your next run with an item up to +3 in your pile of bones. More to come!
+
+
+## A bit deeper: Write your own
+
+Just place a `local_tasks.py` in your SPDIO folder, and they will be loaded as invoke commands in the `u` namespace.
+
+`spdiu.model` contains Python classes that represent game objects, allowing you to query and edit any part of a savegame in an object-oriented context.
+
+- The `Item` class can initialize valid item dicts to allow you to craft your own
+- The `Profile` and `Game` classes can manage all data in a game state
+
+The `spdiu.util` module provides common utilities for working with the game's data folders and files, including reading and writing the `.dat` files containing the game's state. The classes use them and so can you.
 
 
 # Quick Start

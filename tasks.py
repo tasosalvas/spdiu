@@ -20,7 +20,7 @@ from operator import itemgetter, attrgetter
 from invoke import Collection, task
 
 import spdiu
-from spdiu.model import Profile
+from spdiu.model import Profile, Item
 
 
 # Default (Collection level) configuration. Override values in invoke.yaml.
@@ -479,6 +479,36 @@ def ls(c):
     print(a_bullet + strftime(cfg.time_format, a_ts) + f" {a_disc} {cfg.active_save}")
 
 
+# Cheating tasks
+@task
+def bones(c):
+    """
+    Sets your bones to a nice pick-me-up.
+    """
+
+    cfg = c.config.spdiu
+    a_slot = os.path.join(cfg.data_dir, cfg.active_save)
+    p = Profile(a_slot)
+
+    namespace = 'com.shatteredpixel.shatteredpixeldungeon'
+    item = 'armor.LeatherArmor'
+
+    i = Item({
+        '__className': ".".join((namespace, 'items', item)),
+        'level': 3,
+    })
+
+    bones = {
+        'item': i.item,
+        'hero_class': 'HUNTRESS',
+        'level': 1,
+        'branch': 0,
+    }
+
+    p.set_dat('bones.dat', bones)
+    print('A Small Package of Value Will Come to You, Shortly')
+
+
 # Adding tasks to namespace
 ns.add_task(save)
 ns.add_task(load)
@@ -489,6 +519,11 @@ ns.add_task(show)
 ns.add_task(backup)
 ns.add_task(clean)
 ns.add_task(info)
+
+ns_cheat = Collection('ch')
+ns_cheat.add_task(bones)
+
+ns.add_collection(ns_cheat)
 
 
 # Conditionally import local project tasks

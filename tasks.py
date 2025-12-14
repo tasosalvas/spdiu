@@ -15,11 +15,12 @@ Usage:
 import os
 
 from time import strftime
-from operator import itemgetter
+from operator import itemgetter, attrgetter
 
 from invoke import Collection, task
 
 import spdiu
+from spdiu.model import Profile
 
 
 # Default (Collection level) configuration. Override values in invoke.yaml.
@@ -65,25 +66,6 @@ ns.configure({
 
 
 # Helper functions, no context
-def _get_games(save_dir):
-    """
-    Returns a list of game tuples: (path, last mod, game) for a data dir.
-
-    Takes an absolute directory name, and returns the names of any folders in it
-    that contain a 'game.dat'.
-    """
-    games = []
-
-    for i in os.listdir(save_dir):
-        i_path = os.path.join(save_dir, i)
-
-        id_file = os.path.join(save_dir, i, 'game.dat')  # Used to detect a game
-        if os.path.isdir(i_path) and os.path.isfile(id_file):
-            games.append((i_path, spdiu.get_ts(i_path), i))
-
-    return games
-
-
 def _summarize_record(record):
     """
     Prints a brief summary of a rankings record.
@@ -165,28 +147,6 @@ def _get_slots(c):
             slots.append(slot)
 
     return slots
-
-
-def _get_profile(c, dir_name):
-    """
-    Gets the contents of all the dat files in a save slot.
-    """
-    cfg = c.config.spdiu
-    profile = {}
-
-    for fn in cfg.data_files:
-        f_path = os.path.join(dir_name, fn)
-
-        f_parts = fn.split('.')
-        f_ext = f_parts[1].lower() if len(f_parts) > 1 else ""
-
-        if f_ext == "dat":
-            profile[fn] = spdiu.read_dat(f_path)
-
-        elif f_ext == "xml":
-            profile[fn] = spdiu.read_xml(f_path)
-
-    return profile
 
 
 # File manipulation Tasks
@@ -340,7 +300,7 @@ def info(c, config=False):
         print("'inv info -c' to display active SPDIU configuration.")
         return
 
-    print('Active configuration:')
+    print('Active SPDIU configuration:')
     for k, v in cfg.items():
         print(f"{k}: {v}")
 
@@ -355,7 +315,7 @@ def show(c, slot=None, active=False):
         slot = cfg.default_slot
 
     if active:
-        s_dir = os.path.join(os.path.expanduser(cfg.data_dir), cfg.active_save)
+        s_dir = os.path.join(cfg.data_dir, cfg.active_save)
         s_mtime = spdiu.get_ts(s_dir)
         print(f"Showing {cfg.disc_a} Active game data")
 
@@ -364,113 +324,108 @@ def show(c, slot=None, active=False):
         s_dir, s_mtime, s_name = _get_slot(c, slot)
 
 
-    profile = _get_profile(c, s_dir)
+    p = Profile(s_dir)
     print(f"\nProfile information:")
 
-    for fn, v in profile.items():
-
-        print(f"{cfg.i_data} {fn}")
-
-        if fn == 'settings.xml':
-            print(f"{cfg.bullet_b}{len(v)} options set.")
+    # Settings
+    settings = p.get_settings()
+    print(f"{cfg.bullet_b}{len(settings)} options set.")
 
 
-        elif fn == 'badges.dat':
-            badges = v['badges']
+    # Badges
+    badges = p.get_dat('badges.dat')
+    if badges:
+        print(f"{cfg.bullet_b}{len(badges['badges'])} badges and related unlocks.")
 
-            print(f"{cfg.bullet_b}{len(badges)} badges and related unlocks.")
+    # Bones
+    bones = p.get_dat('bones.dat')
+    if bones:
+        if 'hero_class' not in bones:
+            print(f"{cfg.bullet_b}No character bones are set to spawn.")
 
-
-        elif fn == 'bones.dat':
-
-            if 'hero_class' not in v:
-                print(f"{cfg.bullet_b}No character bones are set to spawn.")
-
-            else:
-                hero = v['hero_class']
-                lvl = v['level']
-                br = v['branch']
-
-                print(f"{cfg.bullet_a}{hero} bones at level {lvl}, branch {br}.")
-
-
-        elif fn == 'journal.dat':
-            # NOTE: Entries appear in the file only after they've been unlocked,
-            #       So total numbers are not represented in the save.
-
-            # bestiary_classes <list> [class name] bestiary class index
-            # bestiary_seen <list> [all True] bestiary seen status
-            # bestiary_encounters <list> [int] bestiary encounter count
-
-            b_seen = len(v['bestiary_seen'])
-            print(f"{cfg.bullet_b}Bestiary: {b_seen} mobs seen.")
-
-            # catalog_uses <list> 297 values.
-            # catalog_seen <list> 297 values.
-            # catalog_classes <list> 297 values.
-
-            c_seen = len(v['catalog_seen'])
-            print(f"{cfg.bullet_b}Catalog: {c_seen} items seen.")
-
-            # documents <dict>
-            # {<str> CATEGORY: {<str> note name: <int> 1 unread or 2 read }}.
-            doc_count = 0
-            for k, v in v["documents"].items():
-                doc_count += len(v)
-
-            print(f"{cfg.bullet_b}{doc_count} tutorials and notes discovered.")
-
-
-        elif fn == 'rankings.dat':
-
-            # won <int>: number of wins
-            won = int(v['won'])
-            # total <int>: total games played
-            total = int(v['total'])
-
-            print(f"{cfg.bullet_a}{won} games won out of {total} played.")
-
-            # records <list> [dict Rankings$Record]
-            # latest <int> index of latest game in 'records'
-
-            # assertion: if latest is unset there's no records
-            if 'latest' not in v:
-                return
-
-            print(f"{cfg.bullet_a}{len(v['records'])} stored ranking records.")
-
-            records = v['records']
-            latest = v['records'][int(v['latest'])]
-
-            print(f"{cfg.bullet_b}Latest run:")
-            print("    ", end="")
-            _summarize_record(latest)
-
-            # latest_daily <dict Rankings$Record>
-            # daily_history_dates <list> [int secs since epoch]
-            # daily_history_scores <list> [int score]
-
-            # assertion: no daily has ever been played
-            if 'latest_daily' not in v:
-                return
-
-            print(f"{cfg.bullet_b}Latest daily:")
-            print("    ", end="")
-            _summarize_record(v['latest_daily'])
-
-
-    games = sorted(_get_games(s_dir), key=itemgetter(1), reverse=True)
-    print(f"\n{cfg.i_game} {len(games)} games found:")
-    for fn, mtime, game in games:
-
-        if fn == games[0][0]:
-            bullet = cfg.bullet_a
         else:
-            bullet = cfg.bullet_b
+            hero = bones['hero_class']
+            lvl = bones['level']
+            br = bones['branch']
 
-        time = strftime(cfg.time_format, mtime)
+            print(f"{cfg.bullet_a}{hero} bones at level {lvl}, branch {br}.")
 
-        print(f"{bullet} {time} {cfg.i_game} {game}")
+    # Journal
+    journal = p.get_dat('journal.dat')
+    if journal:
+        # NOTE: Entries appear in the file only after they've been unlocked,
+        #       So total numbers are not represented in the save.
+
+        # bestiary_classes <list> [class name] bestiary class index
+        # bestiary_seen <list> [all True] bestiary seen status
+        # bestiary_encounters <list> [int] bestiary encounter count
+
+        b_seen = len(journal['bestiary_seen'])
+        print(f"{cfg.bullet_b}Bestiary: {b_seen} mobs seen.")
+
+        # catalog_uses <list> 297 values.
+        # catalog_seen <list> 297 values.
+        # catalog_classes <list> 297 values.
+
+        c_seen = len(journal['catalog_seen'])
+        print(f"{cfg.bullet_b}Catalog: {c_seen} items seen.")
+
+        # documents <dict>
+        # {<str> CATEGORY: {<str> note name: <int> 1 unread or 2 read }}.
+        doc_count = 0
+        for k, v in journal['documents'].items():
+            doc_count += len(v)
+
+        print(f"{cfg.bullet_b}{doc_count} tutorials and notes discovered.")
+
+    # Rankings
+    ranks = p.get_dat('rankings.dat')
+    if ranks:
+        # won <int>: number of wins
+        won = int(ranks['won'])
+        # total <int>: total games played
+        total = int(ranks['total'])
+
+        print(f"{cfg.bullet_a}{won} games won out of {total} played.")
+
+        # records <list> [dict Rankings$Record]
+        # latest <int> index of latest game in 'records'
+
+        # assertion: if latest is unset there's no records
+        if 'latest' not in ranks:
+            return
+
+        print(f"{cfg.bullet_a}{len(ranks['records'])} stored ranking records.")
+
+        records = ranks['records']
+        latest = ranks['records'][int(ranks['latest'])]
+
+        print(f"{cfg.bullet_b}Latest run:")
+        print("    ", end="")
+
+        _summarize_record(latest)
+
+        # latest_daily <dict Rankings$Record>
+        # daily_history_dates <list> [int secs since epoch]
+        # daily_history_scores <list> [int score]
+
+        # assertion: no daily has ever been played
+        if 'latest_daily' not in ranks:
+            return
+
+        print(f"{cfg.bullet_b}Latest daily:")
+        print("    ", end="")
+
+        _summarize_record(ranks['latest_daily'])
+
+
+    games = sorted(p.games, key=attrgetter('ts'), reverse=True)
+    print(f"\n{cfg.i_game} {len(p.games)} games found:")
+
+    for g in games:
+        bullet = cfg.bullet_a if g == games[0] else cfg.bullet_b
+        time = strftime(cfg.time_format, g.ts)
+        print(f"{bullet} {time} {cfg.i_game} {g.name}")
 
 
 @task

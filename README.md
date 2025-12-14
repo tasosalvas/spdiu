@@ -311,9 +311,12 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [x] Selectively loading games while leaving profile stats untouched
 - [ ] Walking save dirs to find the true last modification time
 - [x] Parsing profiles (journal etc) in slots and providing summaries
-- [ ] Parsing saved games in slots and providing summaries
+- [x] Parsing saved games in slots
+- [ ] Providing game summaries
 - [x] Save editing API
 - [ ] OOP refactoring of saves and slots, encapsulating all save-reading code and decoupling it from tasks
+  - [x] saves
+  - [ ] slots
 - [ ] CONTRIBUTING document
 - [ ] Readme: Screenshots
 - [ ] Readme: Example of editing config to work with forks, i.e. ReARrangedPD
@@ -350,6 +353,10 @@ Tasks:
 - `save`, `load`, `ls`, `backup` and `clean` tasks create and manage save state slots
 - `show` task reads saves or active game data and displays details on their contents
 - `info` task provides introductory documentation, `-c` displays config
+
+Python:
+- The `spdio.util` module provides helpers for common file operations
+- The `spdio.model` module holds class representations of `Profile` and `Game` data.
 
 Customization:
 - Configuration overrides can be set in an `invoke.yaml` in the project folder

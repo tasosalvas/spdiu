@@ -26,16 +26,7 @@ spdiu:
   # data_dir: '~/.local/share/.shatteredpixel'
 
   ## The save folder
-  # active_save: 'shattered-pixel-dungeon',
-
-  ## The profile files contained in the data folder
-  ## Might be useful for adapting to forks, otherwise leave alone.
-  # data_files:
-  #   - 'settings.xml'
-  #   - 'badges.dat'
-  #   - 'bones.dat'
-  #   - 'journal.dat'
-  #   - 'rankings.dat'
+  # active_save: 'shattered-pixel-dungeon'
 
 
   ## SPDIU config:

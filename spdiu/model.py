@@ -59,6 +59,22 @@ class DataDir():
             return None
 
 
+    def get_newest(self):
+        """
+        Returns the timestamp of the last modified file or directory in the tree.
+        """
+        ts_list = []
+
+        for root, dirs, files in os.walk(self.root_dir):
+
+            ts_list.append(util.get_ts(root))
+            for file in files:
+                fp = os.path.join(root, file)
+                ts_list.append(util.get_ts(fp))
+
+        return sorted(ts_list, reverse=True)[0]
+
+
     def __init__(self, base_dir):
         self.root_dir = os.path.expanduser(base_dir)
         self.name = os.path.split(base_dir)[1]

@@ -339,7 +339,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [x] Allowing user-defined tasks without messing with the core `tasks.py`
 - [x] Saving and loading
 - [x] Selectively loading games while leaving profile stats untouched
-- [ ] Walking save dirs to find the true last modification time
+- [x] Walking save dirs to find the true last modification time
 - [x] Parsing profiles (journal etc) in slots and providing summaries
 - [x] Parsing saved games in slots
 - [ ] Providing game summaries

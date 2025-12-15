@@ -21,7 +21,7 @@ class Item():
             'levelKnown': False,
             'cursed': False,
             'level': 0,
-            'uses_left_to_id': 0,
+            'uses_left_to_id': 10,
             '__className': 'com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor',
             'kept_lost': False,
             'curse_infusion_bonus': False,

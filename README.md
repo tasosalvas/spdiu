@@ -31,7 +31,7 @@ SPDIU keeps a directory of save slots, containing copies of the game's full data
 
 There isn't some big library of cheats (yet), but the `ch` namespace is where they live:
 
-- `inv ch.bones` can bless your next run with an item up to +3 in your pile of bones.
+- `inv ch.bones` can bless your next run with one out of a selection of care packages
 - `inv ch.identify (-g [game])` gets you all consumable identities for the active save
 
 More to come!

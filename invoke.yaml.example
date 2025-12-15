@@ -19,6 +19,9 @@ spdiu:
   ## The command to run the game, relative to game_dir.
   # game_cmd: 'bin/Shattered Pixel Dungeon'
 
+  ## The namespace of the game's java classes. Adjust for forks.
+  # game_ns: 'com.shatteredpixel.shatteredpixeldungeon'
+
 
   ## Game data:
 

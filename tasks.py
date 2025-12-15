@@ -30,18 +30,11 @@ ns.configure({
         # Game binaries
         'game_dir': os.path.dirname(os.path.realpath(__file__)),
         'game_cmd': 'bin/Shattered Pixel Dungeon',
+        'game_ns': 'com.shatteredpixel.shatteredpixeldungeon',
 
         # Game data
         'data_dir': '~/.local/share/.shatteredpixel',
         'active_save': 'shattered-pixel-dungeon',
-
-        'data_files': (
-            'settings.xml',
-            'badges.dat',
-            'bones.dat',
-            'journal.dat',
-            'rankings.dat',
-        ),
 
         # SPDIU config
         'work_dir': '~/.local/share/.shatteredpixel/saves',
@@ -519,26 +512,109 @@ def identify(c, game_name='game1'):
 
 
 @task
-def bones(c):
+def bones(c, package="", hero=""):
     """
-    Sets your bones to a nice pick-me-up.
+    Sets your bones. 'inv -h ch.bones' for options.
+
+    -p, --package to pick your package, or you'll just get food.
+
+    plate: Your one and only armor
+    blade: Be one with the shadows
+    wealth: Yog can wait
+    reroll: Make your own seed
+    regrowth: Stardew Pixel Dungeon
+    zip: Walls are just a suggestion
+
+
+    -h, --hero to pick, or a hero that fits your package will be assigned.
+
+    i.e. WARRIOR, MAGE, ROGUE, HUNTRESS, DUELIST, CLERIC
+    Classes are uppercase in game files, but you can enter them lowercase here.
     """
 
     cfg = c.config.spdiu
     a_slot = os.path.join(cfg.data_dir, cfg.active_save)
     p = Profile(a_slot)
 
-    namespace = 'com.shatteredpixel.shatteredpixeldungeon'
-    item = 'armor.LeatherArmor'
+    namespace = '.'.join((cfg.game_ns, 'items'))
 
-    i = Item({
-        '__className': ".".join((namespace, 'items', item)),
-        'level': 3,
-    })
+
+    if package == 'plate':
+        hero_class = 'WARRIOR'
+        item = 'armor.PlateArmor'
+
+        # no auguments in bones :(
+        # aug = 'armor.glyphs.Thorns'
+
+        i = Item({
+            '__className': '.'.join((namespace, item)),
+            'level': 3,
+            'mastery_potion_bonus': True,
+        })
+
+
+    elif package == 'blade':
+        hero_class = 'DUELIST'
+        item = 'weapon.melee.AssassinsBlade'
+        i = Item({
+            '__className': '.'.join((namespace, item)),
+            'level': 3,
+            'mastery_potion_bonus': True,
+        })
+
+
+    elif package == 'wealth':
+        hero_class = 'ROGUE'
+        item = 'rings.RingOfWealth'
+        i = Item({
+            '__className': '.'.join((namespace, item)),
+            'level': 3,
+        })
+
+
+    elif package == 'reroll':
+        hero_class = 'CLERIC'
+        item = 'scrolls.ScrollOfTransmutation'
+        i = Item({
+            '__className': '.'.join((namespace, item)),
+            'quantity': 6,
+        })
+
+
+    elif package == 'regrowth':
+        hero_class = 'HUNTRESS'
+        item = 'wands.WandOfRegrowth'
+        i = Item({
+            '__className': '.'.join((namespace, item)),
+            'level': 3,
+        })
+
+
+    elif package == 'zip':
+        hero_class = 'ROGUE'
+        item = 'artifacts.EtherealChains'
+        i = Item({
+            '__className': '.'.join((namespace, item)),
+        })
+
+
+    else:
+        hero_class = 'MAGE'
+        item = 'food.Berry'
+        #item = 'food.Food'
+        i = Item({
+            '__className': '.'.join((namespace, item)),
+            'quantity': 12,
+        })
+
+
+    if hero:
+        hero_class = hero.upper()
+
 
     bones = {
         'item': i.item,
-        'hero_class': 'HUNTRESS',
+        'hero_class': hero_class,
         'level': 1,
         'branch': 0,
     }

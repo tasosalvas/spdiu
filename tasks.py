@@ -13,17 +13,16 @@ Usage:
 """
 
 import os
-
 from time import strftime
-from operator import itemgetter, attrgetter
 
 from invoke import Collection, task
 
 from spdiu import util
-from spdiu.model import Slots, Profile, Item
+from spdiu.model import Slots, Profile
+from spdiu.collections import cheat
 
 
-# Default (Collection level) configuration. Override values in invoke.yaml.
+# Default SPDIU configuration. Override values in invoke.yaml.
 ns = Collection()
 ns.configure({
     'spdiu': {
@@ -440,160 +439,9 @@ def ls(c):
     print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {cfg.active_save}")
 
 
-# Cheating tasks
-@task
-def identify(c, game_name='game1'):
-    """
-    Returns all consumable identities. -g [game]
-    """
-    cfg = c.config.spdiu
-    a_slot = os.path.join(cfg.data_dir, cfg.active_save)
-
-    p = Profile(a_slot)
-    g = p.get_game(game_name)
-    gd = g.get_dat('game.dat')
-
-    labels = {k: v for k, v in gd.items() if '_label' in k}
-
-    print('\nPotions:')
-    potions = {k: v for k, v in labels.items() if 'PotionOf' in k}
-
-    for k, v in potions.items():
-        name = k.split('_')[0][len('PotionOf'):]
-        print(f"  {name}: {v}")
-
-
-    print('\nRings:')
-    rings = {k: v for k, v in labels.items() if 'RingOf' in k}
-
-    for k, v in rings.items():
-        name = k.split('_')[0][len('RingOf'):]
-        print(f"  {name}: {v}")
-
-
-    print('\nScrolls:')
-    scrolls = {k: v for k, v in labels.items() if 'ScrollOf' in k}
-
-    for k, v in scrolls.items():
-        name = k.split('_')[0][len('ScrollOf'):]
-        print(f"  {name}: {v}")
-
-
-@task
-def bones(c, package="", hero=""):
-    """
-    Sets your bones. 'inv -h ch.bones' for options.
-
-    -p, --package to pick your package, or you'll just get food.
-
-    plate: Your one and only armor
-    blade: Be one with the shadows
-    wealth: Yog can wait
-    reroll: Make your own seed
-    regrowth: Stardew Pixel Dungeon
-    zip: Walls are just a suggestion
-
-
-    -h, --hero to pick, or a hero that fits your package will be assigned.
-
-    i.e. WARRIOR, MAGE, ROGUE, HUNTRESS, DUELIST, CLERIC
-    Classes are uppercase in game files, but you can enter them lowercase here.
-
-    Read through the task code, it's easy to adapt in your own local task.
-    """
-
-    cfg = c.config.spdiu
-    active_slot = os.path.join(cfg.data_dir, cfg.active_save)
-    p = Profile(active_slot)
-
-
-    namespace = '.'.join((cfg.game_ns, 'items'))
-
-    if package == 'plate':
-        hero_class = 'WARRIOR'
-        item = 'armor.PlateArmor'
-
-        # no auguments in bones :(
-        # aug = 'armor.glyphs.Thorns'
-
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'level': 3,
-            'mastery_potion_bonus': True,
-        })
-
-
-    elif package == 'blade':
-        hero_class = 'DUELIST'
-        item = 'weapon.melee.AssassinsBlade'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'level': 3,
-            'mastery_potion_bonus': True,
-        })
-
-
-    elif package == 'wealth':
-        hero_class = 'ROGUE'
-        item = 'rings.RingOfWealth'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'level': 3,
-        })
-
-
-    elif package == 'reroll':
-        hero_class = 'CLERIC'
-        item = 'scrolls.ScrollOfTransmutation'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'quantity': 6,
-        })
-
-
-    elif package == 'regrowth':
-        hero_class = 'HUNTRESS'
-        item = 'wands.WandOfRegrowth'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'level': 3,
-        })
-
-
-    elif package == 'zip':
-        hero_class = 'ROGUE'
-        item = 'artifacts.EtherealChains'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-        })
-
-
-    else:
-        hero_class = 'MAGE'
-        item = 'food.Berry'
-        #item = 'food.Food'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'quantity': 12,
-        })
-
-
-    if hero:
-        hero_class = hero.upper()
-
-
-    bones = {
-        'item': i.item,
-        'hero_class': hero_class,
-        'level': 1,
-        'branch': 0,
-    }
-
-    p.set_dat('bones.dat', bones)
-    print('A Small Package of Value Will Come to You, Shortly')
-
-
 # Adding tasks to namespace
+ns.add_task(info)
+
 ns.add_task(save)
 ns.add_task(load)
 
@@ -602,13 +450,8 @@ ns.add_task(show)
 
 ns.add_task(backup)
 ns.add_task(clean)
-ns.add_task(info)
 
-ns_cheat = Collection('ch')
-ns_cheat.add_task(bones)
-ns_cheat.add_task(identify)
-
-ns.add_collection(ns_cheat)
+ns.add_collection(cheat)
 
 
 # Conditionally import local project tasks

@@ -29,10 +29,10 @@ SPDIU keeps a directory of save slots, containing copies of the game's full data
 
 ### Cheat like it's 1989
 
-There isn't some big library of cheats (yet), but the `ch` namespace is where they live:
+There isn't some big library of cheats (yet), but the `cheat` namespace is where they live:
 
-- `inv ch.bones` can bless your next run with one out of a selection of care packages
-- `inv ch.identify (-g [game])` gets you all consumable identities for the active save
+- `inv cheat.bones` can bless your next run with one out of a selection of care packages
+- `inv cheat.consumables (-g [game])` gets you all consumable identities for the active save
 
 More to come!
 
@@ -52,7 +52,7 @@ The `spdiu.util` module provides common utilities for working with the game's da
 
 # Quick Start
 
-I build and use this on [Debian](https://www.debian.org/). The installation process should be identical for any `.deb` based distribution, and very similar for other package managers.
+I develop and use this on [Debian](https://www.debian.org/). The installation process should be identical for any `.deb` based distribution, and very similar for other package managers.
 
 - **git** is the way you get (or maybe even contribute to) _SPDIU_.
 - **Invoke** (and by extension Python) needs to be installed on your system. My preferred method is `pipx`.
@@ -343,7 +343,10 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [x] Parsing saved games in slots
 - [ ] Providing game summaries
 - [x] Save editing API
-- [ ] CONTRIBUTING document
+- [ ] Split and expand doc
+  - [ ] Installation and Configuration
+  - [ ] Writing tasks with the spdiu API
+  - [ ] CONTRIBUTING document
 - [ ] Readme: Screenshots
 - [ ] Readme: Example of editing config to work with forks, i.e. ReARrangedPD
 

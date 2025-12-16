@@ -4,6 +4,7 @@
 """
 Classes that represent the user data of an SPD installation.
 """
+
 import os
 from operator import attrgetter
 

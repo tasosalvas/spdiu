@@ -5,6 +5,7 @@
 Classes that represent the user data of an SPD installation.
 """
 import os
+from operator import attrgetter
 
 from . import util
 
@@ -39,7 +40,8 @@ class DataDir():
     """
     A directory of game data. Inherited by Profile and Game.
 
-    It knows its last modification time and the .dat files it contains.
+    It has a list of the .dat files it contains and methods for reading them.
+    It can dig up the newest timestamp in the files and directories under it.
     """
     def set_dat(self, dat_file, contents):
         """
@@ -59,31 +61,28 @@ class DataDir():
             return None
 
 
-    def get_newest(self):
-        """
-        Returns the timestamp of the last modified file or directory in the tree.
-        """
-        ts_list = []
-
-        for root, dirs, files in os.walk(self.root_dir):
-
-            ts_list.append(util.get_ts(root))
-            for file in files:
-                fp = os.path.join(root, file)
-                ts_list.append(util.get_ts(fp))
-
-        return sorted(ts_list, reverse=True)[0]
-
-
     def __init__(self, base_dir):
         self.root_dir = os.path.expanduser(base_dir)
         self.name = os.path.split(base_dir)[1]
-        self.ts = util.get_ts(base_dir)
 
         self.dat_files = [
             i for i in os.listdir(self.root_dir)      \
             if os.path.splitext(i)[1] == '.dat'       \
         ]
+
+        # Get the newest timestamp between the directory and its files.
+        ts_list = [util.get_ts(self.root_dir)]
+
+        for f in os.listdir(self.root_dir):
+            p = os.path.join(self.root_dir, f)
+            if not os.path.isdir(p):
+                ts_list.append(util.get_ts(p))
+
+        self.ts = sorted(ts_list, reverse=True)[0]
+
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {self.name}"
 
 
 class Game(DataDir):
@@ -94,6 +93,9 @@ class Game(DataDir):
     def __init__(self, game_dir):
         super().__init__(game_dir)
 
+        if 'game.dat' not in self.dat_files:
+            raise FileNotFoundError
+
 
     def __repr__(self):
         return f"<{self.__class__.__name__}> {self.name}"
@@ -102,23 +104,9 @@ class Game(DataDir):
 class Profile(DataDir):
     """
     An SPD data folder. Includes settings, profile stats, and games.
+
+    games contains Game objects sorted by modification time.
     """
-
-    def _get_games(self):
-        """
-        Returns a list of Game objects for the Profile.
-        """
-        games = []
-        for i in os.listdir(self.root_dir):
-            i_path = os.path.join(self.root_dir, i)
-            # Used to detect whether a folder is a game
-            id_file = os.path.join(i_path, 'game.dat')
-
-            if os.path.isdir(i_path) and os.path.isfile(id_file):
-                games.append(Game(i_path))
-
-        return games
-
 
     def get_settings(self):
         """
@@ -144,8 +132,71 @@ class Profile(DataDir):
 
     def __init__(self, base_dir):
         super().__init__(base_dir)
-        self.games = self._get_games()
 
+        # Detect if this is a game data folder:
+        # settings.xml appears at first launch
+        # journal.dat the moment the dungeon is first loaded
+        if 'journal.dat' not in self.dat_files:
+            raise FileNotFoundError
+
+        games = []
+        for i in os.listdir(self.root_dir):
+            i_path = os.path.join(self.root_dir, i)
+
+            if not os.path.isdir(i_path):
+                continue
+
+            try:
+                game = Game(i_path)
+                games.append(game)
+            except FileNotFoundError:
+                continue
+
+            if self.ts < game.ts:
+                self.ts = game.ts
+
+        self.games = sorted(games, key=attrgetter('ts'), reverse=True)
+
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}> {self.name}"
+
+
+class Slots():
+    """
+    Manager class for save directories containing states of data files.
+
+    Represents a flat namespace of alphanumeric character names.
+
+    slots contains all states as Profiles sorted by modification time.
+    """
+
+    def get_slot(self, slot_name):
+        """
+        Returns a Profile representing the save with the requested name.
+        """
+        for p in self.slots:
+            if p.name == slot_name:
+                return p
+
+        return None
+
+
+    def __init__(self, base_dir):
+
+        self.root_dir = os.path.expanduser(base_dir)
+        self.name = os.path.split(base_dir)[1]
+
+        slots = []
+        for i in os.listdir(self.root_dir):
+            i_path = os.path.join(self.root_dir, i)
+
+            try:
+                slots.append(Profile(i_path))
+            except FileNotFoundError:
+                pass
+
+        self.slots = sorted(slots, key=attrgetter('ts'), reverse=True)
 
     def __repr__(self):
         return f"<{self.__class__.__name__}> {self.name}"

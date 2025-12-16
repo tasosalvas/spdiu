@@ -19,8 +19,8 @@ from operator import itemgetter, attrgetter
 
 from invoke import Collection, task
 
-import spdiu
-from spdiu.model import Profile, Item
+from spdiu import util
+from spdiu.model import Slots, Profile, Item
 
 
 # Default (Collection level) configuration. Override values in invoke.yaml.
@@ -108,40 +108,6 @@ def _summarize_record(record):
     print(title_line)
 
 
-# Helper functions, need context
-def _get_slot(c, slot):
-    """
-    Returns a slot tuple: (path, last modification, slot name) from a name.
-    """
-    slot_path = os.path.join(os.path.expanduser(c.config.spdiu.work_dir), slot)
-
-    return (
-        slot_path,
-        spdiu.get_ts(slot_path),
-        slot,
-    )
-
-
-def _get_slots(c):
-    """
-    Returns all save slots as tuples:
-    """
-    cfg = c.config.spdiu
-
-    try:
-        folders = os.listdir(os.path.expanduser(cfg.work_dir))
-    except FileNotFoundError:
-        folders = ()
-
-    slots = []
-    for i in folders:
-        slot = _get_slot(c, i)
-        if slot:
-            slots.append(slot)
-
-    return slots
-
-
 # File manipulation Tasks
 @task
 def backup(c):
@@ -155,7 +121,7 @@ def backup(c):
     dest = os.path.join(cfg.work_dir, cfg.backup_slot)
 
     try:
-        spdiu.replace(src, dest)
+        util.replace(src, dest)
 
     except FileNotFoundError:
         print('Aborting! There seems to be no active data folder.')
@@ -170,15 +136,15 @@ def clean(c):
     Removes all saved states, leaves a backup of the active data folder.
     """
     cfg = c.config.spdiu
-    if not spdiu.exists(os.path.join(data_dir, cfg.active_save)):
+    if not util.exists(os.path.join(data_dir, cfg.active_save)):
         print('Aborting! There seems to be no active data folder.')
         return
 
-    slots = _get_slots(c)
-    for (fn, mtime, slot) in slots:
-        spdiu.remove(fn)
+    s = Slots(cfg.work_dir)
+    for p in s.slots:
+        util.remove(p.root_dir)
 
-    print(f"{cfg.i_clean} {len(slots)} saved states deleted.")
+    print(f"{cfg.i_clean} {len(s.slots)} saved states deleted.")
 
 
 @task
@@ -206,12 +172,12 @@ def save(c, slot=None):
     dest = os.path.join(cfg.work_dir, slot)
     bak = os.path.join(cfg.work_dir, f"{cfg.backup_slot}.{slot}")
 
-    if spdiu.exists(dest):
-        spdiu.replace(dest, bak)
+    if util.exists(dest):
+        util.replace(dest, bak)
         print(f"Previous save preserved as {cfg.i_bak} {cfg.backup_slot}.{slot}")
 
     try:
-        spdiu.replace(src, dest)
+        util.replace(src, dest)
     except FileNotFoundError:
         print("No game data found to save!")
 
@@ -219,7 +185,7 @@ def save(c, slot=None):
 
 
 @task
-def load(c, slot=None, last=False, game=None):
+def load(c, last=False, slot=None, game=None):
     """
     Loads a save. -s [slot], -l for last save, -g [game] to only load a game.
 
@@ -229,51 +195,54 @@ def load(c, slot=None, last=False, game=None):
     Loading will save a backup of the active save in the backup slot,
     unless the backup slot itself is being loaded.
     """
-    cfg = c.config.spdiu
 
+    cfg = c.config.spdiu
+    s = Slots(cfg.work_dir)
+
+    # determine the profile slot from the arguments
     if slot == None:
         slot = cfg.default_slot
 
     if last:
-        slots = sorted(_get_slots(c), key=itemgetter(1), reverse=True)
-
-        if not slots:
-            print("No saves found. Make some with 'inv save [-n name]'")
+        if not s.slots:
+            print("No saves found. Make some with 'inv save [-s slot name]'")
             return
 
-        slot = slots[0][2]
+        slot = s.slots[0].name
 
 
-    src_slot = os.path.join(cfg.work_dir, slot)
-    dest_slot = os.path.join(cfg.data_dir, cfg.active_save)
+    # Get the instance of the profile to load, build the destination path
+    p = s.get_slot(slot)
+    ap_path = os.path.join(cfg.data_dir, cfg.active_save)
 
-    if not spdiu.exists(src_slot):
-        print("Invalid slot name. 'inv ls' to list existing slots.")
-        return
+    if not p:
+        print(f"Invalid slot name: {slot}. 'inv ls' to list existing slots.")
 
 
+    # Load the requested profile and exit
     if game == None:
-        if slot != cfg.backup_slot:
+        if p.name != cfg.backup_slot:
             backup(c)
 
-        spdiu.replace(src_slot, dest_slot)
+        util.replace(p.root_dir, ap_path)
 
         print(f"State loaded! {cfg.disc_a} {slot}")
         return
 
 
-    src_game = os.path.join(src_slot, game)
-    dest_game = os.path.join(dest_slot, game)
+    # Get the instance of the requested game, build the destination path.
+    g = p.get_game(game)
+    agp = os.path.join(ap.root_dir, game)
 
-    if not spdiu.exists(src_game):
+    if not g:
         print('Game not found in slot.')
         print(f"'inv show -s {slot}' to list existing games.")
         return
 
-    if slot != cfg.backup_slot:
+    if  p.name != cfg.backup_slot:
         backup(c)
 
-    spdiu.replace(src_game, dest_game)
+    util.replace(g.root_dir, agp)
     print(f"Game loaded! {cfg.disc_a} {slot} {cfg.i_game} {game}")
 
 
@@ -309,16 +278,16 @@ def show(c, slot=None, active=False):
 
     if active:
         s_dir = os.path.join(cfg.data_dir, cfg.active_save)
-        s_mtime = spdiu.get_ts(s_dir)
         print(f"Showing {cfg.disc_a} Active game data")
 
     else:
+        s_dir = os.path.join(cfg.work_dir, slot)
         print(f"Showing details for slot {cfg.disc_b} {slot}")
-        s_dir, s_mtime, s_name = _get_slot(c, slot)
 
 
     p = Profile(s_dir)
     print(f"\nProfile information:")
+
 
     # Settings
     settings = p.get_settings()
@@ -412,11 +381,10 @@ def show(c, slot=None, active=False):
         _summarize_record(ranks['latest_daily'])
 
 
-    games = sorted(p.games, key=attrgetter('ts'), reverse=True)
     print(f"\n{cfg.i_game} {len(p.games)} games found:")
 
-    for g in games:
-        bullet = cfg.bullet_a if g == games[0] else cfg.bullet_b
+    for g in reversed(p.games):
+        bullet = cfg.bullet_a if g == p.games[0] else cfg.bullet_b
         time = strftime(cfg.time_format, g.ts)
         print(f"{bullet} {time} {cfg.i_game} {g.name}")
 
@@ -434,42 +402,42 @@ def ls(c):
     The slots are sorted by time, so the latest one is always last.
     """
     cfg = c.config.spdiu
-    slots = sorted(_get_slots(c), key=itemgetter(1))
+    ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
+    s = Slots(cfg.work_dir)
 
     # active save vars
-    a_ts = spdiu.get_ts(os.path.join(cfg.data_dir, cfg.active_save))
     a_bullet = cfg.bullet_a
     a_disc = cfg.disc_a
 
     # Calculate latest save
-    if slots:
-        latest = slots[-1]
+    if s.slots:
+        latest = s.slots[0]
 
         # adjust the active save display
-        if a_ts <= latest[1]:
+        if ap.ts <= latest.ts:
             a_bullet = cfg.bullet_b
             a_disc = cfg.disc_b
 
 
-    print(f"Displaying {len(slots)} save slots, oldest to newest:")
-    for (fn, mtime, slot) in slots:
+    print(f"Displaying {len(s.slots)} save slots, oldest to newest:")
+    for slot in reversed(s.slots):
 
-        bullet = cfg.bullet_a if slot == latest[2] else cfg.bullet_b
+        bullet = cfg.bullet_a if slot == latest else cfg.bullet_b
 
-        if slot.split(".")[0] == cfg.backup_slot:
+        if slot.name.split(".")[0] == cfg.backup_slot:
             disc = cfg.i_bak
-        elif slot == latest[2] and a_ts <= latest[1]:
+        elif slot == latest and ap.ts <= latest.ts:
             disc = cfg.disc_a
         else:
             disc = cfg.disc_b
 
-        time = strftime(cfg.time_format, mtime)
-        print(f"{bullet}{time} {disc} {slot}")
+        time = strftime(cfg.time_format, slot.ts)
+        print(f"{bullet}{time} {disc} {slot.name}")
 
 
     print(f"\nActive slot:")
 
-    print(a_bullet + strftime(cfg.time_format, a_ts) + f" {a_disc} {cfg.active_save}")
+    print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {cfg.active_save}")
 
 
 # Cheating tasks
@@ -530,14 +498,16 @@ def bones(c, package="", hero=""):
 
     i.e. WARRIOR, MAGE, ROGUE, HUNTRESS, DUELIST, CLERIC
     Classes are uppercase in game files, but you can enter them lowercase here.
+
+    Read through the task code, it's easy to adapt in your own local task.
     """
 
     cfg = c.config.spdiu
-    a_slot = os.path.join(cfg.data_dir, cfg.active_save)
-    p = Profile(a_slot)
+    active_slot = os.path.join(cfg.data_dir, cfg.active_save)
+    p = Profile(active_slot)
+
 
     namespace = '.'.join((cfg.game_ns, 'items'))
-
 
     if package == 'plate':
         hero_class = 'WARRIOR'

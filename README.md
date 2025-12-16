@@ -45,6 +45,7 @@ Just place a `local_tasks.py` in your SPDIO folder, and they will be loaded as i
 
 - The `Item` class can initialize valid item dicts to allow you to craft your own
 - The `Profile` and `Game` classes can manage all data in a game state
+- `Slots` manager helps keep track of saved states
 
 The `spdiu.util` module provides common utilities for working with the game's data folders and files, including reading and writing the `.dat` files containing the game's state. The classes use them and so can you.
 
@@ -337,16 +338,11 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [x] Initial project structure and doc
 - [x] Config hierarchy, allowing user configuration
 - [x] Allowing user-defined tasks without messing with the core `tasks.py`
-- [x] Saving and loading
-- [x] Selectively loading games while leaving profile stats untouched
-- [x] Walking save dirs to find the true last modification time
+- [x] Saving and loading profiles and games
 - [x] Parsing profiles (journal etc) in slots and providing summaries
 - [x] Parsing saved games in slots
 - [ ] Providing game summaries
 - [x] Save editing API
-- [ ] OOP refactoring of saves and slots, encapsulating all save-reading code and decoupling it from tasks
-  - [x] saves
-  - [ ] slots
 - [ ] CONTRIBUTING document
 - [ ] Readme: Screenshots
 - [ ] Readme: Example of editing config to work with forks, i.e. ReARrangedPD

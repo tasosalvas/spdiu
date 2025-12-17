@@ -56,7 +56,7 @@ def clean(c):
         return
 
 
-    s = Slots(cfg.work_dir, ('manual', 'auto', 'backup'))
+    s = Slots(cfg.work_dir, ['manual', 'auto', 'backup'])
     for p in s.slots:
         util.remove(p.root_dir)
 
@@ -129,7 +129,7 @@ def load(c, last=False, slot=None, game=None):
     cfg = c.config.spdiu
 
     if last:
-        p = Slots(cfg.work_dir, ('manual', 'auto')).slots[0]
+        p = Slots(cfg.work_dir, ['manual', 'auto']).slots[0]
         # TODO: catch this exception sometime
         # print("No saves found. Make some with 'inv save [-s slot name]'")
         # return
@@ -137,10 +137,10 @@ def load(c, last=False, slot=None, game=None):
 
     else:
         if slot == None:
-            p = Slots(cfg.work_dir, ('manual')).get_slot(cfg.default_slot)
+            p = Slots(cfg.work_dir, ['manual']).get_slot(cfg.default_slot)
 
         else:
-            p = Slots(cfg.work_dir, ('manual', 'auto', 'backup')).get_slot(slot)
+            p = Slots(cfg.work_dir, ['manual', 'auto', 'backup']).get_slot(slot)
 
 
     if not p:
@@ -253,7 +253,7 @@ def ls(c):
     """
     cfg = c.config.spdiu
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
-    s = Slots(cfg.work_dir, ('manual', 'auto', 'backup'))
+    s = Slots(cfg.work_dir, ['manual', 'auto', 'backup'])
 
 
     # active save vars

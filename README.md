@@ -335,17 +335,18 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 
 ### Planned before the first release
 
-- [x] Initial project structure and doc
-- [x] Config hierarchy, allowing user configuration
-- [x] Allowing user-defined tasks without messing with the core `tasks.py`
-- [x] Saving and loading profiles and games
-- [x] Parsing profiles (journal etc) in slots and providing summaries
-- [x] Parsing saved games in slots
-- [ ] Providing game summaries
-- [x] Save editing API
+- [ ] Backups rework
+- [ ] data object summaries
+  - [ ] Data mining API
+  - [ ] Some tidy setup for summary templating
+  - [x] Parsing profiles (journal etc) in slots and providing summaries
+  - [x] Parsing saved games in slots
+  - [ ] Providing game summaries
 - [ ] Split and expand doc
   - [ ] Installation and Configuration
-  - [ ] Writing tasks with the spdiu API
+  - [ ] Recipes: Adapting config to SPD forks
+  - [ ] Writing tasks: relevant invoke basics
+  - [ ] Writing tasks: The SPDIU object model
   - [ ] CONTRIBUTING document
 - [ ] Readme: Screenshots
 - [ ] Readme: Example of editing config to work with forks, i.e. ReARrangedPD

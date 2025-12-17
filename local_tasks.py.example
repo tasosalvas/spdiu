@@ -10,22 +10,14 @@ See https://docs.pyinvoke.org/en/stable/ for invoke documentation.
 
 from invoke import task
 
-# You can access the main tasks.py and run tasks from it.
-import tasks
 
 ## An automatically detected user collection will use the 'u' prefix.
-## If a 'collection_name' is found in an implicit collection, it will be used instead.
+## If a 'collection_name' is found, it will be used instead.
 # collection_name = 'myname'
 
 ## An 'ns' object can be used to declare the collection explicitly.
 ## If it is detected, SPDIU will add it as-is instead, ignoring 'collection_name'
-
-## If you wish to manage the collection's namespace, you need to declare it.
-## If you do this, you will need to add the tasks to the collection manually,
-## but it can allow you to load a whole hierarchy of collections from local_tasks.
-
-# from invoke import Collection
-# ns = Collection('mycollection')
+## See task collections in the spdiu.collections module for examples.
 
 
 @task
@@ -35,23 +27,4 @@ def config(c):
     """
     cfg = c.config.spdiu
 
-    print(f"Here's a config value: \"{cfg.bullet_a}\".")
-
-
-@task(pre=[tasks.save])
-def chain(c):
-    """
-    Chains tasks from the main tasks.py. Saves and displays info.
-    """
-    print("\nThe above task was loaded and ran as an invoke pre-task.\n")
-
-    tasks.show(c)
-
-    print("\nThis task called the 'show' function directly.")
-
-
-## Adding tasks manually, required if the collection was explicitly declared.
-# ns.add_task(config)
-# ns.add_task(chain)
-
-## Happy Hacking!
+    print(f"Here's a config value: \"{cfg.active_save}\".")

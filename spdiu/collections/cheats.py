@@ -2,11 +2,13 @@
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-SPDIU Cheat task collection.
+SPDIU Cheats task collection.
 
-These tasks all work on the active game data. Make a save before using them.
+These tasks all work on the active game data.
+Make a save before using them.
 
-Tasks that act on a game accept the -g --game_name flag. It defaults to 'game1'.
+-g, --game picks a game, where applicable.
+It defaults to the latest modified game if not supplied.
 """
 
 import os
@@ -20,17 +22,17 @@ ns = Collection('cheat')
 
 
 @task
-def gold(c, game_name='game1', number='10000'):
+def gold(c, game=None, number='10000'):
     """
-    Set your Gold! -n --number [amount]
+    Set your Gold! -n --number [amount], default: 10000
     """
     cfg = c.config.spdiu
-    a_slot = os.path.join(cfg.data_dir, cfg.active_save)
-    ap = Profile(a_slot)
+    ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
-    g = ap.get_game(game_name)
+    g = ap.get_game(game) if game else ap.games[0]
     gd = g.get_dat('game.dat')
 
+    print(f"{cfg.disc_a} {ap.name} {cfg.i_game} {g.name}")
     print(f"Previous Gold: {gd['gold']}")
 
     gd['gold'] = int(number)
@@ -40,16 +42,17 @@ def gold(c, game_name='game1', number='10000'):
 
 
 @task
-def energy(c, game_name='game1', number='1000'):
+def energy(c, game=None, number='1000'):
     """
-    Set your Alchemical Energy! -n --number [amount]
+    Set your Alchemical Energy! -n --number [amount], default: 1000
     """
     cfg = c.config.spdiu
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
-    g = ap.get_game(game_name)
+    g = ap.get_game(game) if game else ap.games[0]
     gd = g.get_dat('game.dat')
 
+    print(f"{cfg.disc_a} {ap.name} {cfg.i_game} {g.name}")
     print(f"Previous Alchemical Energy: {gd['energy']}")
 
     gd['energy'] = int(number)
@@ -59,7 +62,7 @@ def energy(c, game_name='game1', number='1000'):
 
 
 @task
-def bones(c, package="", hero=""):
+def bones(c, package="", hero="", display=False):
     """
     Sets your bones. 'inv -h cheat.bones' for options.
 
@@ -78,13 +81,13 @@ def bones(c, package="", hero=""):
     i.e. WARRIOR, MAGE, ROGUE, HUNTRESS, DUELIST, CLERIC
     Classes are uppercase in game files, but you can enter them lowercase here.
 
+    -d --display will only display the current bones without editing game files.
+
     Read through the task code, it's easy to adapt in your own local task.
     """
 
     cfg = c.config.spdiu
-    active_slot = os.path.join(cfg.data_dir, cfg.active_save)
-    p = Profile(active_slot)
-
+    ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
     namespace = '.'.join((cfg.game_ns, 'items'))
 
@@ -168,31 +171,37 @@ def bones(c, package="", hero=""):
         'branch': 0,
     }
 
-    p.set_dat('bones.dat', bones)
-    print('A Small Package of Value Will Come to You, Shortly')
+    if display:
+        print(ap.get_dat('bones.dat'))
+        return
+
+    ap.set_dat('bones.dat', bones)
+
+    print(f"{cfg.disc_a} {ap.name} {cfg.i_data} Profile data")
+    print(f"A Small Package of Value Will Come to You, Shortly")
 
 
 @task
-def consumables(c, game_name='game1'):
+def consumables(c, game=None):
     """
-    Returns all consumable identities. -g --game [game_name] to pick a game.
+    Returns all consumable identities. -g --game [game] to pick a game.
 
     Bullet indicators show whether a consumable is known or not.
     """
     cfg = c.config.spdiu
-    a_slot = os.path.join(cfg.data_dir, cfg.active_save)
+    ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
-    p = Profile(a_slot)
-    g = p.get_game(game_name)
+    g = ap.get_game(game) if game else ap.games[0]
     gd = g.get_dat('game.dat')
 
     labels = {k: v for k, v in gd.items() if '_label' in k}
-
     potions = {k: v for k, v in labels.items() if 'PotionOf' in k}
     rings = {k: v for k, v in labels.items() if 'RingOf' in k}
     scrolls = {k: v for k, v in labels.items() if 'ScrollOf' in k}
 
-    print(f" {cfg.i_data} Potions")
+    print(f"{cfg.disc_a} {ap.name} {cfg.i_game} {g.name}")
+
+    print(f"\n {cfg.i_data} Potions")
     for k, v in potions.items():
         iclass = k.split('_')[0]
         known = gd[iclass + '_known']

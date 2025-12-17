@@ -11,6 +11,7 @@ from operator import attrgetter
 from . import util
 
 
+# Game data representation classes
 class Item():
     """
     An inventory item with an initialized dict.
@@ -37,6 +38,7 @@ class Item():
             self.item[k] = v
 
 
+# Save directory management classes
 class DataDir():
     """
     A directory of game data. Inherited by Profile and Game.
@@ -198,6 +200,7 @@ class Slots():
                 pass
 
         self.slots = sorted(slots, key=attrgetter('ts'), reverse=True)
+
 
     def __repr__(self):
         return f"<{self.__class__.__name__}> {self.name}"

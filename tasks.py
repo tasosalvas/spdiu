@@ -29,8 +29,8 @@ from invoke import Collection, task
 
 import spdiu  # required to get docstrings for the info task
 
-from spdiu.collections.saves import save, load, backup, clean
-from spdiu.collections.display import ls, show
+from spdiu.collections.saves import save, load, backup, clean, watch, ls
+from spdiu.collections.display import show
 from spdiu.collections import get, cheats
 
 
@@ -76,6 +76,7 @@ defaults = {
         # Icons
         # TODO: unified icon namespace for visual stuff?
         'i_bak': '💾',
+        'i_auto': '🤖',
         'i_game': '🕹️',
         'i_data': '🗂️',
         'i_clean': '🧹',
@@ -130,7 +131,6 @@ ns.configure(defaults)
 ns.add_task(info)
 
 # spdiu.collections.display tasks
-ns.add_task(ls)
 ns.add_task(show)
 
 # spdiu.collections.saves tasks
@@ -138,6 +138,9 @@ ns.add_task(save)
 ns.add_task(load)
 ns.add_task(backup)
 ns.add_task(clean)
+ns.add_task(watch)
+ns.add_task(ls)
+
 
 # namespaced collections
 ns.add_collection(get)

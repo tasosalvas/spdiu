@@ -8,7 +8,6 @@ SPDIU Download and installation tasks.
 import os, shutil, stat
 
 import urllib.request
-
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile, BadZipFile
 

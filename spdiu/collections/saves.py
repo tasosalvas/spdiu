@@ -9,11 +9,14 @@ By convention, where applicable:
 -g --game to pick a specific game in a slot
 """
 
-import os
+import os, re
+from time import strftime
+
 from invoke import task, Collection
+from invoke.watchers import StreamWatcher
 
 from .. import util
-from ..model import Slots
+from ..model import Profile, Slots
 
 
 ns = Collection("io")
@@ -29,7 +32,7 @@ def backup(c):
     """
     cfg = c.config.spdiu
     src = os.path.join(cfg.data_dir, cfg.active_save)
-    dest = os.path.join(cfg.work_dir, cfg.backup_slot)
+    dest = os.path.join(cfg.work_dir, 'backup', cfg.backup_slot)
 
     try:
         util.replace(src, dest)
@@ -39,7 +42,7 @@ def backup(c):
         return
 
 
-    print(f"Active state backup created! {cfg.i_bak} {cfg.backup_slot}")
+    print(f"Active state backup created! {cfg.i_bak} backup.{cfg.backup_slot}")
 
 
 @task(post=[backup])
@@ -53,7 +56,7 @@ def clean(c):
         return
 
 
-    s = Slots(cfg.work_dir)
+    s = Slots(cfg.work_dir, ('manual', 'auto', 'backup'))
     for p in s.slots:
         util.remove(p.root_dir)
 
@@ -69,7 +72,7 @@ def save(c, slot=None):
     Slot names can only be alphanumeric characters.
 
     When saving over an existing slot, a backup of the previous state is kept
-    as bak.[slot name].
+    as backup.[slot name].
 
     Saves are kept in the game's data folder, with their slot as an extension.
     """
@@ -84,12 +87,12 @@ def save(c, slot=None):
 
 
     src = os.path.join(cfg.data_dir, cfg.active_save)
-    dest = os.path.join(cfg.work_dir, slot)
-    bak = os.path.join(cfg.work_dir, f"{cfg.backup_slot}.{slot}")
+    dest = os.path.join(cfg.work_dir, 'manual', slot)
+    bak = os.path.join(cfg.work_dir, 'backup', slot)
 
     if util.exists(dest):
         util.replace(dest, bak)
-        print(f"Previous save preserved as {cfg.i_bak} {cfg.backup_slot}.{slot}")
+        print(f"Previous save preserved as {cfg.i_bak} backup.{slot}")
 
 
     try:
@@ -106,7 +109,15 @@ def load(c, last=False, slot=None, game=None):
     """
     Loads a save. -l for last save, -s [slot], -g [game] to only load a game.
 
+    Slots provided with -s, --slot correspond to the manual saves,
+    while the other categories can be accessed with dot syntax,
+
+    i.e. 'inv load -s backup.bak' or 'auto.floor3'
+    'inv load -s mysave' is in effect equivalent 'inv load -s manual.mysave'.
+
     If -l, --last is provided, any slot named with -s is ignored.
+    The task will look for the latest save in the manual and auto folders,
+    ignoring the backup folder.
 
     The -g, --game [game name] flag allows loading only a specific game,
     while leaving the player profile untouched (i.e. keeping unlocks).
@@ -116,26 +127,27 @@ def load(c, last=False, slot=None, game=None):
     """
 
     cfg = c.config.spdiu
-    s = Slots(cfg.work_dir)
-
-    # determine the profile slot from the arguments
-    if slot == None:
-        slot = cfg.default_slot
 
     if last:
-        if not s.slots:
-            print("No saves found. Make some with 'inv save [-s slot name]'")
-            return
+        p = Slots(cfg.work_dir, ('manual', 'auto')).slots[0]
+        # TODO: catch this exception sometime
+        # print("No saves found. Make some with 'inv save [-s slot name]'")
+        # return
 
-        slot = s.slots[0].name
 
+    else:
+        if slot == None:
+            p = Slots(cfg.work_dir, ('manual')).get_slot(cfg.default_slot)
 
-    # Get the instance of the profile to load, build the destination path
-    p = s.get_slot(slot)
-    ap_path = os.path.join(cfg.data_dir, cfg.active_save)
+        else:
+            p = Slots(cfg.work_dir, ('manual', 'auto', 'backup')).get_slot(slot)
+
 
     if not p:
-        print(f"Invalid slot name: {slot}. 'inv ls' to list existing slots.")
+        print(f"Invalid slot name: {slot} - 'inv ls' to list existing slots.")
+        return
+
+    ap_path = os.path.join(cfg.data_dir, cfg.active_save)
 
 
     # Load the requested profile and exit
@@ -165,7 +177,126 @@ def load(c, last=False, slot=None, game=None):
     print(f"Game loaded! {cfg.disc_a} {slot} {cfg.i_game} {game}")
 
 
+# Autosaves
+class AutoSaveWatcher(StreamWatcher):
+    """
+    Watches the stdout of the game, autosaves on certain events.
+    """
+    def __init__(self, c):
+        self.c = c
+
+        patterns = (
+            r"\[GAME\] @@ You \S+ to (floor \d+) of the dungeon.",
+        )
+
+        self.patterns = [re.compile(i) for i in patterns]
+        self.log_index = 0
+
+
+    def autosave(self, event):
+        """
+        Creates saves in the autosave directory.
+        """
+        cfg = self.c.config.spdiu
+
+        name = event.replace(' ', '')
+        dest = os.path.join(cfg.work_dir, 'auto', name)
+        src = os.path.join(cfg.data_dir, cfg.active_save)
+
+        util.replace(src, dest)
+        print(f"{cfg.bullet_b}Autosave {cfg.i_auto} auto.{name}")
+
+
+    def submit(self, stream):
+        """
+        Gets the whole log every time there's a line.
+        """
+        new = stream[self.log_index:]
+
+        # Autosave triggers
+        for p in self.patterns:
+            match = re.search(p, new)
+            if match:
+                self.autosave(match.group(1))
+                break
+
+
+        self.log_index = len(stream)
+        return ()
+
+
+@task
+def watch(c):
+    """
+    Runs the game, autosaves on certain log events.
+    """
+    cfg = c.config.spdiu
+    cmd = cfg.game_cmd.replace(' ', '\ ')
+
+    w_out = AutoSaveWatcher(c)
+
+    with c.cd(os.path.expanduser(cfg.game_dir)):
+        c.run(cmd, watchers=[w_out])
+
+
+@task
+def ls(c):
+    """
+    Lists all saved states chronologically.
+
+    The disc icon signifies the latest data folder between all states.
+
+    The bullet indicator signifies whether the active state is latest,
+    but also displays the latest save slot, even if the active one is newer.
+
+    The slots are sorted by time, so the latest one is always last.
+    """
+    cfg = c.config.spdiu
+    ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
+    s = Slots(cfg.work_dir, ('manual', 'auto', 'backup'))
+
+
+    # active save vars
+    a_bullet = cfg.bullet_a
+    a_disc = cfg.disc_a
+
+    # Calculate latest save
+    if s.slots:
+        latest = s.slots[0]
+
+        # adjust the active save display
+        if ap.ts <= latest.ts:
+            a_bullet = cfg.bullet_b
+            a_disc = cfg.disc_b
+
+
+    print(f"Displaying {len(s.slots)} save slots, oldest to newest:")
+    for p in reversed(s.slots):
+
+        bullet = cfg.bullet_a if p == latest else cfg.bullet_b
+
+        if p.group == 'backup':
+            disc = cfg.i_bak
+        elif p.group == 'auto':
+            disc = cfg.i_auto
+        elif p == latest and ap.ts <= latest.ts:
+            disc = cfg.disc_a
+        else:
+            disc = cfg.disc_b
+
+        time = strftime(cfg.time_format, p.ts)
+        prefix = '' if p.group == 'manual' else p.group + '.'
+        print(f"{bullet}{time} {disc} {prefix}{p.name}")
+
+
+    print(f"\nActive slot:")
+
+    print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {cfg.active_save}")
+
+
 ns.add_task(backup)
 ns.add_task(clean)
 ns.add_task(save)
 ns.add_task(load)
+ns.add_task(watch)
+ns.add_task(ls)

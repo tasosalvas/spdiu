@@ -46,6 +46,7 @@ class DataDir():
     It has a list of the .dat files it contains and methods for reading them.
     It can dig up the newest timestamp in the files and directories under it.
     """
+
     def set_dat(self, dat_file, contents):
         """
         Writes a python object into a dat file.
@@ -134,7 +135,12 @@ class Profile(DataDir):
 
 
     def __init__(self, base_dir):
+        """
+        Accepts a group: str, which represents its parent
+        """
+
         super().__init__(base_dir)
+        self.group = os.path.split(os.path.split(self.root_dir)[0])[1]
 
         # Detect if this is a game data folder:
         # settings.xml appears at first launch
@@ -177,27 +183,45 @@ class Slots():
     def get_slot(self, slot_name):
         """
         Returns a Profile representing the save with the requested name.
+
+        Accepts 'subdir.slot' syntax, falls back to default_subdir if omitted.
         """
+        parts = slot_name.split('.')
+        if len(parts) > 1:
+            sd = parts[0]
+            slot = parts[1]
+
+        else:
+            sd = self.default_subdir
+            slot = slot_name
+
         for p in self.slots:
-            if p.name == slot_name:
+            if p.name == slot and p.group == sd:
                 return p
 
         return None
 
 
-    def __init__(self, base_dir):
-
+    def __init__(self, base_dir, subdirs=['manual'], default_subdir='manual'):
+        """
+        Accepts a list of subdirs to construct its slots from.
+        """
+        self.name = '+'.join(subdirs)
         self.root_dir = os.path.expanduser(base_dir)
-        self.name = os.path.split(base_dir)[1]
+
+        self.subdirs = [os.path.join(self.root_dir, i) for i in subdirs]
+        self.default_subdir = default_subdir
 
         slots = []
-        for i in os.listdir(self.root_dir):
-            i_path = os.path.join(self.root_dir, i)
+        for sd in self.subdirs:
+            for i in os.listdir(sd):
+                i_path = os.path.join(sd, i)
 
-            try:
-                slots.append(Profile(i_path))
-            except FileNotFoundError:
-                pass
+                try:
+                    slots.append(Profile(i_path))
+                except FileNotFoundError:
+                    print("oops")
+                    pass
 
         self.slots = sorted(slots, key=attrgetter('ts'), reverse=True)
 

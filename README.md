@@ -32,7 +32,8 @@ SPDIU keeps a directory of save slots, containing copies of the game's full data
 There isn't some big library of cheats (yet), but the `cheat` namespace is where they live:
 
 - `inv cheat.bones` can bless your next run with one out of a selection of care packages
-- `inv cheat.consumables (-g [game])` gets you all consumable identities for the active save
+- `inv cheat.consumables` gets you all consumable identities for the active game
+- `inv cheat.gold` and `.energy` let you adjust your wealth appropriately
 
 More to come!
 
@@ -335,8 +336,6 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 
 ### Planned before the first release
 
-- [ ] Backups rework
-- [x] Installing a chosen version of SPD in the spdiu folder
 - [ ] data object summaries
   - [ ] Data mining API
   - [ ] Some tidy setup for summary templating
@@ -345,12 +344,18 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
   - [ ] Providing game summaries
 - [ ] Split and expand doc
   - [ ] Installation and Configuration
-  - [ ] Recipes: Adapting config to SPD forks
-  - [ ] Writing tasks: relevant invoke basics
-  - [ ] Writing tasks: The SPDIU object model
+  - [ ] Adapting config to SPD forks
+  - [ ] Task usage guide
+    - [ ] Saves, backups
+    - [ ] the autosave watcher
+    - [ ] Displaying game data
+    - [ ] Cheats and save editing
+  - [ ] Writing tasks
+    - [ ] relevant invoke basics
+    - [ ] The SPDIU object model
   - [ ] CONTRIBUTING document
+- [ ] Sphinx for modules? Can we do it in markdown?
 - [ ] Readme: Screenshots
-- [ ] Readme: Example of editing config to work with forks, i.e. ReARrangedPD
 
 
 ### Cool future ideas
@@ -377,13 +382,16 @@ Maybe if there's collaboration and I don't run out of steam.
 ### Added
 
 Tasks:
+- `info` task provides introductory documentation, `-c` displays config, `-h` provides overviews of the SPDIU collections
 - `save`, `load`, `ls`, `backup` and `clean` tasks create and manage save state slots
+- The `watch` task starts the game, autosaving after certain log events
 - `show` task reads saves or active game data and displays details on their contents
-- `info` task provides introductory documentation, `-c` displays config
+
 
 Python:
 - The `spdio.util` module provides helpers for common file operations
-- The `spdio.model` module holds class representations of `Profile` and `Game` data.
+- The `spdio.model` module holds class representations of `Slots` containing `Profile` and `Game` data.
+
 
 Customization:
 - Configuration overrides can be set in an `invoke.yaml` in the project folder

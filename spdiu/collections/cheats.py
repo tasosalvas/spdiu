@@ -14,7 +14,6 @@ It defaults to the latest modified game if not supplied.
 import os
 from invoke import task, Collection
 
-from .. import util
 from ..model import Profile, Item
 
 

@@ -16,8 +16,7 @@ from time import strftime
 
 from invoke import Collection, task
 
-from spdiu import collections
-from spdiu.model import Slots, Profile
+from ..model import Profile
 
 
 ns = Collection("view")
@@ -195,56 +194,4 @@ def show(c, slot=None, active=False):
         print(f"{bullet} {time} {cfg.i_game} {g.name}")
 
 
-@task
-def ls(c):
-    """
-    Lists all saved states chronologically.
-
-    The disc icon signifies the latest data folder between all states.
-
-    The bullet indicator signifies whether the active state is latest,
-    but also displays the latest save slot, even if the active one is newer.
-
-    The slots are sorted by time, so the latest one is always last.
-    """
-    cfg = c.config.spdiu
-    ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
-    s = Slots(cfg.work_dir)
-
-    # active save vars
-    a_bullet = cfg.bullet_a
-    a_disc = cfg.disc_a
-
-    # Calculate latest save
-    if s.slots:
-        latest = s.slots[0]
-
-        # adjust the active save display
-        if ap.ts <= latest.ts:
-            a_bullet = cfg.bullet_b
-            a_disc = cfg.disc_b
-
-
-    print(f"Displaying {len(s.slots)} save slots, oldest to newest:")
-    for slot in reversed(s.slots):
-
-        bullet = cfg.bullet_a if slot == latest else cfg.bullet_b
-
-        if slot.name.split(".")[0] == cfg.backup_slot:
-            disc = cfg.i_bak
-        elif slot == latest and ap.ts <= latest.ts:
-            disc = cfg.disc_a
-        else:
-            disc = cfg.disc_b
-
-        time = strftime(cfg.time_format, slot.ts)
-        print(f"{bullet}{time} {disc} {slot.name}")
-
-
-    print(f"\nActive slot:")
-
-    print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {cfg.active_save}")
-
-
 ns.add_task(show)
-ns.add_task(ls)

@@ -336,6 +336,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 ### Planned before the first release
 
 - [ ] Backups rework
+- [x] Installing a chosen version of SPD in the spdiu folder
 - [ ] data object summaries
   - [ ] Data mining API
   - [ ] Some tidy setup for summary templating
@@ -358,10 +359,6 @@ Not planned yet but viable, loosely in the order I'm considering them.
 
 - [ ] Checking for self updates
 - [ ] Logo n stuff
-- [ ] Game binary management
-    - [ ] Getting all releases from the SPD github
-    - [ ] Installing a chosen version of SPD in the spdiu folder
-    - [ ] Checking for SPD updates
 - [ ] Extra Flavor management
     - [ ] Presets for installing common SPD forks
 - [ ] linting (maybe black?)

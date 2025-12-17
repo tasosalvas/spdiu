@@ -31,28 +31,38 @@ import spdiu  # required to get docstrings for the info task
 
 from spdiu.collections.saves import save, load, backup, clean
 from spdiu.collections.display import ls, show
-from spdiu.collections import cheats
+from spdiu.collections import get, cheats
 
 
 # Default SPDIU configuration. Override values in invoke.yaml.
 defaults = {
     'spdiu': {
-        # game info
-        'game_github': 'https://github.com/00-Evan/shattered-pixel-dungeon',
-
-        # Game binaries
-        'game_dir': os.path.dirname(os.path.realpath(__file__)),
-        'game_cmd': 'bin/Shattered Pixel Dungeon',
-        'game_ns': 'com.shatteredpixel.shatteredpixeldungeon',
-
-        # Game data
-        'data_dir': '~/.local/share/.shatteredpixel',
-        'active_save': 'shattered-pixel-dungeon',
-
         # SPDIU config
+        'base_dir': os.path.dirname(os.path.realpath(__file__)),
         'work_dir': '~/.local/share/.shatteredpixel/saves',
         'default_slot': 'default',
         'backup_slot': 'bak',
+
+
+        # Game release info, used to download the game
+        'release_packages': 'packages',
+        'release_github': 'https://github.com/00-Evan/shattered-pixel-dungeon/releases',
+        'release_template': 'download/{version}/ShatteredPD-{version}-{platform}.{ext}',
+        'release_version': None,
+        'release_platform': 'Linux',
+        'release_extension': 'zip',
+
+
+        # The game installation
+        'game_dir': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'spd'),
+        'game_cmd': 'bin/Shattered Pixel Dungeon',
+        'game_ns': 'com.shatteredpixel.shatteredpixeldungeon',
+
+
+        # Game user data
+        'data_dir': '~/.local/share/.shatteredpixel',
+        'active_save': 'shattered-pixel-dungeon',
+
 
         # Fancy decorations
         'time_format': '🗓️ %Y %b %d 🕰️ %H:%M:%S',
@@ -130,6 +140,7 @@ ns.add_task(backup)
 ns.add_task(clean)
 
 # namespaced collections
+ns.add_collection(get)
 ns.add_collection(cheats)
 
 

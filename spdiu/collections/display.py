@@ -22,6 +22,73 @@ from ..model import Profile
 ns = Collection("view")
 
 
+def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
+    """
+    Explore a dat file, printing merrily along the way.
+
+    Accepts any data type, will recurse into lists and dicts.
+
+    It returns a flat list of tuples for every value in the structure:
+    (breadcrumb: list, title: str, d_type: str, game_class: str, summary: str)
+
+    By default, it pretty prints the values. silent=True to just get the list.
+    """
+    cfg = c.config.spdiu
+    ns = cfg.game_ns
+
+    d_breadcrumb = '.'.join(breadcrumb)
+    d_type = type(dump).__name__
+    d_title = f"{title} <{d_type}>"
+    d_icon = cfg[f"i_{d_type}"]
+
+
+    game_class = ""
+
+    if d_type == 'dict' and '__className' in dump:
+        game_class = dump['__className'][len(ns)+1:]
+        summary = f"{cfg.i_game} {game_class}, {len(dump)} values"
+
+
+    elif d_type == 'str' and ns in dump:
+        game_class = dump[len(ns)+1:]
+        summary = f"{cfg.i_game} {game_class}"
+
+
+    elif d_type in ('list', 'dict'):
+        summary = f"{len(dump)} values"
+
+
+    else:
+        summary = f"{str(dump)}"
+
+
+    results = [(breadcrumb, title, d_type, game_class, summary)]
+
+    if not silent:
+        lpad = "  " * len(breadcrumb)
+        newline = '\n' if d_type in ('list', 'dict') and len(dump) > 0 else ''
+        print(newline + lpad + f"{d_breadcrumb} {d_title} {d_icon}: {summary}")
+
+    breadcrumb_next = breadcrumb + [title]
+
+
+    # Got our line, now to dig deeper
+    if d_type == 'dict':
+
+        for k, v in dump.items():
+            results += _recurse_dump(c, v, k, breadcrumb_next, silent)
+
+
+    elif d_type == 'list':
+
+        for idv, v in enumerate(dump):
+            idv_title = f"[{str(idv)}]"
+            results += _recurse_dump(c, v, idv_title, breadcrumb_next, silent)
+
+
+    return results
+
+
 # Object summaries
 def _summarize_record(record):
     """

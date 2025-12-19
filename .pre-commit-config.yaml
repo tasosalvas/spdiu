@@ -1,7 +1,27 @@
+# Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
 repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    - id: check-added-large-files
+    - id: check-case-conflict
+    - id: check-illegal-windows-names
+    - id: check-toml
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+
+
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.14.10
   hooks:
     - id: ruff-check
       # args: [ --fix ]
     - id: ruff-format
+
+repos:
+  - repo: https://codeberg.org/fsfe/reuse-tool
+    rev: v6.2.0
+    hooks:
+      - id: reuse-lint-file

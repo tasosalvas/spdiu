@@ -55,15 +55,8 @@ def install(c, version=None):
     install_path = os.path.expanduser(cfg.game_dir)
 
 
-    # Determine the version
-    if cfg.release_version:
-        r_url = '/'.join((cfg.release_github, cfg.release_version))
-
-    elif version:
-        r_url = '/'.join((cfg.release_github, version))
-
-    else:
-        version = latest(c)
+    if not version:
+        version = cfg.release_version if cfg.release_version else latest(c)
 
 
     # Don't put arbitrary code in your user config, mkay?

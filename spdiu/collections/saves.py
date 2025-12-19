@@ -52,7 +52,7 @@ def clean(c):
     Removes all saved states, leaves a backup of the active data folder.
     """
     cfg = c.config.spdiu
-    if not util.exists(os.path.join(data_dir, cfg.active_save)):
+    if not util.exists(os.path.join(cfg.data_dir, cfg.active_save)):
         print('Aborting! There seems to be no active data folder.')
         return
 
@@ -79,7 +79,7 @@ def save(c, slot=None):
     """
     cfg = c.config.spdiu
 
-    if slot == None:
+    if slot is None:
         slot = cfg.default_slot
 
     if slot and not slot.isalnum():
@@ -137,7 +137,7 @@ def load(c, last=False, slot=None, game=None):
 
 
     else:
-        if slot == None:
+        if slot is None:
             p = Slots(cfg.work_dir, ['manual']).get_slot(cfg.default_slot)
 
         else:
@@ -152,7 +152,7 @@ def load(c, last=False, slot=None, game=None):
 
 
     # Load the requested profile and exit
-    if game == None:
+    if game is None:
         if p.name != cfg.backup_slot:
             backup(c)
 

@@ -145,7 +145,7 @@ def show(c, slot=None, active=False):
     Displays details for a save slot. -s [slot] or -a for the active data.
     """
     cfg = c.config.spdiu
-    if slot == None:
+    if slot is None:
         slot = cfg.default_slot
 
     if active:
@@ -231,7 +231,6 @@ def show(c, slot=None, active=False):
 
         print(f"{cfg.bullet_a}{len(ranks['records'])} stored ranking records.")
 
-        records = ranks['records']
         latest = ranks['records'][int(ranks['latest'])]
 
         print(f"{cfg.bullet_b}Latest run:")

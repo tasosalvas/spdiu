@@ -177,7 +177,7 @@ def bones(c, package="", hero="", display=False):
     ap.set_dat('bones.dat', bones)
 
     print(f"{cfg.disc_a} {ap.name} {cfg.i_data} Profile data")
-    print(f"A Small Package of Value Will Come to You, Shortly")
+    print("A Small Package of Value Will Come to You, Shortly")
 
 
 @task

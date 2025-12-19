@@ -14,9 +14,11 @@ Parsing methods read and write game datafiles.
 File manipulation methods unify disk io into relevant operations.
 """
 
-import os, shutil
+import os
+import shutil
 
-import gzip, json
+import gzip
+import json
 import xml.etree.ElementTree as ET
 
 from time import gmtime

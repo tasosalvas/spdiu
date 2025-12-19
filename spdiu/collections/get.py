@@ -5,10 +5,11 @@
 SPDIU Download and installation tasks.
 """
 
-import os, shutil, stat
+import os
+import shutil
+import stat
 
 import urllib.request
-import xml.etree.ElementTree as ET
 from zipfile import ZipFile, BadZipFile
 
 from invoke import task, Collection
@@ -106,7 +107,7 @@ def install(c, version=None):
 
         except urllib.error.ContentTooShortError:
             os.remove(p_path)
-            print(f'Transfer failed, try again.')
+            print('Transfer failed, try again.')
             return
 
         print('Package downloaded. Great success!')

@@ -158,7 +158,7 @@ def show(c, slot=None, active=False):
 
 
     p = Profile(s_dir)
-    print(f"\nProfile information:")
+    print("\nProfile information:")
 
 
     # Settings

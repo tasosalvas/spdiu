@@ -9,7 +9,8 @@ By convention, where applicable:
 -g --game to pick a specific game in a slot
 """
 
-import os, re
+import os
+import re
 from time import strftime
 
 from invoke import task, Collection
@@ -163,7 +164,7 @@ def load(c, last=False, slot=None, game=None):
 
     # Get the instance of the requested game, build the destination path.
     g = p.get_game(game)
-    agp = os.path.join(ap.root_dir, game)
+    ag_path = os.path.join(ap_path, game)
 
     if not g:
         print('Game not found in slot.')
@@ -173,7 +174,7 @@ def load(c, last=False, slot=None, game=None):
     if  p.name != cfg.backup_slot:
         backup(c)
 
-    util.replace(g.root_dir, agp)
+    util.replace(g.root_dir, ag_path)
     print(f"Game loaded! {cfg.disc_a} {p.name} {cfg.i_game} {game}")
 
 
@@ -289,7 +290,7 @@ def ls(c):
         print(f"{bullet}{time} {disc} {prefix}{p.name}")
 
 
-    print(f"\nActive slot:")
+    print("\nActive slot:")
 
     print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {cfg.active_save}")
 

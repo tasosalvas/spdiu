@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""
-Classes that represent the user data of an SPD installation.
-"""
+"""Classes that represent the user data of an SPD installation."""
 
 import os
 from operator import attrgetter
@@ -13,11 +11,10 @@ from . import util
 
 # Game data representation classes
 class Item():
-    """
-    An inventory item with an initialized dict.
-    """
+    """An inventory item with an initialized dict."""
 
     def __init__(self, itemdict={}):
+        """Construct a valid item dict, then overload its values with itemdict."""
         self.item = {
             'cursedKnown': True,
             'quantity': 1,
@@ -40,24 +37,19 @@ class Item():
 
 # Save directory management classes
 class DataDir():
-    """
-    A directory of game data. Inherited by Profile and Game.
+    """A directory of game data. Inherited by Profile and Game.
 
     It has a list of the .dat files it contains and methods for reading them.
     It can dig up the newest timestamp in the files and directories under it.
     """
 
     def set_dat(self, dat_file, contents):
-        """
-        Writes a python object into a dat file.
-        """
+        """Write a python object into a dat file."""
         util.write_dat(os.path.join(self.root_dir, dat_file), contents)
 
 
     def get_dat(self, dat_file):
-        """
-        Returns the contents of a dat file as a python object.
-        """
+        """Return the contents of a dat file as a python object."""
         try:
             return util.read_dat(os.path.join(self.root_dir, dat_file))
 
@@ -66,6 +58,11 @@ class DataDir():
 
 
     def __init__(self, base_dir):
+        """Analyze the directory and bake some variables.
+
+        The directory and all files contained are timestamped,
+        and the newest time is kept as self.ts.
+        """
         self.root_dir = os.path.expanduser(base_dir)
         self.name = os.path.split(base_dir)[1]
 
@@ -86,36 +83,29 @@ class DataDir():
 
 
     def __repr__(self):
+        """Return the class and the name of the directory."""
         return f"<{self.__class__.__name__}> {self.name}"
 
 
 class Game(DataDir):
-    """
-    An active game of SPD. A Profile can have multile Games.
-    """
+    """An active game of SPD. A Profile can have multile Games."""
 
     def __init__(self, game_dir):
+        """Ensure the directory contains a game and create a Game object."""
         super().__init__(game_dir)
 
         if 'game.dat' not in self.dat_files:
             raise FileNotFoundError
 
 
-    def __repr__(self):
-        return f"<{self.__class__.__name__}> {self.name}"
-
-
 class Profile(DataDir):
-    """
-    An SPD data folder. Includes settings, profile stats, and games.
+    """An SPD data folder. Includes settings, profile stats, and games.
 
     games contains Game objects sorted by modification time.
     """
 
     def get_settings(self):
-        """
-        Returns the values from settings.xml as a dict.
-        """
+        """Get the values from settings.xml as a dict."""
         try:
             return util.read_xml(os.path.join(self.root_dir, 'settings.xml'))
 
@@ -124,9 +114,7 @@ class Profile(DataDir):
 
 
     def get_game(self, game_name):
-        """
-        Returns a game by the requested name.
-        """
+        """Return a game from the requested name."""
         for g in self.games:
             if g.name == game_name:
                 return g
@@ -135,10 +123,7 @@ class Profile(DataDir):
 
 
     def __init__(self, base_dir):
-        """
-        Accepts a group: str, which represents its parent
-        """
-
+        """Ensure the directory contains game data and create a Profile object."""
         super().__init__(base_dir)
         self.group = os.path.split(os.path.split(self.root_dir)[0])[1]
 
@@ -168,12 +153,12 @@ class Profile(DataDir):
 
 
     def __repr__(self):
+        """Return the class name and the name of the save slot."""
         return f"<{self.__class__.__name__}> {self.name}"
 
 
 class Slots():
-    """
-    Manager class for save directories containing states of data files.
+    """Manager class for save directories containing states of data files.
 
     Represents a flat namespace of alphanumeric character names.
 
@@ -181,8 +166,7 @@ class Slots():
     """
 
     def get_slot(self, slot_name):
-        """
-        Returns a Profile representing the save with the requested name.
+        """Return a Profile representing the save with the requested name.
 
         Accepts 'subdir.slot' syntax, falls back to default_subdir if omitted.
         """
@@ -203,7 +187,8 @@ class Slots():
 
 
     def __init__(self, base_dir, subdirs=['manual'], default_subdir='manual'):
-        """
+        """Initialize a Slots manager, loading every profile in subdirs.
+
         Accepts a list of subdirs to construct its slots from.
         """
         self.name = '+'.join(subdirs)
@@ -227,4 +212,5 @@ class Slots():
 
 
     def __repr__(self):
+        """Return the class name and the slot directories represented."""
         return f"<{self.__class__.__name__}> {self.name}"

@@ -26,8 +26,7 @@ ns = Collection("io")
 # File manipulation Tasks
 @task
 def backup(c):
-    """
-    Creates a backup of the active data.
+    """Create a backup of the active data.
 
     Automatically called by load and clean.
     """
@@ -48,9 +47,7 @@ def backup(c):
 
 @task(post=[backup])
 def clean(c):
-    """
-    Removes all saved states, leaves a backup of the active data folder.
-    """
+    """Remove all saved states, leave a backup of the active data folder."""
     cfg = c.config.spdiu
     if not util.exists(os.path.join(cfg.data_dir, cfg.active_save)):
         print('Aborting! There seems to be no active data folder.')
@@ -67,8 +64,7 @@ def clean(c):
 
 @task
 def save(c, slot=None):
-    """
-    Saves a copy of the current savegame folder. -s [slot] to name a slot.
+    """Save a copy of the current savegame folder. -s [slot] to name a slot.
 
     Slot names can only be alphanumeric characters.
 
@@ -107,8 +103,7 @@ def save(c, slot=None):
 
 @task
 def load(c, last=False, slot=None, game=None):
-    """
-    Loads a save. -l for last save, -s [slot], -g [game] to only load a game.
+    """Load a save. -l for last save, -s [slot], -g [game] to only load a game.
 
     Slots provided with -s, --slot correspond to the manual saves,
     while the other categories can be accessed with dot syntax,
@@ -126,7 +121,6 @@ def load(c, last=False, slot=None, game=None):
     Loading will save a backup of the active save in the backup slot,
     unless the backup slot itself is being loaded.
     """
-
     cfg = c.config.spdiu
 
     if last:
@@ -180,10 +174,10 @@ def load(c, last=False, slot=None, game=None):
 
 # Autosaves
 class AutoSaveWatcher(StreamWatcher):
-    """
-    Watches the stdout of the game, autosaves on certain events.
-    """
+    """Watch the stdout of the game, autosave on certain events."""
+
     def __init__(self, c):
+        """Compile patterns, keep track of the log position."""
         self.c = c
 
         patterns = (
@@ -195,9 +189,7 @@ class AutoSaveWatcher(StreamWatcher):
 
 
     def autosave(self, event):
-        """
-        Creates saves in the autosave directory.
-        """
+        """Create saves in the autosave directory."""
         cfg = self.c.config.spdiu
 
         name = event.replace(' ', '')
@@ -209,8 +201,10 @@ class AutoSaveWatcher(StreamWatcher):
 
 
     def submit(self, stream):
-        """
-        Gets the whole log every time there's a line.
+        """Autosave if a pattern is matched.
+
+        Gets the whole log every time there's a line,
+        skips to the current log_index and updates it.
         """
         new = stream[self.log_index:]
 
@@ -228,9 +222,7 @@ class AutoSaveWatcher(StreamWatcher):
 
 @task
 def watch(c):
-    """
-    Runs the game, autosaves on certain log events.
-    """
+    """Run the game, autosave on certain log events."""
     cfg = c.config.spdiu
     cmd = cfg.game_cmd.replace(' ', '\ ')
 
@@ -242,8 +234,7 @@ def watch(c):
 
 @task
 def ls(c):
-    """
-    Lists all saved states chronologically.
+    """List all saved states chronologically.
 
     The disc icon signifies the latest data folder between all states.
 

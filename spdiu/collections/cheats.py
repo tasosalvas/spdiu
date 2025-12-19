@@ -22,9 +22,7 @@ ns = Collection('cheat')
 
 @task
 def gold(c, game=None, number='10000'):
-    """
-    Set your Gold! -n --number [amount], default: 10000
-    """
+    """Set your Gold! -n --number [amount], default: 10000."""
     cfg = c.config.spdiu
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
@@ -42,9 +40,7 @@ def gold(c, game=None, number='10000'):
 
 @task
 def energy(c, game=None, number='1000'):
-    """
-    Set your Alchemical Energy! -n --number [amount], default: 1000
-    """
+    """Set your Alchemical Energy! -n --number [amount], default: 1000."""
     cfg = c.config.spdiu
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
@@ -62,8 +58,7 @@ def energy(c, game=None, number='1000'):
 
 @task
 def bones(c, package="", hero="", display=False):
-    """
-    Sets your bones. 'inv -h cheat.bones' for options.
+    """Set your bones. 'inv -h cheat.bones' for options.
 
     -p, --package to pick your package, or you'll just get food.
 
@@ -74,7 +69,6 @@ def bones(c, package="", hero="", display=False):
     regrowth: Stardew Pixel Dungeon
     zip: Walls are just a suggestion
 
-
     -h, --hero to pick, or a hero that fits your package will be assigned.
 
     i.e. WARRIOR, MAGE, ROGUE, HUNTRESS, DUELIST, CLERIC
@@ -84,7 +78,6 @@ def bones(c, package="", hero="", display=False):
 
     Read through the task code, it's easy to adapt in your own local task.
     """
-
     cfg = c.config.spdiu
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
@@ -183,7 +176,7 @@ def bones(c, package="", hero="", display=False):
 @task
 def consumables(c, game=None):
     """
-    Returns all consumable identities. -g --game [game] to pick a game.
+    Return all consumable identities. -g --game [game] to pick a game.
 
     Bullet indicators show whether a consumable is known or not.
     """

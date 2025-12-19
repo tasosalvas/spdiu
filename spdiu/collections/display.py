@@ -91,15 +91,13 @@ def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
 
 # Object summaries
 def _summarize_record(record):
-    """
-    Prints a brief summary of a rankings record.
+    """Print a brief summary of a rankings record.
 
     Accepts a dict of serialized data from a
     com.shatteredpixel.shatteredpixeldungeon.Rankings$Record.
 
     Only looks for 'Rankings$Record' to enable fork compatibility.
     """
-
     # __className <str>: Java class for ranking records
     if record['__className'].split('.')[-1] != 'Rankings$Record':
         return
@@ -141,9 +139,7 @@ def _summarize_record(record):
 
 @task
 def show(c, slot=None, active=False):
-    """
-    Displays details for a save slot. -s [slot] or -a for the active data.
-    """
+    """Display details for a save slot. -s [slot] or -a for the active data."""
     cfg = c.config.spdiu
     if slot is None:
         slot = cfg.default_slot

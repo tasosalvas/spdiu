@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""
-SPDIU Download and installation tasks.
-"""
+"""SPDIU Download and installation tasks."""
 
 import os
 import shutil
@@ -22,9 +20,7 @@ ns = Collection('get')
 
 @task
 def latest(c):
-    """
-    Returns the latest version by checking github's 'releases/latest'.
-    """
+    """Get the latest version number by checking github's 'releases/latest'."""
     cfg = c.config.spdiu
 
     l_url = '/'.join((cfg.release_github, 'latest'))
@@ -38,10 +34,10 @@ def latest(c):
 
 @task
 def install(c, version=None):
-    """
-    Downloads the latest game release from github. 'inv -h' this for more options.
+    """Download the game and install it. 'inv -h' this for more options.
 
     -v, --version [release] to request a version.
+    If a version is not supplied and not pinned in config, it gets the latest.
 
     See invoke.yaml.example for configuring the task to download different SPD forks.
     """

@@ -26,27 +26,13 @@ from time import gmtime
 
 # File attributes
 def get_ts(dir_name):
-    """
-    Returns a gmtime (seconds: float since epoch) timestamp for a directory.
-    """
-
+    """Return a gmtime (seconds: float since epoch) timestamp for a directory."""
     return gmtime(os.stat(os.path.expanduser(dir_name)).st_mtime)
-
-
-def walk_ts(dir_name, oldest=True):
-    """
-    Returns the newest timestamp in a directory, or the oldest if oldest=True.
-    Walks the full tree from the provided directory,
-    """
-
-    raise NotImplementedError
 
 
 # Parsing
 def read_dat(file_name):
-    """
-    Reads an SPD .dat file into a python object.
-    """
+    """Read an SPD .dat file into a python object."""
     with gzip.open(file_name, 'rb') as f:
         content = f.read()
 
@@ -54,10 +40,7 @@ def read_dat(file_name):
 
 
 def write_dat(file_name, data):
-    """
-    Writes a python object into an SPD .dat file.
-    """
-
+    """Write a python object into an SPD .dat file."""
     json_bin = str.encode(json.dumps(data, separators=(",",":")))
 
     with gzip.open(file_name, 'wb') as f:
@@ -65,9 +48,7 @@ def write_dat(file_name, data):
 
 
 def read_xml(file_name):
-    """
-    Reads an xml file structured like SPD's settings.xml
-    """
+    """Read an xml file structured like SPD's settings.xml."""
     values = {}
     root = ET.parse(file_name).getroot()
     for i in root:
@@ -77,13 +58,13 @@ def read_xml(file_name):
 
 
 def write_xml(file_name, data):
+    """Write an xml file structured like SPD's settings.xml."""
     raise NotImplementedError
 
 
 # Folder manipulation
 def replace(src_dir, dest_dir):
-    """
-    Copies a directory tree to a destination, replacing anything there.
+    """Copy a directory tree to a destination, replacing anything there.
 
     Expands user (~) on supplied paths.
     Raises `FileNotFoundError` if the source does not exist.
@@ -103,8 +84,8 @@ def replace(src_dir, dest_dir):
 
 
 def remove(directory):
-    """
-    Makes sure a directory tree is deleted.
+    """Ensure a directory tree is deleted.
+
     Expands user (~) on supplied paths.
     """
     try:
@@ -114,8 +95,7 @@ def remove(directory):
 
 
 def exists(path):
-    """
-    Returns True if a specified file or directory exists.
+    """Check if a specified file or directory exists.
 
     Expands user (~) on supplied paths.
     """

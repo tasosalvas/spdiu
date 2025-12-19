@@ -8,3 +8,4 @@
 !/spdiu/
 !/uv.lock
 !/pyproject.toml
+!/.pre-commit-config.yaml

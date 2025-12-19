@@ -28,3 +28,9 @@ convention="pep257"
 
 [tool.ruff.format]
 docstring-code-format=true
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+    "ruff>=0.14.10",
+]

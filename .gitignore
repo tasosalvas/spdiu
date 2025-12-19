@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 /*
 !/tasks.py
-!/invoke.yaml.example
-!/local_tasks.py.example
+!/invoke.example.yaml
+!/local_tasks.example.py
 !/.gitignore
 !/README.md
 !/LICENSES

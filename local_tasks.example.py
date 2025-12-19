@@ -7,7 +7,6 @@ This is an example for adding your own local tasks to SPDIU.
 See https://docs.pyinvoke.org/en/stable/ for invoke documentation.
 """
 
-
 from invoke import task
 
 
@@ -22,9 +21,7 @@ from invoke import task
 
 @task
 def config(c):
-    """
-    Accesses a config value from the same context.
-    """
+    """Access a config value from the same context."""
     cfg = c.config.spdiu
 
-    print(f"Here's a config value: \"{cfg.active_save}\".")
+    print(f'Here\'s a config value: "{cfg.active_save}".')

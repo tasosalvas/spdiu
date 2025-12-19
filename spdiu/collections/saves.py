@@ -157,7 +157,7 @@ def load(c, last=False, slot=None, game=None):
 
         util.replace(p.root_dir, ap_path)
 
-        print(f"State loaded! {cfg.disc_a} {slot}")
+        print(f"State loaded! {cfg.disc_a} {p.name}")
         return
 
 
@@ -174,7 +174,7 @@ def load(c, last=False, slot=None, game=None):
         backup(c)
 
     util.replace(g.root_dir, agp)
-    print(f"Game loaded! {cfg.disc_a} {slot} {cfg.i_game} {game}")
+    print(f"Game loaded! {cfg.disc_a} {p.name} {cfg.i_game} {game}")
 
 
 # Autosaves

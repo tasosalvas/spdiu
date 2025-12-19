@@ -6,3 +6,5 @@
 !/README.md
 !/LICENSE
 !/spdiu/
+!/uv.lock
+!/pyproject.toml

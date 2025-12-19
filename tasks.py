@@ -37,8 +37,9 @@ from spdiu.collections import get, cheats
 # Default SPDIU configuration. Override values in invoke.yaml.
 defaults = {
     'spdiu': {
-        # SPDIU config
         'base_dir': os.path.dirname(os.path.realpath(__file__)),
+
+        # SPDIU config
         'work_dir': '~/.local/share/.shatteredpixel/saves',
         'default_slot': 'default',
         'backup_slot': 'bak',
@@ -54,7 +55,7 @@ defaults = {
 
 
         # The game installation
-        'game_dir': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'spd'),
+        'game_dir': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'game'),
         'game_cmd': 'bin/Shattered Pixel Dungeon',
         'game_ns': 'com.shatteredpixel.shatteredpixeldungeon',
 

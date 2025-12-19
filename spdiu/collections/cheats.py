@@ -199,6 +199,7 @@ def consumables(c, game=None):
     scrolls = {k: v for k, v in labels.items() if 'ScrollOf' in k}
 
     print(f"{cfg.disc_a} {ap.name} {cfg.i_game} {g.name}")
+    print(f"{cfg.bullet_a}: known | {cfg.bullet_b}: not known")
 
     print(f"\n {cfg.i_data} Potions")
     for k, v in potions.items():

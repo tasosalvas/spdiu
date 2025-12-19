@@ -36,58 +36,45 @@ from spdiu.collections import get, cheats
 
 # Default SPDIU configuration. Override values in invoke.yaml.
 defaults = {
-    'spdiu': {
-        'base_dir': os.path.dirname(os.path.realpath(__file__)),
-
+    "spdiu": {
+        "base_dir": os.path.dirname(os.path.realpath(__file__)),
         # SPDIU config
-        'work_dir': '~/.local/share/.shatteredpixel/saves',
-        'default_slot': 'default',
-        'backup_slot': 'bak',
-
-
+        "work_dir": "~/.local/share/.shatteredpixel/saves",
+        "default_slot": "default",
+        "backup_slot": "bak",
         # Game release info, used to download the game
-        'release_packages': 'packages',
-        'release_github': 'https://github.com/00-Evan/shattered-pixel-dungeon/releases',
-        'release_template': 'download/{version}/ShatteredPD-{version}-{platform}.{ext}',
-        'release_version': None,
-        'release_platform': 'Linux',
-        'release_extension': 'zip',
-
-
+        "release_packages": "packages",
+        "release_github": "https://github.com/00-Evan/shattered-pixel-dungeon/releases",
+        "release_template": "download/{version}/ShatteredPD-{version}-{platform}.{ext}",
+        "release_version": None,
+        "release_platform": "Linux",
+        "release_extension": "zip",
         # The game installation
-        'game_dir': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'game'),
-        'game_cmd': 'bin/Shattered Pixel Dungeon',
-        'game_ns': 'com.shatteredpixel.shatteredpixeldungeon',
-
-
+        "game_dir": os.path.join(os.path.dirname(os.path.realpath(__file__)), "game"),
+        "game_cmd": "bin/Shattered Pixel Dungeon",
+        "game_ns": "com.shatteredpixel.shatteredpixeldungeon",
         # Game user data
-        'data_dir': '~/.local/share/.shatteredpixel',
-        'active_save': 'shattered-pixel-dungeon',
-
-
+        "data_dir": "~/.local/share/.shatteredpixel",
+        "active_save": "shattered-pixel-dungeon",
         # Fancy decorations
-        'time_format': '🗓️ %Y %b %d 🕰️ %H:%M:%S',
-
-        'bullet_a': ' ||> ',
-        'bullet_b': '  |> ',
-
-        'disc_a': '📀',
-        'disc_b': '💿',
-
+        "time_format": "🗓️ %Y %b %d 🕰️ %H:%M:%S",
+        "bullet_a": " ||> ",
+        "bullet_b": "  |> ",
+        "disc_a": "📀",
+        "disc_b": "💿",
         # Icons
         # TODO: unified icon namespace for visual stuff?
-        'i_bak': '💾',
-        'i_auto': '🤖',
-        'i_game': '🕹️',
-        'i_data': '🗂️',
-        'i_clean': '🧹',
-
-        'i_dict': '📖',
-        'i_list': '📋',
-        'i_int': '🧮',
-        'i_float': '🍕',
-        'i_str': '🔤',
-        'i_bool': '💡',
+        "i_bak": "💾",
+        "i_auto": "🤖",
+        "i_game": "🕹️",
+        "i_data": "🗂️",
+        "i_clean": "🧹",
+        "i_dict": "📖",
+        "i_list": "📋",
+        "i_int": "🧮",
+        "i_float": "🍕",
+        "i_str": "🔤",
+        "i_bool": "💡",
     }
 }
 
@@ -107,9 +94,9 @@ def info(c, config=False, help=None):
     """
     if config:
         cfg = c.config.spdiu
-        d_cfg = defaults['spdiu']
+        d_cfg = defaults["spdiu"]
 
-        print('Active SPDIU configuration:')
+        print("Active SPDIU configuration:")
         print(f"{cfg.bullet_b}: default | {cfg.bullet_a}: overridden\n")
 
         for k, v in cfg.items():
@@ -118,7 +105,6 @@ def info(c, config=False, help=None):
 
         return
 
-
     if help:
         if help in dir(spdiu.collections):
             print(getattr(spdiu.collections, help).__doc__)
@@ -126,7 +112,6 @@ def info(c, config=False, help=None):
         else:
             print(f"Collection {help} not found. 'inv info' for general help.")
             return
-
 
     print(__doc__)
     print("'inv info -c' to display active SPDIU configuration.")
@@ -159,14 +144,14 @@ ns.add_collection(cheats)
 try:
     import local_tasks
 
-    if 'ns' in dir(local_tasks):
+    if "ns" in dir(local_tasks):
         ns.add_collection(local_tasks.ns)
 
     else:
-        if 'collection_name' in dir(local_tasks):
+        if "collection_name" in dir(local_tasks):
             col_name = local_tasks.collection_name
         else:
-            col_name = 'u'
+            col_name = "u"
 
         ns.add_collection(Collection.from_module(local_tasks, col_name))
 

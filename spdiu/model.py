@@ -10,25 +10,25 @@ from . import util
 
 
 # Game data representation classes
-class Item():
+class Item:
     """An inventory item with an initialized dict."""
 
     def __init__(self, itemdict={}):
         """Construct a valid item dict, then overload its values with itemdict."""
         self.item = {
-            'cursedKnown': True,
-            'quantity': 1,
-            'levelKnown': False,
-            'cursed': False,
-            'level': 0,
-            'uses_left_to_id': 10,
-            '__className': 'com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor',
-            'kept_lost': False,
-            'curse_infusion_bonus': False,
-            'augment': 'NONE',
-            'glyph_hardened': False,
-            'mastery_potion_bonus': False,
-            'available_uses': 5
+            "cursedKnown": True,
+            "quantity": 1,
+            "levelKnown": False,
+            "cursed": False,
+            "level": 0,
+            "uses_left_to_id": 10,
+            "__className": "com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor",
+            "kept_lost": False,
+            "curse_infusion_bonus": False,
+            "augment": "NONE",
+            "glyph_hardened": False,
+            "mastery_potion_bonus": False,
+            "available_uses": 5,
         }
 
         for k, v in itemdict.items():
@@ -36,7 +36,7 @@ class Item():
 
 
 # Save directory management classes
-class DataDir():
+class DataDir:
     """A directory of game data. Inherited by Profile and Game.
 
     It has a list of the .dat files it contains and methods for reading them.
@@ -47,7 +47,6 @@ class DataDir():
         """Write a python object into a dat file."""
         util.write_dat(os.path.join(self.root_dir, dat_file), contents)
 
-
     def get_dat(self, dat_file):
         """Return the contents of a dat file as a python object."""
         try:
@@ -55,7 +54,6 @@ class DataDir():
 
         except FileNotFoundError:
             return None
-
 
     def __init__(self, base_dir):
         """Analyze the directory and bake some variables.
@@ -67,8 +65,7 @@ class DataDir():
         self.name = os.path.split(base_dir)[1]
 
         self.dat_files = [
-            i for i in os.listdir(self.root_dir)      \
-            if os.path.splitext(i)[1] == '.dat'       \
+            i for i in os.listdir(self.root_dir) if os.path.splitext(i)[1] == ".dat"
         ]
 
         # Get the newest timestamp between the directory and its files.
@@ -80,7 +77,6 @@ class DataDir():
                 ts_list.append(util.get_ts(p))
 
         self.ts = sorted(ts_list, reverse=True)[0]
-
 
     def __repr__(self):
         """Return the class and the name of the directory."""
@@ -94,7 +90,7 @@ class Game(DataDir):
         """Ensure the directory contains a game and create a Game object."""
         super().__init__(game_dir)
 
-        if 'game.dat' not in self.dat_files:
+        if "game.dat" not in self.dat_files:
             raise FileNotFoundError
 
 
@@ -107,11 +103,10 @@ class Profile(DataDir):
     def get_settings(self):
         """Get the values from settings.xml as a dict."""
         try:
-            return util.read_xml(os.path.join(self.root_dir, 'settings.xml'))
+            return util.read_xml(os.path.join(self.root_dir, "settings.xml"))
 
         except FileNotFoundError:
             return {}
-
 
     def get_game(self, game_name):
         """Return a game from the requested name."""
@@ -121,7 +116,6 @@ class Profile(DataDir):
 
         return None
 
-
     def __init__(self, base_dir):
         """Ensure the directory contains game data and create a Profile object."""
         super().__init__(base_dir)
@@ -130,7 +124,7 @@ class Profile(DataDir):
         # Detect if this is a game data folder:
         # settings.xml appears at first launch
         # journal.dat the moment the dungeon is first loaded
-        if 'journal.dat' not in self.dat_files:
+        if "journal.dat" not in self.dat_files:
             raise FileNotFoundError
 
         games = []
@@ -149,15 +143,14 @@ class Profile(DataDir):
             if self.ts < game.ts:
                 self.ts = game.ts
 
-        self.games = sorted(games, key=attrgetter('ts'), reverse=True)
-
+        self.games = sorted(games, key=attrgetter("ts"), reverse=True)
 
     def __repr__(self):
         """Return the class name and the name of the save slot."""
         return f"<{self.__class__.__name__}> {self.name}"
 
 
-class Slots():
+class Slots:
     """Manager class for save directories containing states of data files.
 
     Represents a flat namespace of alphanumeric character names.
@@ -170,7 +163,7 @@ class Slots():
 
         Accepts 'subdir.slot' syntax, falls back to default_subdir if omitted.
         """
-        parts = slot_name.split('.')
+        parts = slot_name.split(".")
         if len(parts) > 1:
             sd = parts[0]
             slot = parts[1]
@@ -185,13 +178,12 @@ class Slots():
 
         return None
 
-
-    def __init__(self, base_dir, subdirs=['manual'], default_subdir='manual'):
+    def __init__(self, base_dir, subdirs=["manual"], default_subdir="manual"):
         """Initialize a Slots manager, loading every profile in subdirs.
 
         Accepts a list of subdirs to construct its slots from.
         """
-        self.name = '+'.join(subdirs)
+        self.name = "+".join(subdirs)
         self.root_dir = os.path.expanduser(base_dir)
 
         self.subdirs = [os.path.join(self.root_dir, i) for i in subdirs]
@@ -208,8 +200,7 @@ class Slots():
                     print("oops")
                     pass
 
-        self.slots = sorted(slots, key=attrgetter('ts'), reverse=True)
-
+        self.slots = sorted(slots, key=attrgetter("ts"), reverse=True)
 
     def __repr__(self):
         """Return the class name and the slot directories represented."""

@@ -17,41 +17,41 @@ from invoke import task, Collection
 from ..model import Profile, Item
 
 
-ns = Collection('cheat')
+ns = Collection("cheat")
 
 
 @task
-def gold(c, game=None, number='10000'):
+def gold(c, game=None, number="10000"):
     """Set your Gold! -n --number [amount], default: 10000."""
     cfg = c.config.spdiu
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
     g = ap.get_game(game) if game else ap.games[0]
-    gd = g.get_dat('game.dat')
+    gd = g.get_dat("game.dat")
 
     print(f"{cfg.disc_a} {ap.name} {cfg.i_game} {g.name}")
     print(f"Previous Gold: {gd['gold']}")
 
-    gd['gold'] = int(number)
-    g.set_dat('game.dat', gd)
+    gd["gold"] = int(number)
+    g.set_dat("game.dat", gd)
 
     print(f"{cfg.i_data} Gold set to {number}!")
 
 
 @task
-def energy(c, game=None, number='1000'):
+def energy(c, game=None, number="1000"):
     """Set your Alchemical Energy! -n --number [amount], default: 1000."""
     cfg = c.config.spdiu
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
     g = ap.get_game(game) if game else ap.games[0]
-    gd = g.get_dat('game.dat')
+    gd = g.get_dat("game.dat")
 
     print(f"{cfg.disc_a} {ap.name} {cfg.i_game} {g.name}")
     print(f"Previous Alchemical Energy: {gd['energy']}")
 
-    gd['energy'] = int(number)
-    g.set_dat('game.dat', gd)
+    gd["energy"] = int(number)
+    g.set_dat("game.dat", gd)
 
     print(f"{cfg.i_data} Alchemical Energy set to {number}!")
 
@@ -81,93 +81,99 @@ def bones(c, package="", hero="", display=False):
     cfg = c.config.spdiu
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
-    namespace = '.'.join((cfg.game_ns, 'items'))
+    namespace = ".".join((cfg.game_ns, "items"))
 
-    if package == 'plate':
-        hero_class = 'WARRIOR'
-        item = 'armor.PlateArmor'
+    if package == "plate":
+        hero_class = "WARRIOR"
+        item = "armor.PlateArmor"
 
         # no auguments in bones :(
         # aug = 'armor.glyphs.Thorns'
 
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'level': 3,
-            'mastery_potion_bonus': True,
-        })
+        i = Item(
+            {
+                "__className": ".".join((namespace, item)),
+                "level": 3,
+                "mastery_potion_bonus": True,
+            }
+        )
 
+    elif package == "blade":
+        hero_class = "DUELIST"
+        item = "weapon.melee.AssassinsBlade"
+        i = Item(
+            {
+                "__className": ".".join((namespace, item)),
+                "level": 3,
+                "mastery_potion_bonus": True,
+            }
+        )
 
-    elif package == 'blade':
-        hero_class = 'DUELIST'
-        item = 'weapon.melee.AssassinsBlade'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'level': 3,
-            'mastery_potion_bonus': True,
-        })
+    elif package == "wealth":
+        hero_class = "ROGUE"
+        item = "rings.RingOfWealth"
+        i = Item(
+            {
+                "__className": ".".join((namespace, item)),
+                "level": 3,
+            }
+        )
 
+    elif package == "reroll":
+        hero_class = "CLERIC"
+        item = "scrolls.ScrollOfTransmutation"
+        i = Item(
+            {
+                "__className": ".".join((namespace, item)),
+                "quantity": 6,
+            }
+        )
 
-    elif package == 'wealth':
-        hero_class = 'ROGUE'
-        item = 'rings.RingOfWealth'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'level': 3,
-        })
+    elif package == "regrowth":
+        hero_class = "HUNTRESS"
+        item = "wands.WandOfRegrowth"
+        i = Item(
+            {
+                "__className": ".".join((namespace, item)),
+                "level": 3,
+            }
+        )
 
-
-    elif package == 'reroll':
-        hero_class = 'CLERIC'
-        item = 'scrolls.ScrollOfTransmutation'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'quantity': 6,
-        })
-
-
-    elif package == 'regrowth':
-        hero_class = 'HUNTRESS'
-        item = 'wands.WandOfRegrowth'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'level': 3,
-        })
-
-
-    elif package == 'zip':
-        hero_class = 'ROGUE'
-        item = 'artifacts.EtherealChains'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-        })
-
+    elif package == "zip":
+        hero_class = "ROGUE"
+        item = "artifacts.EtherealChains"
+        i = Item(
+            {
+                "__className": ".".join((namespace, item)),
+            }
+        )
 
     else:
-        hero_class = 'MAGE'
-        item = 'food.Berry'
-        #item = 'food.Food'
-        i = Item({
-            '__className': '.'.join((namespace, item)),
-            'quantity': 12,
-        })
-
+        hero_class = "MAGE"
+        item = "food.Berry"
+        # item = 'food.Food'
+        i = Item(
+            {
+                "__className": ".".join((namespace, item)),
+                "quantity": 12,
+            }
+        )
 
     if hero:
         hero_class = hero.upper()
 
-
     bones = {
-        'item': i.item,
-        'hero_class': hero_class,
-        'level': 1,
-        'branch': 0,
+        "item": i.item,
+        "hero_class": hero_class,
+        "level": 1,
+        "branch": 0,
     }
 
     if display:
-        print(ap.get_dat('bones.dat'))
+        print(ap.get_dat("bones.dat"))
         return
 
-    ap.set_dat('bones.dat', bones)
+    ap.set_dat("bones.dat", bones)
 
     print(f"{cfg.disc_a} {ap.name} {cfg.i_data} Profile data")
     print("A Small Package of Value Will Come to You, Shortly")
@@ -184,40 +190,39 @@ def consumables(c, game=None):
     ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
 
     g = ap.get_game(game) if game else ap.games[0]
-    gd = g.get_dat('game.dat')
+    gd = g.get_dat("game.dat")
 
-    labels = {k: v for k, v in gd.items() if '_label' in k}
-    potions = {k: v for k, v in labels.items() if 'PotionOf' in k}
-    rings = {k: v for k, v in labels.items() if 'RingOf' in k}
-    scrolls = {k: v for k, v in labels.items() if 'ScrollOf' in k}
+    labels = {k: v for k, v in gd.items() if "_label" in k}
+    potions = {k: v for k, v in labels.items() if "PotionOf" in k}
+    rings = {k: v for k, v in labels.items() if "RingOf" in k}
+    scrolls = {k: v for k, v in labels.items() if "ScrollOf" in k}
 
     print(f"{cfg.disc_a} {ap.name} {cfg.i_game} {g.name}")
     print(f"{cfg.bullet_a}: known | {cfg.bullet_b}: not known")
 
     print(f"\n {cfg.i_data} Potions")
     for k, v in potions.items():
-        iclass = k.split('_')[0]
-        known = gd[iclass + '_known']
-        name = iclass[len('PotionOf'):]
+        iclass = k.split("_")[0]
+        known = gd[iclass + "_known"]
+        name = iclass[len("PotionOf") :]
         bullet = cfg.bullet_a if known else cfg.bullet_b
 
         print(f"{bullet}{name}: {v}")
 
     print(f"\n {cfg.i_data} Rings")
     for k, v in rings.items():
-        iclass = k.split('_')[0]
-        known = gd[iclass + '_known']
-        name = iclass[len('RingOf'):]
+        iclass = k.split("_")[0]
+        known = gd[iclass + "_known"]
+        name = iclass[len("RingOf") :]
         bullet = cfg.bullet_a if known else cfg.bullet_b
 
         print(f"{bullet}{name}: {v}")
 
     print(f"\n {cfg.i_data} Scrolls")
     for k, v in scrolls.items():
-
-        iclass = k.split('_')[0]
-        known = gd[iclass + '_known']
-        name = iclass[len('ScrollOf'):]
+        iclass = k.split("_")[0]
+        known = gd[iclass + "_known"]
+        name = iclass[len("ScrollOf") :]
         bullet = cfg.bullet_a if known else cfg.bullet_b
 
         print(f"{bullet}{name}: {v}")

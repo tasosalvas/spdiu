@@ -33,7 +33,7 @@ def get_ts(dir_name):
 # Parsing
 def read_dat(file_name):
     """Read an SPD .dat file into a python object."""
-    with gzip.open(file_name, 'rb') as f:
+    with gzip.open(file_name, "rb") as f:
         content = f.read()
 
     return json.loads(content)
@@ -41,9 +41,9 @@ def read_dat(file_name):
 
 def write_dat(file_name, data):
     """Write a python object into an SPD .dat file."""
-    json_bin = str.encode(json.dumps(data, separators=(",",":")))
+    json_bin = str.encode(json.dumps(data, separators=(",", ":")))
 
-    with gzip.open(file_name, 'wb') as f:
+    with gzip.open(file_name, "wb") as f:
         f.write(json_bin)
 
 
@@ -52,7 +52,7 @@ def read_xml(file_name):
     values = {}
     root = ET.parse(file_name).getroot()
     for i in root:
-        values[i.attrib['key']] = i.text
+        values[i.attrib["key"]] = i.text
 
     return values
 

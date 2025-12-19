@@ -24,3 +24,7 @@ extend-select = [
 [tool.ruff.lint.pydocstyle]
 # Enforces PEP-257 docstrings
 convention="pep257"
+
+
+[tool.ruff.format]
+docstring-code-format=true

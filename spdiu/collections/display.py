@@ -36,55 +36,45 @@ def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
     cfg = c.config.spdiu
     ns = cfg.game_ns
 
-    d_breadcrumb = '.'.join(breadcrumb)
+    d_breadcrumb = ".".join(breadcrumb)
     d_type = type(dump).__name__
     d_title = f"{title} <{d_type}>"
     d_icon = cfg[f"i_{d_type}"]
 
-
     game_class = ""
 
-    if d_type == 'dict' and '__className' in dump:
-        game_class = dump['__className'][len(ns)+1:]
+    if d_type == "dict" and "__className" in dump:
+        game_class = dump["__className"][len(ns) + 1 :]
         summary = f"{cfg.i_game} {game_class}, {len(dump)} values"
 
-
-    elif d_type == 'str' and ns in dump:
-        game_class = dump[len(ns)+1:]
+    elif d_type == "str" and ns in dump:
+        game_class = dump[len(ns) + 1 :]
         summary = f"{cfg.i_game} {game_class}"
 
-
-    elif d_type in ('list', 'dict'):
+    elif d_type in ("list", "dict"):
         summary = f"{len(dump)} values"
-
 
     else:
         summary = f"{str(dump)}"
-
 
     results = [(breadcrumb, title, d_type, game_class, summary)]
 
     if not silent:
         lpad = "  " * len(breadcrumb)
-        newline = '\n' if d_type in ('list', 'dict') and len(dump) > 0 else ''
+        newline = "\n" if d_type in ("list", "dict") and len(dump) > 0 else ""
         print(newline + lpad + f"{d_breadcrumb} {d_title} {d_icon}: {summary}")
 
     breadcrumb_next = breadcrumb + [title]
 
-
     # Got our line, now to dig deeper
-    if d_type == 'dict':
-
+    if d_type == "dict":
         for k, v in dump.items():
             results += _recurse_dump(c, v, k, breadcrumb_next, silent)
 
-
-    elif d_type == 'list':
-
+    elif d_type == "list":
         for idv, v in enumerate(dump):
             idv_title = f"[{str(idv)}]"
             results += _recurse_dump(c, v, idv_title, breadcrumb_next, silent)
-
 
     return results
 
@@ -99,7 +89,7 @@ def _summarize_record(record):
     Only looks for 'Rankings$Record' to enable fork compatibility.
     """
     # __className <str>: Java class for ranking records
-    if record['__className'].split('.')[-1] != 'Rankings$Record':
+    if record["__className"].split(".")[-1] != "Rankings$Record":
         return
 
     # date <str> 'YY-MM-DD' completion date
@@ -116,10 +106,10 @@ def _summarize_record(record):
     title_line += f"l{record['level']:<2} {record['class']:<10}"
     title_line += f"{record['score']:>9,}  "
 
-    if record['win'] and record['ascending']:
-        title_line += 'Ascended with the Amulet.'
-    elif record['win']:
-        title_line += 'Obtained the Amulet.'
+    if record["win"] and record["ascending"]:
+        title_line += "Ascended with the Amulet."
+    elif record["win"]:
+        title_line += "Obtained the Amulet."
     else:
         title_line += f"Died by {record['cause'].split('.')[-1]} "
         title_line += f"on depth {record['depth']}."
@@ -152,36 +142,33 @@ def show(c, slot=None, active=False):
         s_dir = os.path.join(cfg.work_dir, slot)
         print(f"Showing details for slot {cfg.disc_b} {slot}")
 
-
     p = Profile(s_dir)
     print("\nProfile information:")
-
 
     # Settings
     settings = p.get_settings()
     print(f"{cfg.bullet_b}{len(settings)} options set.")
 
-
     # Badges
-    badges = p.get_dat('badges.dat')
+    badges = p.get_dat("badges.dat")
     if badges:
         print(f"{cfg.bullet_b}{len(badges['badges'])} badges and related unlocks.")
 
     # Bones
-    bones = p.get_dat('bones.dat')
+    bones = p.get_dat("bones.dat")
     if bones:
-        if 'hero_class' not in bones:
+        if "hero_class" not in bones:
             print(f"{cfg.bullet_b}No character bones are set to spawn.")
 
         else:
-            hero = bones['hero_class']
-            lvl = bones['level']
-            br = bones['branch']
+            hero = bones["hero_class"]
+            lvl = bones["level"]
+            br = bones["branch"]
 
             print(f"{cfg.bullet_a}{hero} bones at level {lvl}, branch {br}.")
 
     # Journal
-    journal = p.get_dat('journal.dat')
+    journal = p.get_dat("journal.dat")
     if journal:
         # NOTE: Entries appear in the file only after they've been unlocked,
         #       So total numbers are not represented in the save.
@@ -190,31 +177,31 @@ def show(c, slot=None, active=False):
         # bestiary_seen <list> [all True] bestiary seen status
         # bestiary_encounters <list> [int] bestiary encounter count
 
-        b_seen = len(journal['bestiary_seen'])
+        b_seen = len(journal["bestiary_seen"])
         print(f"{cfg.bullet_b}Bestiary: {b_seen} mobs seen.")
 
         # catalog_uses <list> 297 values.
         # catalog_seen <list> 297 values.
         # catalog_classes <list> 297 values.
 
-        c_seen = len(journal['catalog_seen'])
+        c_seen = len(journal["catalog_seen"])
         print(f"{cfg.bullet_b}Catalog: {c_seen} items seen.")
 
         # documents <dict>
         # {<str> CATEGORY: {<str> note name: <int> 1 unread or 2 read }}.
         doc_count = 0
-        for k, v in journal['documents'].items():
+        for k, v in journal["documents"].items():
             doc_count += len(v)
 
         print(f"{cfg.bullet_b}{doc_count} tutorials and notes discovered.")
 
     # Rankings
-    ranks = p.get_dat('rankings.dat')
+    ranks = p.get_dat("rankings.dat")
     if ranks:
         # won <int>: number of wins
-        won = int(ranks['won'])
+        won = int(ranks["won"])
         # total <int>: total games played
-        total = int(ranks['total'])
+        total = int(ranks["total"])
 
         print(f"{cfg.bullet_a}{won} games won out of {total} played.")
 
@@ -222,12 +209,12 @@ def show(c, slot=None, active=False):
         # latest <int> index of latest game in 'records'
 
         # assertion: if latest is unset there's no records
-        if 'latest' not in ranks:
+        if "latest" not in ranks:
             return
 
         print(f"{cfg.bullet_a}{len(ranks['records'])} stored ranking records.")
 
-        latest = ranks['records'][int(ranks['latest'])]
+        latest = ranks["records"][int(ranks["latest"])]
 
         print(f"{cfg.bullet_b}Latest run:")
         print("    ", end="")
@@ -239,14 +226,13 @@ def show(c, slot=None, active=False):
         # daily_history_scores <list> [int score]
 
         # assertion: no daily has ever been played
-        if 'latest_daily' not in ranks:
+        if "latest_daily" not in ranks:
             return
 
         print(f"{cfg.bullet_b}Latest daily:")
         print("    ", end="")
 
-        _summarize_record(ranks['latest_daily'])
-
+        _summarize_record(ranks["latest_daily"])
 
     print(f"\n{cfg.i_game} {len(p.games)} games found:")
 

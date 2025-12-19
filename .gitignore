@@ -10,6 +10,7 @@
 !/LICENSE
 !/REUSE.toml
 !/spdiu/
+!/doc/
 !/uv.lock
 !/pyproject.toml
 !/.pre-commit-config.yaml

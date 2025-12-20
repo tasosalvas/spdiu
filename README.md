@@ -108,8 +108,8 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 ### Added
 
 Python:
-- The `spdio.util` module provides helpers for common file operations
-- The `spdio.model` module holds class representations of `Slots` containing `Profile` and `Game` data.
+- The `spdiu.util` module provides helpers for common file operations
+- The `spdiu.model` module holds class representations of `Slots` containing `Profile` and `Game` data.
 
 
 Customization:

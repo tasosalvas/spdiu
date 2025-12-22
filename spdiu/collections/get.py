@@ -4,6 +4,7 @@
 """SPDIU Download and installation tasks."""
 
 import os
+import json
 import shutil
 import stat
 
@@ -18,18 +19,146 @@ from .. import util
 ns = Collection("get")
 
 
-@task
-def latest(c):
-    """Get the latest version number by checking github's 'releases/latest'."""
+# Github-related methods and tasks
+def github_json(c, target=None):
+    """Query the Github API for a project."""
+    try:
+        cfg = c.config.spdiu
+        api_url = f"https://api.github.com/repos/{cfg.release.project}"
+
+        if target:
+            api_url += "/" + target
+
+        headers = {
+            "Accept": "application/vnd.github.v3+json",
+            "User-Agent": "Shattered Pixel Dungeon Invoke Utility",
+        }
+        req = urllib.request.Request(api_url, headers=headers)
+
+        with urllib.request.urlopen(req) as r:
+            response = json.loads(r.read().decode("utf-8"))
+
+        return response
+
+    except Exception as e:
+        print(f"Github API Error: {e}")
+        return []
+
+
+def print_package(c, release: dict):
+    """Print package information for a dict returned by strip_release."""
     cfg = c.config.spdiu
 
-    l_url = "/".join((cfg.release_github, "latest"))
-    with urllib.request.urlopen(l_url) as r:
-        r_url = r.geturl()
-        version = r_url.split("/")[-1]
+    title = f"{cfg.i.package} Latest package from {cfg.release.project}"
 
-    print(f"The latest version is {version}")
-    return version
+    print("\n|||>" + (len(title) - 6) * "-" + "<|||")
+    print(title)
+    print(f"  Tag name: {release['tag_name']}")
+    print(f"  Name: {release['name']}")
+    print(f"  Published at: {release['published_at']}")
+
+    # Single package available
+    if release.get("package"):
+        print(f"{cfg.i.package} Link for {release['package']} discovered.")
+
+    elif type(release["download"]) is list:
+        print("Multiple candidates available:")
+        for p in release["download"]:
+            print(f"{cfg.i.package} {p}")
+
+    else:
+        print("No appropriate download link detected.")
+
+
+def strip_release(c, release_json, silent=False):
+    """Grab the values we care about from a Github API response.
+
+    Returns a dict of "name", "tag_name", "published_at", "download", "package".
+
+    The "download" key can be "", a list of urls, or an unambiguous url.
+    A "package" key is only set if there is an unambiguous single package.
+    """
+    cfg = c.config.spdiu
+
+    fields = ("name", "tag_name", "published_at")
+    summary = {k: release_json[k] for k in fields}
+
+    # filter links by any relevant values i    Accepts a regular en config until one is left.
+    links = [i["browser_download_url"] for i in release_json["assets"]]
+    wants = (
+        cfg.release.extension,
+        cfg.release.platform,
+        cfg.release.version,
+        cfg.release.tag_name,
+    )
+
+    download = ""
+    for condition in [i for i in wants if i is not None]:
+        links = [i for i in links if condition in i]
+
+        if len(links) == 1:
+            download = links[0]
+            summary["download"] = download
+            summary["package"] = download.split("/")[-1]
+            return summary
+
+    summary["download"] = links
+    return summary
+
+
+@task
+def latest(c):
+    """Get information on the latest release from the Github API.
+
+    Prints what it discovers to the terminal, and returns a package dict.
+    """
+    cfg = c.config.spdiu
+    if not cfg.release.gh_use_api:
+        print("Can't get latest releases without the project's github info.")
+        print("Use release_template to configure the installation instead.")
+        return []
+
+    package = strip_release(c, github_json(c, "releases/latest"))
+
+    print_package(c, package)
+    return package
+
+
+@task
+def releases(c, search=""):
+    """List releases. -s, --search to filter results that match it.
+
+    Looks for a supplied pattern in the asset download urls of each release,
+    and filters the result to only the releases containing links that match.
+
+    TODO: Currently only gets one page, pagination planned.
+    """
+    cfg = c.config.spdiu
+
+    if not cfg.release.gh_use_api:
+        print("Can't get latest releases without the project's github info.")
+        print("Use release_template to configure the installation instead.")
+        return []
+
+    r_data = github_json(c, "releases")
+
+    result = []
+    for r in r_data:
+        found = False
+        for asset in r.get("assets", []):
+            if search in asset["browser_download_url"]:
+                found = True
+
+        if found:
+            result.append(strip_release(c, r))
+
+    matching = f' matching pattern "{search}"' if search else ""
+    print(f"{len(result)} {cfg.i.int}, releases found{matching}")
+
+    for package in result:
+        print_package(c, package)
+
+    return result
 
 
 @task
@@ -42,23 +171,49 @@ def install(c, version=None):
     See invoke.yaml.example for configuring the task to download different SPD forks.
     """
     cfg = c.config.spdiu
+    version = version if version else cfg.release.version
+    platform = cfg.release.platform
+    ext = cfg.release.extension
 
-    tpl = cfg.release_template
-    platform = cfg.release_platform
-    ext = cfg.release_extension
-
-    packages = os.path.join(os.path.expanduser(cfg.base_dir), cfg.release_packages)
-    install_path = os.path.expanduser(cfg.game_dir)
-
-    if not version:
-        version = cfg.release_version if cfg.release_version else latest(c)
-
-    # Don't put arbitrary code in your user config, mkay?
-    f_url = "/".join((cfg.release_github, eval('f"' + tpl + '"')))
-    f_name = f_url.split("/")[-1]
-
-    p_path = os.path.join(packages, f_name)
+    packages = util.path(c, cfg.dirs.package)
     os.makedirs(packages, exist_ok=True)
+
+    install_path = util.path(c, cfg.dirs.game)
+
+    # Get latest from gh
+    if cfg.release.gh_use_api and not version:
+        d_url = latest(c)["download"]
+
+    # Get a version from gh
+    elif cfg.release.gh_use_api:
+        rel = releases(c, version)
+
+        if len(rel) == 1:
+            d_url = rel[0]["download"]
+            d_name = rel[0]["package"]
+
+        elif not rel:
+            print(f'No matches found for "{version}"')
+            return
+
+        else:
+            print("Multiple matches found, please narrow your search terms")
+            return
+
+    # Manually generate a download link from release_template.
+    else:
+        print(f"{cfg.i.str} Project is not hosted on github, templating manually:")
+        # Don't put arbitrary code in your user config, mkay?
+        tpl = cfg.release.template
+
+        tag_name = cfg.release.tag_name  # noqa: F841
+        project = cfg.release.project  # noqa: F841
+
+        d_url = eval('f"' + tpl + '"')
+        d_name = d_url.split("/")[-1]
+        print(d_url)
+
+    p_path = os.path.join(packages, d_name)
 
     # Get ready to download
     def progress_hook(blocks, block_size, total):
@@ -74,20 +229,20 @@ def install(c, version=None):
 
     # Downloading
     if os.path.exists(p_path):
-        print(f"{f_name} already exists in {cfg.release_packages}.")
+        print(f"{d_name} already exists in {cfg.dirs.package}.")
 
-    elif ext == "jar" and os.path.exists(os.path.join(install_path, f_name)):
+    elif ext == "jar" and os.path.exists(os.path.join(install_path, d_name)):
         print("This jar file is already installed, nothing to do.")
         return
 
     else:
-        print(f"Downloading {f_name}...")
+        print(f"Downloading {d_name}...")
 
         try:
-            urllib.request.urlretrieve(f_url, p_path, progress_hook)
+            urllib.request.urlretrieve(d_url, p_path, progress_hook)
 
         except urllib.error.HTTPError:
-            print(f"404: {f_url} not found.")
+            print(f"404: {d_url} not found.")
             return
 
         except urllib.error.ContentTooShortError:
@@ -111,7 +266,7 @@ def install(c, version=None):
             return
 
     # Installation, varying by package
-    print(f"Installing {f_name}...")
+    print(f"Installing {d_name}...")
     os.makedirs(install_path, exist_ok=True)
 
     if ext == "zip":
@@ -126,7 +281,7 @@ def install(c, version=None):
 
         # Python's zipfile doesn't preserve permissions when extracting
         if platform.lower() == "linux":
-            binary = os.path.join(install_path, cfg.game_cmd)
+            binary = os.path.join(install_path, cfg.game.cmd)
             permissions = stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH
             os.chmod(binary, permissions)
 
@@ -134,8 +289,9 @@ def install(c, version=None):
         shutil.move(p_path, install_path)
         print("Jar package copied to the game folder.")
 
-    print(f"{f_name} was successfully installed. Have a nice day!")
+    print(f"{d_name} was successfully installed. Have a nice day!")
 
 
+ns.add_task(releases)
 ns.add_task(latest)
 ns.add_task(install)

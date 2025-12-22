@@ -20,7 +20,7 @@ from .. import util
 from ..model import Profile, Slots
 
 
-ns = Collection("io")
+ns = Collection("slots")
 
 
 # File manipulation Tasks
@@ -31,8 +31,8 @@ def backup(c):
     Automatically called by load and clean.
     """
     cfg = c.config.spdiu
-    src = os.path.join(cfg.data_dir, cfg.active_save)
-    dest = os.path.join(cfg.work_dir, "backup", cfg.backup_slot)
+    src = util.path(c, cfg.game.data)
+    dest = util.path(c, cfg.dirs.slots, "backup", cfg.backup_slot)
 
     try:
         util.replace(src, dest)
@@ -41,22 +41,22 @@ def backup(c):
         print("Aborting! There seems to be no active data folder.")
         return
 
-    print(f"Active state backup created! {cfg.i_bak} backup.{cfg.backup_slot}")
+    print(f"Active state backup created! {cfg.i.bak} backup.{cfg.backup_slot}")
 
 
 @task(post=[backup])
 def clean(c):
     """Remove all saved states, leave a backup of the active data folder."""
     cfg = c.config.spdiu
-    if not util.exists(os.path.join(cfg.data_dir, cfg.active_save)):
+    if not util.exists(util.path(c, cfg.game.data)):
         print("Aborting! There seems to be no active data folder.")
         return
 
-    s = Slots(cfg.work_dir, ["manual", "auto", "backup"])
+    s = Slots(util.path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
     for p in s.slots:
         util.remove(p.root_dir)
 
-    print(f"{cfg.i_clean} {len(s.slots)} saved states deleted.")
+    print(f"{cfg.i.clean} {len(s.slots)} saved states deleted.")
 
 
 @task
@@ -79,20 +79,20 @@ def save(c, slot=None):
         print("Aborting! Names can only contain alphanumeric characters.")
         return
 
-    src = os.path.join(cfg.data_dir, cfg.active_save)
-    dest = os.path.join(cfg.work_dir, "manual", slot)
-    bak = os.path.join(cfg.work_dir, "backup", slot)
+    src = cfg.game.data
+    dest = util.path(c, cfg.dirs.slots, "manual", slot)
+    bak = util.path(c, cfg.dirs.slots, "backup", slot)
 
     if util.exists(dest):
         util.replace(dest, bak)
-        print(f"Previous save preserved as {cfg.i_bak} backup.{slot}")
+        print(f"Previous save preserved as {cfg.i.bak} backup.{slot}")
 
     try:
         util.replace(src, dest)
     except FileNotFoundError:
         print("No game data found to save!")
 
-    print(f"State saved! {cfg.disc_b} {slot}")
+    print(f"State saved! {cfg.i.disc_b} {slot}")
 
 
 @task
@@ -118,23 +118,27 @@ def load(c, last=False, slot=None, game=None):
     cfg = c.config.spdiu
 
     if last:
-        p = Slots(cfg.work_dir, ["manual", "auto"]).slots[0]
+        p = Slots(util.path(c, cfg.dirs.slots), ["manual", "auto"]).slots[0]
         # TODO: catch this exception sometime
         # print("No saves found. Make some with 'inv save [-s slot name]'")
         # return
 
     else:
         if slot is None:
-            p = Slots(cfg.work_dir, ["manual"]).get_slot(cfg.default_slot)
+            p = Slots(util.path(c, cfg.dirs.slots), ["manual"]).get_slot(
+                cfg.default_slot
+            )
 
         else:
-            p = Slots(cfg.work_dir, ["manual", "auto", "backup"]).get_slot(slot)
+            p = Slots(
+                util.path(c, cfg.dirs.slots), ["manual", "auto", "backup"]
+            ).get_slot(slot)
 
     if not p:
         print(f"Invalid slot name: {slot} - 'inv ls' to list existing slots.")
         return
 
-    ap_path = os.path.join(cfg.data_dir, cfg.active_save)
+    ap_path = cfg.game.data
 
     # Load the requested profile and exit
     if game is None:
@@ -143,7 +147,7 @@ def load(c, last=False, slot=None, game=None):
 
         util.replace(p.root_dir, ap_path)
 
-        print(f"State loaded! {cfg.disc_a} {p.name}")
+        print(f"State loaded! {cfg.i.disc_a} {p.name}")
         return
 
     # Get the instance of the requested game, build the destination path.
@@ -159,7 +163,7 @@ def load(c, last=False, slot=None, game=None):
         backup(c)
 
     util.replace(g.root_dir, ag_path)
-    print(f"Game loaded! {cfg.disc_a} {p.name} {cfg.i_game} {game}")
+    print(f"Game loaded! {cfg.i.disc_a} {p.name} {cfg.i.game} {game}")
 
 
 # Autosaves
@@ -180,11 +184,11 @@ class AutoSaveWatcher(StreamWatcher):
         cfg = self.c.config.spdiu
 
         name = event.replace(" ", "")
-        dest = os.path.join(cfg.work_dir, "auto", name)
-        src = os.path.join(cfg.data_dir, cfg.active_save)
+        dest = util.path(self.c, cfg.dirs.slots, "auto", name)
+        src = cfg.game.data
 
         util.replace(src, dest)
-        print(f"{cfg.bullet_b}Autosave {cfg.i_auto} auto.{name}")
+        print(f"{cfg.bullet_b}Autosave {cfg.i.auto} auto.{name}")
 
     def submit(self, stream):
         """Autosave if a pattern is matched.
@@ -209,11 +213,11 @@ class AutoSaveWatcher(StreamWatcher):
 def watch(c):
     """Run the game, autosave on certain log events."""
     cfg = c.config.spdiu
-    cmd = cfg.game_cmd.replace(" ", "\ ")
+    cmd = cfg.game.cmd.replace(" ", "\ ")
 
     w_out = AutoSaveWatcher(c)
 
-    with c.cd(os.path.expanduser(cfg.game_dir)):
+    with c.cd(util.path(c, cfg.dirs.game)):
         c.run(cmd, watchers=[w_out])
 
 
@@ -229,12 +233,25 @@ def ls(c):
     The slots are sorted by time, so the latest one is always last.
     """
     cfg = c.config.spdiu
-    ap = Profile(os.path.join(cfg.data_dir, cfg.active_save))
-    s = Slots(cfg.work_dir, ["manual", "auto", "backup"])
+
+    try:
+        path = util.path(c, cfg.game.data)
+        ap = Profile(path)
+    except FileNotFoundError:
+        print(f"No active slot found at {path}")
+        return
+
+    try:
+        path = util.path(c, cfg.dirs.slots)
+        s = Slots(path, ["manual", "auto", "backup"])
+
+    except FileNotFoundError:
+        print(f"No slots data found in {path}.")
+        return
 
     # active save vars
     a_bullet = cfg.bullet_a
-    a_disc = cfg.disc_a
+    a_disc = cfg.i.disc_a
 
     # Calculate latest save
     if s.slots:
@@ -243,20 +260,20 @@ def ls(c):
         # adjust the active save display
         if ap.ts <= latest.ts:
             a_bullet = cfg.bullet_b
-            a_disc = cfg.disc_b
+            a_disc = cfg.i.disc_b
 
     print(f"Displaying {len(s.slots)} save slots, oldest to newest:")
     for p in reversed(s.slots):
         bullet = cfg.bullet_a if p == latest else cfg.bullet_b
 
         if p.group == "backup":
-            disc = cfg.i_bak
+            disc = cfg.i.bak
         elif p.group == "auto":
-            disc = cfg.i_auto
+            disc = cfg.i.auto
         elif p == latest and ap.ts <= latest.ts:
-            disc = cfg.disc_a
+            disc = cfg.i.disc_a
         else:
-            disc = cfg.disc_b
+            disc = cfg.i.disc_b
 
         time = strftime(cfg.time_format, p.ts)
         prefix = "" if p.group == "manual" else p.group + "."
@@ -264,7 +281,8 @@ def ls(c):
 
     print("\nActive slot:")
 
-    print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {cfg.active_save}")
+    a_name = os.path.split(cfg.game.data)[-1]
+    print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {a_name}")
 
 
 ns.add_task(backup)

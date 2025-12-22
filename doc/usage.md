@@ -32,12 +32,16 @@ $ inv -h save
 > ["Full description and parameters of the 'save' task"]
 ```
 
-The code itself also aims to be easy to read so it can act as a reference for how each task is accomplished.
-
-The task help texts are the Python docstrings in [tasks.py](./tasks.py).
-Their accepted parameters are the arguments in each task's definition.
-
 Anyway, here we go.
+
+
+# Installing the game
+
+`inv get.install` will get the latest version of [00-Evan/shattered-pixel-dungeon](https://github.com/00-Evan/shattered-pixel-dungeon) installed.
+- The executable will be inside the SPDIU `game` folder
+- The package downloaded will be in the `packages` folder
+
+See the documentation on [Game installation configuration](./configuration.md#game-installation) for loading different SPD flavors.
 
 
 # Saving and Loading
@@ -53,7 +57,7 @@ $ inv save -s goo
 > State saved! 💿 goo
 ```
 
-Save slots by default are kept in a `saves` directory next to your active game data in `~/.local/share/.shatteredpixel/`, but can be configured through the `work_dir` setting.
+Save slots by default are kept in a `saves` directory next to your active game data in `~/.local/share/.shatteredpixel/`, but can be configured through the `dirs.work` setting.
 
 Loading can be done while the game is on the main menu, unless your character just died, in which case you will need to restart SPD for it to look up the loaded game.
 

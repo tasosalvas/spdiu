@@ -19,7 +19,7 @@ games/spdiu-rearranged/
 
 A nice, comfortable **terminal** and **font**. Ideally something that can show _ligatures_ and _emojis_.
 
-> SPDIU is developed on [kitty](https://sw.kovidgoyal.net/kitty/), `zsh`, with [FiraCode](https://github.com/tonsky/FiraCode).
+> SPDIU is developed and enjoyed on [kitty](https://sw.kovidgoyal.net/kitty/), `zsh`, with [FiraCode](https://github.com/tonsky/FiraCode).
 
 
 [git](https://git-scm.com/) is the easiest way to get _SPDIU_. Maybe even contribute to it.
@@ -53,7 +53,7 @@ $ sudo apt install kitty fonts-firacode
 ```
 
 Now we can **install the `inv` command** through `pipx`.
-```
+```sh
 $ pipx install invoke
 ```
 
@@ -82,22 +82,18 @@ $ inv info
 ]
 ```
 
+## Completions configuration
 
-# Downloading the game
-
-If you're going for vanilla [Shattered Pixel Dungeon](https://shatteredpixel.com/shatteredpd/), you can run the install task right now.
+Adding this line to your `~/.bashrc` will enable shell autocompletions for invoke.
 ```sh
-$ inv get.install
+if [ -x "$(command -v inv)" ]; then
+    eval "$(inv --print-completion-script bash)"
+fi
 ```
 
-The game will be installed in the `game` directory - in this example `~/games/shattered/game`.
+They can be really helpful, as all our tasks are arguments to the `inv` command.
 
-You can both configure SPDIU to work with an existing installation, or to install the game somewhere else, but this should work out of the box.
-
-```sh
-$ inv watch
-```
-...now with autosaves!
+`zsh` and `fish` are also supported, just replace `bash` in the line above and adapt it to your respective shell init file.
 
 
 # Further reading

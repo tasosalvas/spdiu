@@ -6,13 +6,16 @@ Shattered Pixel Dungeon Invoke Utility.
 
 This file is the entry point to the SPDIU task collections:
 
-'saves', imported at the root namespace:
+'slots', imported at the root namespace:
   Tasks for saving, loading, and managing save slots.
 
 'display', imported at the root namespace:
   Tasks for displaying information about the game state.
 
-'cheats', imported at the 'cheat' namespace:
+'get', imported at the 'get' namespace:
+  Tasks for listing and downloading game releases.
+
+'cheats', imported at the 'cheats' namespace:
   Tasks that affect gameplay.
 
 Usage:
@@ -29,52 +32,69 @@ from invoke import Collection, task
 
 import spdiu  # required to get docstrings for the info task
 
-from spdiu.collections.saves import save, load, backup, clean, watch, ls
+# collections imported at the root namespace
+from spdiu.collections.slots import save, load, backup, clean, watch, ls
 from spdiu.collections.display import show
+
+# The rest of the collections
 from spdiu.collections import get, cheats
 
 
 # Default SPDIU configuration. Override values in invoke.yaml.
 defaults = {
     "spdiu": {
-        "base_dir": os.path.dirname(os.path.realpath(__file__)),
+        "dirs": {
+            # Internal variable, the location of the script.
+            "base": os.path.dirname(os.path.realpath(__file__)),
+            "slots": "slots",
+            "package": "packages",
+            "game": "game",
+        },
         # SPDIU config
-        "work_dir": "~/.local/share/.shatteredpixel/saves",
         "default_slot": "default",
         "backup_slot": "bak",
-        # Game release info, used to download the game
-        "release_packages": "packages",
-        "release_github": "https://github.com/00-Evan/shattered-pixel-dungeon/releases",
-        "release_template": "download/{version}/ShatteredPD-{version}-{platform}.{ext}",
-        "release_version": None,
-        "release_platform": "Linux",
-        "release_extension": "zip",
+        ## Game release info, used to download the game
+        "release": {
+            # Github specific, if they work elsewhere it's a miracle
+            "gh_use_api": True,
+            "project": "00-Evan/shattered-pixel-dungeon",
+            # Release properties, used for fishing for the right release
+            "version": None,
+            "tag_name": None,
+            "platform": "Linux",
+            "extension": "zip",
+            # Template expression, constructs a download url if automation can't
+            "template": "https://github.com/{project}/releases/download/{tag_name}/ShatteredPD-{version}-{platform}.{ext}",
+        },
         # The game installation
-        "game_dir": os.path.join(os.path.dirname(os.path.realpath(__file__)), "game"),
-        "game_cmd": "bin/Shattered Pixel Dungeon",
-        "game_ns": "com.shatteredpixel.shatteredpixeldungeon",
-        # Game user data
-        "data_dir": "~/.local/share/.shatteredpixel",
-        "active_save": "shattered-pixel-dungeon",
+        "game": {
+            "data": "~/.local/share/.shatteredpixel/shattered-pixel-dungeon",
+            "cmd": "bin/Shattered Pixel Dungeon",
+            "ns": "com.shatteredpixel.shatteredpixeldungeon",
+        },
         # Fancy decorations
         "time_format": "🗓️ %Y %b %d 🕰️ %H:%M:%S",
         "bullet_a": " ||> ",
         "bullet_b": "  |> ",
-        "disc_a": "📀",
-        "disc_b": "💿",
         # Icons
-        # TODO: unified icon namespace for visual stuff?
-        "i_bak": "💾",
-        "i_auto": "🤖",
-        "i_game": "🕹️",
-        "i_data": "🗂️",
-        "i_clean": "🧹",
-        "i_dict": "📖",
-        "i_list": "📋",
-        "i_int": "🧮",
-        "i_float": "🍕",
-        "i_str": "🔤",
-        "i_bool": "💡",
+        "i": {
+            "disc_a": "📀",
+            "disc_b": "💿",
+            "bak": "💾",
+            "auto": "🤖",
+            "game": "🕹️",
+            "data": "🗂️",
+            "clean": "🧹",
+            "package": "📦",
+            # data types
+            "dict": "📖",
+            "list": "📋",
+            "int": "🧮",
+            "float": "🍕",
+            "str": "🔤",
+            "bool": "💡",
+            "NoneType": "🫙",
+        },
     }
 }
 
@@ -87,7 +107,7 @@ def info(c, config=False, help=None):
 
     It displays the docstring of a task collection.
 
-    -h, --help [collection name] displays the collection's docstring instead.
+    -h, --help [collection] displays the collection's docstring instead.
     -c, --config displays the active SPDIU configuration.
 
     It supplements invoke core's 'inv -h' flag, which supplies task docstrings.
@@ -126,7 +146,7 @@ ns.add_task(info)
 # spdiu.collections.display tasks
 ns.add_task(show)
 
-# spdiu.collections.saves tasks
+# spdiu.collections.slots tasks
 ns.add_task(save)
 ns.add_task(load)
 ns.add_task(backup)

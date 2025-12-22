@@ -23,7 +23,7 @@ It's a library of tricks to make your SPD CLI experience as comfortable as the r
 - [About SPDIU](./doc/about.md)
 
 
-# Quick and easy: Tasks
+# What does it do?
 
 ## Save and Load the game
 
@@ -45,6 +45,18 @@ Get overviews of every single thing stored in your save data.
 It's your game, after all!
 
 
+## Check for updates or download older versions
+
+On github releases, just pick your version.
+
+Create an issue if you know of an SPD fork hosted elsewhere, and we'll try to enable that platform, too!
+
+
+## Install flavors and remixes
+
+With just a bit of configuration, you can use SPDIU to download any of the SPD forks available in the wild!
+
+
 # Changelog
 
 The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and roughly tries to abide with [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/).
@@ -62,28 +74,21 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
   - [x] Parsing profiles (journal etc) in slots and providing summaries
   - [x] Parsing saved games in slots
   - [ ] Providing game summaries
-- [ ] Split and expand doc
+- [ ] Expand doc
   - [x] Installation
-  - [ ] Configuration
-    - [x] folder structure
-    - [x] invoke.yaml basics
-    - [ ] Adapting config to SPD forks
+  - [x] Configuration
   - [ ] Usage guide
     - [x] Interactive help
     - [x] Saves, backups
     - [ ] the autosave watcher
     - [x] Displaying game data
     - [ ] Cheats and save editing
-  - [x] Task Collections, first pass, go read the code
-  - [ ] API
-    - [x] relevant invoke basics
-    - [ ] The SPDIU object model
+  - [x] Task Collections
+  - [x] API
+    - [ ] The SPDIU object model cont
   - [ ] About
-    - [x] Philosophy and goals
-    - [x] Tools
     - [ ] Standards and specifications
   - [ ] CONTRIBUTING document
-- [x] linting
 - [ ] unit tests while things are small
 - [ ] Readme: Screenshots
 - [ ] Logo n stuff
@@ -101,7 +106,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [ ] Memory stuff?
 - [ ] releasing in pypi
 - [ ] installing as a custom command
-- [ ] replacing invoke with something custom and specialized for fancier output
+- [ ] fancier output?
 - [ ] Sphinx for modules? Can we do it in markdown?
 
 

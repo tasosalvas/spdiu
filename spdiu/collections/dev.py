@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+# Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+"""SPDIU Dev tools collection."""
+
+from invoke import task
+
+from .display import _recurse_dump
+
+
+@task
+def print_config(c):
+    """Get a pretty recursive dump of the invoke config object."""
+    print("Here's the whole invoke config as seen by the tasks:")
+    _recurse_dump(c, c.config.__dict__["_config"], "config")

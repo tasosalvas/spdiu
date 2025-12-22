@@ -24,6 +24,26 @@ import xml.etree.ElementTree as ET
 from time import gmtime
 
 
+# Unified path handling
+def path(c, path, *args):
+    """Provide an absolute path for an operation, resolving config values.
+
+    Accepts a base path, and appends any other arguments to it as subdirectories.
+
+    If the path is relative, it is resolved in relation to spdiu.dirs.base.
+    """
+    cfg = c.config.spdiu
+    path = os.path.expanduser(path)
+
+    if not os.path.isabs(path):
+        path = os.path.join(os.path.expanduser(cfg.dirs.base), path)
+
+    for arg in args:
+        path = os.path.join(path, arg)
+
+    return path
+
+
 # File attributes
 def get_ts(dir_name):
     """Return a gmtime (seconds: float since epoch) timestamp for a directory."""

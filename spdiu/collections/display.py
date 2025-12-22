@@ -11,15 +11,15 @@ By convention, where applicable:
 -g, --game to pick a specific game in a slot
 """
 
-import os
 from time import strftime
 
 from invoke import Collection, task
 
-from ..model import Profile
+from .. import util
+from ..model import Profile, Slots
 
 
-ns = Collection("view")
+ns = Collection("display")
 
 
 def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
@@ -34,22 +34,25 @@ def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
     By default, it pretty prints the values. silent=True to just get the list.
     """
     cfg = c.config.spdiu
-    ns = cfg.game_ns
+    ns = cfg.game.ns
 
     d_breadcrumb = ".".join(breadcrumb)
     d_type = type(dump).__name__
     d_title = f"{title} <{d_type}>"
-    d_icon = cfg[f"i_{d_type}"]
+    try:
+        d_icon = cfg.i[d_type]
+    except KeyError:
+        d_icon = cfg.i.package
 
     game_class = ""
 
     if d_type == "dict" and "__className" in dump:
         game_class = dump["__className"][len(ns) + 1 :]
-        summary = f"{cfg.i_game} {game_class}, {len(dump)} values"
+        summary = f"{cfg.i.game} {game_class}, {len(dump)} values"
 
     elif d_type == "str" and ns in dump:
         game_class = dump[len(ns) + 1 :]
-        summary = f"{cfg.i_game} {game_class}"
+        summary = f"{cfg.i.game} {game_class}"
 
     elif d_type in ("list", "dict"):
         summary = f"{len(dump)} values"
@@ -135,14 +138,15 @@ def show(c, slot=None, active=False):
         slot = cfg.default_slot
 
     if active:
-        s_dir = os.path.join(cfg.data_dir, cfg.active_save)
-        print(f"Showing {cfg.disc_a} Active game data")
+        s_dir = util.path(c, cfg.game.data)
+        p = Profile(s_dir)
+        print(f"Showing {cfg.i.disc_a} Active game data")
 
     else:
-        s_dir = os.path.join(cfg.work_dir, slot)
-        print(f"Showing details for slot {cfg.disc_b} {slot}")
+        slots = Slots(util.path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
+        p = slots.get_slot(slot)
+        print(f"Showing details for slot {cfg.i.disc_b} {slot}")
 
-    p = Profile(s_dir)
     print("\nProfile information:")
 
     # Settings
@@ -234,12 +238,12 @@ def show(c, slot=None, active=False):
 
         _summarize_record(ranks["latest_daily"])
 
-    print(f"\n{cfg.i_game} {len(p.games)} games found:")
+    print(f"\n{cfg.i.game} {len(p.games)} games found:")
 
     for g in reversed(p.games):
         bullet = cfg.bullet_a if g == p.games[0] else cfg.bullet_b
         time = strftime(cfg.time_format, g.ts)
-        print(f"{bullet} {time} {cfg.i_game} {g.name}")
+        print(f"{bullet} {time} {cfg.i.game} {g.name}")
 
 
 ns.add_task(show)

@@ -182,7 +182,9 @@ def install(c, version=None):
 
     # Get latest from gh
     if cfg.release.gh_use_api and not version:
-        d_url = latest(c)["download"]
+        rel = latest(c)
+        d_url = rel["download"]
+        d_name = rel["package"]
 
     # Get a version from gh
     elif cfg.release.gh_use_api:

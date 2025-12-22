@@ -213,7 +213,12 @@ class AutoSaveWatcher(StreamWatcher):
 def watch(c):
     """Run the game, autosave on certain log events."""
     cfg = c.config.spdiu
-    cmd = cfg.game.cmd.replace(" ", "\ ")
+
+    # split the arguments and escape spaces in the command
+    smash = cfg.game.cmd.split(" -")
+    bin = smash[0].replace(" ", "\ ")
+    args = smash[1:] if len(smash) > 1 else []
+    cmd = " -".join([bin] + args)
 
     w_out = AutoSaveWatcher(c)
 

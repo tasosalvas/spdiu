@@ -36,17 +36,18 @@ Provides save state management tasks:
 
 
 # The `display` collection
-> Tasks imported at the root namespace.
+> Collection added as the `display` namespace.
 
-- `show` task reads saves or active game data and displays details on their contents
+- `display.slot` prints a summary of the active game data or a save slot
+- `display.dump` Can recursivey extract any value in any `.dat` file in for a saved game or user profile, and look pretty while doing it. Useful for inspecting data structures.
 
 
 # The `cheats` collection
 > Collection added as the `cheats` namespace.
 
-- `inv cheats.bones` can bless your next run with one out of a selection of care packages
-- `inv cheats.consumables` gets you all consumable identities for the active game
-- `inv cheats.gold` and `.energy` let you adjust your wealth appropriately
+- `cheats.bones` can bless your next run with one out of a selection of care packages
+- `cheats.consumables` gets you all consumable identities for the active game
+- `cheats.gold` and `.energy` let you adjust your wealth appropriately
 
 
 # The `get` collection

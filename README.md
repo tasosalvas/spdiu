@@ -69,7 +69,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 `main` is usable, no need to wait, that's just for when I announce.
 
 - [ ] data object summaries
-  - [x] Basic data mining with `_recurse_dump()`
+  - [x] Basic data mining with `recurse_dump()`
   - [ ] Some tidy setup for summary templating
   - [x] Parsing profiles (journal etc) in slots and providing summaries
   - [x] Parsing saved games in slots
@@ -101,7 +101,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
   - [ ] Cloning the SPD code to get the complete mob and item lists for journal
   - [ ] Adapting the process for digging into SPD forks
   - [ ] Templating a starter codebase for a fork from SPD source, documenting best practices
-- [ ] Automatic SPDIU remix installations, uh like a mod manager?
+- [ ] Automatic SPDIU presets for remix installations, uh like a mod manager?
 - [ ] Controlling the game?
 - [ ] Memory stuff?
 - [ ] releasing in pypi

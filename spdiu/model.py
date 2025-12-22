@@ -49,11 +49,7 @@ class DataDir:
 
     def get_dat(self, dat_file):
         """Return the contents of a dat file as a python object."""
-        try:
-            return util.read_dat(os.path.join(self.root_dir, dat_file))
-
-        except FileNotFoundError:
-            return None
+        return util.read_dat(os.path.join(self.root_dir, dat_file))
 
     def __init__(self, base_dir):
         """Analyze the directory and bake some variables.

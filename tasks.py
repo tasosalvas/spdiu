@@ -34,10 +34,9 @@ import spdiu  # required to get docstrings for the info task
 
 # collections imported at the root namespace
 from spdiu.collections.slots import save, load, backup, clean, watch, ls
-from spdiu.collections.display import show
 
 # The rest of the collections
-from spdiu.collections import get, cheats
+from spdiu.collections import get, display, cheats
 
 
 # Default SPDIU configuration. Override values in invoke.yaml.
@@ -86,6 +85,10 @@ defaults = {
             "data": "🗂️",
             "clean": "🧹",
             "package": "📦",
+            "fork": "🍽️",
+            "unknown": "👽",
+            "warning": "☢️",
+            "inspect": "🔎",
             # data types
             "dict": "📖",
             "list": "📋",
@@ -144,7 +147,7 @@ ns.configure(defaults)
 ns.add_task(info)
 
 # spdiu.collections.display tasks
-ns.add_task(show)
+ns.add_collection(display)
 
 # spdiu.collections.slots tasks
 ns.add_task(save)

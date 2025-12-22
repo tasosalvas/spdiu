@@ -53,8 +53,17 @@ def get_ts(dir_name):
 # Parsing
 def read_dat(file_name):
     """Read an SPD .dat file into a python object."""
-    with gzip.open(file_name, "rb") as f:
-        content = f.read()
+    if not os.path.exists(file_name):
+        print("The .dat file requested does not exist:")
+        print(file_name)
+        raise FileNotFoundError
+
+    try:
+        with gzip.open(file_name, "rb") as f:
+            content = f.read()
+    except gzip.BadGzipFile:
+        print(f'Trouble unpacking "{file_name}"')
+        return {}
 
     return json.loads(content)
 

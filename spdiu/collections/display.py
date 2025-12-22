@@ -7,13 +7,13 @@ SPDIU Display task collection.
 Tasks that query and display game data.
 
 By convention, where applicable:
--s, --slot is used to load a save slot by name
--g, --game to pick a specific game in a slot
+-s, --slot is used to select a slot. Defaults to the active data.
+-g, --game to pick a specific game in a slot, defaults to the latest modified.
 """
 
 from time import strftime
 
-from invoke import Collection, task
+from invoke import Collection, task, terminals
 
 from .. import util
 from ..model import Profile, Slots
@@ -22,7 +22,51 @@ from ..model import Profile, Slots
 ns = Collection("display")
 
 
-def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
+def tag_class(c, object_name):
+    """Try to separate the class name from known namespaces.
+
+    Returns a dict with:
+    {"namespace" str, "class" str, "vanilla" bool, "icon" str}
+
+    If the namespace was not known, the object name is returned
+    as "class", and the "namespace" field is empty.
+    """
+    cfg = c.config.spdiu
+
+    vanilla = "com.shatteredpixel.shatteredpixeldungeon"
+    namespaces = set([vanilla])
+    namespaces.add(cfg.game.ns)
+
+    tagged = {}
+
+    found = False
+    for ns in namespaces:
+        if ns in object_name:
+            tagged["class"] = object_name[len(ns) + 1 :]
+            tagged["namespace"] = ns
+
+            if ns == vanilla:
+                tagged["vanilla"] = True
+                tagged["icon"] = cfg.i.game
+            else:
+                tagged["vanilla"] = False
+                tagged["icon"] = cfg.i.fork
+            found = True
+            break
+
+    if not found:
+        tagged["class"] = object_name
+        tagged["namespace"] = ""
+        tagged["vanilla"] = False
+        tagged["icon"] = cfg.i.unknown
+
+        w = cfg.i.warning
+        print(f"{w} Unknown namespace. Add it to your config! {w}")
+
+    return tagged
+
+
+def recurse_dump(c, dump, title, breadcrumb=[], silent=False):
     """
     Explore a dat file, printing merrily along the way.
 
@@ -34,7 +78,6 @@ def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
     By default, it pretty prints the values. silent=True to just get the list.
     """
     cfg = c.config.spdiu
-    ns = cfg.game.ns
 
     d_breadcrumb = ".".join(breadcrumb)
     d_type = type(dump).__name__
@@ -47,18 +90,18 @@ def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
     game_class = ""
 
     if d_type == "dict" and "__className" in dump:
-        game_class = dump["__className"][len(ns) + 1 :]
-        summary = f"{cfg.i.game} {game_class}, {len(dump)} values"
+        tag = tag_class(c, dump["__className"])
+        summary = f"{tag['icon']} {tag['class']}, {len(dump)} values"
 
-    elif d_type == "str" and ns in dump:
-        game_class = dump[len(ns) + 1 :]
-        summary = f"{cfg.i.game} {game_class}"
+    elif d_type == "str" and len(dump.split(".")) >= 3 and " " not in dump:
+        tag = tag_class(c, dump)
+        summary = f"{tag['icon']} {tag['class']}"
 
     elif d_type in ("list", "dict"):
         summary = f"{len(dump)} values"
 
     else:
-        summary = f"{str(dump)}"
+        summary = str(dump)
 
     results = [(breadcrumb, title, d_type, game_class, summary)]
 
@@ -72,14 +115,116 @@ def _recurse_dump(c, dump, title, breadcrumb=[], silent=False):
     # Got our line, now to dig deeper
     if d_type == "dict":
         for k, v in dump.items():
-            results += _recurse_dump(c, v, k, breadcrumb_next, silent)
+            results += recurse_dump(c, v, k, breadcrumb_next, silent)
 
     elif d_type == "list":
         for idv, v in enumerate(dump):
             idv_title = f"[{str(idv)}]"
-            results += _recurse_dump(c, v, idv_title, breadcrumb_next, silent)
+            results += recurse_dump(c, v, idv_title, breadcrumb_next, silent)
 
     return results
+
+
+@task(optional=["game"])
+def dump(c, slot="", game="", file="", entity=""):
+    """Display all variables in a game "dat" file recursively.
+
+    -e, --entity [object] can narrow down the display
+    to a specified entity in the dat.
+
+    You can specify dictionaries and lists with dot syntax.
+        i.e. hero.inventory.2
+
+    -s, --slot [slot] will pick a save slot.
+    If not provided, it defaults to the active data.
+
+    -g, --game indicates a game dat file.
+    If not provided, the task will look for a user profile dat.
+
+    It accepts an optional argument of a game name, while
+    used as a flag it defaults to the latest modified game.
+
+    -f, --file [file] will look for a filename in game or profile folder.
+    It defaults to "rankings.dat" for profiles, and "game.dat" for games.
+    """
+    cfg = c.config.spdiu
+
+    if not slot:
+        p = Profile(cfg.game.data)
+        selection = f"{cfg.i.disc_a} {p.name}"
+    else:
+        s = Slots(util.path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
+        p = s.get_slot(slot)
+        selection = f"{cfg.i.disc_b} {p.name}"
+
+    # --game: True means latest, "" means unset.
+    if game:
+        g = p.games[0] if game is True else p.get_game(game)
+        file = file if file else "game.dat"
+        parent = g
+        selection += f" {cfg.i.game} {g.name}"
+
+    else:
+        file = file if file else "rankings.dat"
+        parent = p
+
+    try:
+        dump = parent.get_dat(file)
+
+    except FileNotFoundError:
+        return
+
+    # --entity: parse dot syntax and dig
+    if not entity:
+        name = f"{cfg.i.inspect} {file}"
+        title = f"Displaying the complete {cfg.i.data} {file}"
+
+    else:
+        for item in entity.split("."):
+            # Try to cast it as a list index first
+            try:
+                item = int(item)
+                dump = dump[item]
+                continue
+            except IndexError:
+                print(f"Index {item} out of range.")
+                return
+            except (ValueError, KeyError):
+                pass
+
+            try:
+                dump = dump[item]
+            except KeyError:
+                print(f"Entity {entity} not found.")
+                return
+
+        name = f"{entity.split('.')[-1]} {cfg.i.inspect}"
+        title = f"Inspecting {cfg.i.inspect} {entity} in {cfg.i.data} {file}"
+
+    # Graphic design is my passion
+    width = terminals.pty_size()[0]
+    border = "<><>"
+    line = "--|--"
+    filler = line * int((width - (2 * len(border))) / len(line))
+    rest = width % 5
+    lpad = (int(rest / 2) + 1 if rest % 2 else int(rest / 2)) * " "
+    separator = f"{lpad}{border}{filler}{border}"
+
+    pad_selection = int((width - len(selection)) / 2) * " " + selection
+    pad_title = int((width - len(title)) / 2) * " " + title
+
+    print(separator)
+    print(pad_title)
+    print(pad_selection)
+    print(separator, "\n")
+
+    recurse_dump(c, dump, name)
+
+    print()
+    print(separator)
+    print(pad_title)
+    print(pad_selection)
+    print(separator, "\n")
 
 
 # Object summaries
@@ -131,13 +276,13 @@ def _summarize_record(record):
 
 
 @task
-def show(c, slot=None, active=False):
+def slot(c, slot=None, game=None):
     """Display details for a save slot. -s [slot] or -a for the active data."""
     cfg = c.config.spdiu
     if slot is None:
         slot = cfg.default_slot
 
-    if active:
+    if not slot:
         s_dir = util.path(c, cfg.game.data)
         p = Profile(s_dir)
         print(f"Showing {cfg.i.disc_a} Active game data")
@@ -246,4 +391,5 @@ def show(c, slot=None, active=False):
         print(f"{bullet} {time} {cfg.i.game} {g.name}")
 
 
-ns.add_task(show)
+ns.add_task(slot)
+ns.add_task(dump)

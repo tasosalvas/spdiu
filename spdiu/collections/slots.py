@@ -243,13 +243,12 @@ def ls(c):
         path = util.path(c, cfg.game.data)
         ap = Profile(path)
     except FileNotFoundError:
-        print(f"No active slot found at {path}")
+        print(f"No active slot found at {path}.")
         return
 
     try:
         path = util.path(c, cfg.dirs.slots)
         s = Slots(path, ["manual", "auto", "backup"])
-
     except FileNotFoundError:
         print(f"No slots data found in {path}.")
         return

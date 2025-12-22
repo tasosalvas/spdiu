@@ -191,14 +191,17 @@ class Slots:
 
         slots = []
         for sd in self.subdirs:
-            for i in os.listdir(sd):
-                i_path = os.path.join(sd, i)
+            try:
+                saves = os.listdir(sd)
+            except FileNotFoundError:
+                continue
 
+            for i in saves:
                 try:
+                    i_path = os.path.join(sd, i)
                     slots.append(Profile(i_path))
                 except FileNotFoundError:
-                    print("oops")
-                    pass
+                    continue
 
         self.slots = sorted(slots, key=attrgetter("ts"), reverse=True)
 

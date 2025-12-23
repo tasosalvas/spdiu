@@ -18,9 +18,9 @@ from invoke.config import Config
 from . import util
 
 
-@pytest.fixture
-def mc():
-    """Generate a MockContext with a Config.
+@pytest.fixture(scope="class")
+def mc() -> MockContext:
+    """Provide a MockContext with a Config.
 
     Contains a dirs.base value used in normalizing paths.
     """
@@ -37,7 +37,16 @@ def mc():
     )
 
 
-def test_path(mc):
+@pytest.fixture(scope="class")
+def game_data() -> dict:
+    """Provide a dict of game data."""
+    return {
+        "won": False,
+        "hero": {"HP": 130},
+    }
+
+
+def test_path(mc: MockContext):
     """Test the path function."""
     c = mc
 
@@ -66,28 +75,31 @@ def test_get_ts(tmp_path):
     assert util.get_ts(new_file) > old_gmtime
 
 
-def test_read_dat(tmp_path):
+def test_read_dat(tmp_path, game_data):
     """Test reading gzipped SPD .dat files."""
-    dummy_data = {
-        "hero": {"HP": 130},
-    }
-    json_bin = str.encode(json.dumps(dummy_data, separators=(",", ":")))
+    json_bin = str.encode(json.dumps(game_data, separators=(",", ":")))
+    df = tmp_path / "dummy.dat"
 
-    d = tmp_path / "dummy.dat"
-    with gzip.open(d, "wb") as f:
+    with gzip.open(df, "wb") as f:
         f.write(json_bin)
 
     with pytest.raises(FileNotFoundError):
         util.read_dat(tmp_path / "missing.dat")
+    assert type(util.read_dat(df)) is dict
+    assert util.read_dat(df).get("hero") is not None
+    assert util.read_dat(df)["hero"]["HP"] == 130
 
-    assert type(util.read_dat(d)) is dict
-    assert util.read_dat(d).get("hero") is not None
-    assert util.read_dat(d)["hero"]["HP"] == 130
 
+def test_write_dat(tmp_path, game_data):
+    """Test writing gzipped .dat files."""
+    df = tmp_path / "write.dat"
 
-# def test_write_dat():
-#     """Test writing gzipped .dat files."""
-#     pytest.fail("Test not ready yet")
+    util.write_dat(df, game_data)
+
+    assert type(util.read_dat(df)) is dict
+    assert util.read_dat(df).get("hero") is not None
+    assert util.read_dat(df)["hero"]["HP"] == 130
+
 
 # def test_read_xml():
 #     """Test reading SPD Settings XML files."""

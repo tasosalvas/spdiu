@@ -68,6 +68,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 
 `main` is usable, no need to wait, that's just for when I announce.
 
+- [ ] Migrate to pathlib, omg
 - [ ] data object summaries
   - [x] Basic data mining with `recurse_dump()`
   - [ ] Some tidy setup for summary templating
@@ -89,7 +90,12 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
   - [ ] About
     - [ ] Standards and specifications
   - [ ] CONTRIBUTING document
-- [ ] unit tests while things are small
+- [x] Pytest configured
+- [ ] base spdiu tests
+  - [ ] util
+  - [ ] model
+- [ ] collection tests
+- [ ] tasks.py/configuration tests
 - [ ] Readme: Screenshots
 - [ ] Logo n stuff
 

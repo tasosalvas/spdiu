@@ -25,9 +25,9 @@ from time import gmtime
 
 
 # File attributes
-def get_ts(dir_name):
+def get_ts(path_name):
     """Return a gmtime (seconds: float since epoch) timestamp for a directory."""
-    return gmtime(os.stat(os.path.expanduser(dir_name)).st_mtime)
+    return gmtime(os.stat(os.path.expanduser(path_name)).st_mtime)
 
 
 # Parsing

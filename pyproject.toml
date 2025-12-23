@@ -10,30 +10,36 @@ authors = [
 license = "AGPL-3.0-or-later"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
-
-
-[tool.uv]
-package = false
-
-
-[tool.ruff.lint]
-extend-select = [
-    "D",    # pydocstyle
+dependencies = [
+    "invoke>=2.2.1",
 ]
-
-
-[tool.ruff.lint.pydocstyle]
-# Enforces PEP-257 docstrings
-convention="pep257"
-
-
-[tool.ruff.format]
-docstring-code-format=true
 
 [dependency-groups]
 dev = [
     "pre-commit>=4.5.1",
+    "pytest>=9.0.2",
     "reuse>=6.2.0",
     "ruff>=0.14.10",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff.lint]
+extend-select = [
+    "D",    # pydocstyle
+    "PT",   # flake8-pytest-style
+]
+
+[tool.ruff.lint.pydocstyle]
+convention="pep257"
+
+[tool.ruff.format]
+docstring-code-format=true
+
+[tool.pytest]
+minversion = "9.0"
+addopts = [
+    "--import-mode=importlib",
+    "-p no:legacypath",
 ]

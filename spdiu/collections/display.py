@@ -66,7 +66,7 @@ def tag_class(c, object_name):
     return tagged
 
 
-def recurse_dump(c, dump, title, breadcrumb=[], silent=False):
+def recurse_dump(c, dump, title, depth=None, silent=False, breadcrumb=[]):
     """
     Explore a dat file, printing merrily along the way.
 
@@ -113,20 +113,26 @@ def recurse_dump(c, dump, title, breadcrumb=[], silent=False):
     breadcrumb_next = breadcrumb + [title]
 
     # Got our line, now to dig deeper
+    if depth is not None:
+        if depth == 0:
+            return results
+        else:
+            depth += -1
+
     if d_type == "dict":
         for k, v in dump.items():
-            results += recurse_dump(c, v, k, breadcrumb_next, silent)
+            results += recurse_dump(c, v, k, depth, silent, breadcrumb_next)
 
     elif d_type == "list":
         for idv, v in enumerate(dump):
             idv_title = f"[{str(idv)}]"
-            results += recurse_dump(c, v, idv_title, breadcrumb_next, silent)
+            results += recurse_dump(c, v, idv_title, depth, silent, breadcrumb_next)
 
     return results
 
 
 @task(optional=["game"])
-def dump(c, slot="", game="", file="", entity=""):
+def dump(c, slot="", game="", file="", entity="", levels=None):
     """Display all variables in a game "dat" file recursively.
 
     -e, --entity [object] can narrow down the display
@@ -134,6 +140,9 @@ def dump(c, slot="", game="", file="", entity=""):
 
     You can specify dictionaries and lists with dot syntax.
         i.e. hero.inventory.2
+
+    -l, --levels [number] limits the depth the task will recurse.
+    When unset, the task will print the whole entity requested.
 
     -s, --slot [slot] will pick a save slot.
     If not provided, it defaults to the active data.
@@ -176,7 +185,7 @@ def dump(c, slot="", game="", file="", entity=""):
 
     # --entity: parse dot syntax and dig
     if not entity:
-        name = f"{cfg.i.inspect} {file}"
+        name = f'{cfg.i.inspect} "{file}"'
         title = f"Displaying the complete {cfg.i.data} {file}"
 
     else:
@@ -218,7 +227,8 @@ def dump(c, slot="", game="", file="", entity=""):
     print(pad_selection)
     print(separator, "\n")
 
-    recurse_dump(c, dump, name)
+    depth = int(levels) if levels else None
+    recurse_dump(c, dump, name, depth)
 
     print()
     print(separator)

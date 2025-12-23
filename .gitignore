@@ -14,3 +14,5 @@
 !/uv.lock
 !/pyproject.toml
 !/.pre-commit-config.yaml
+
+**/__pycache__

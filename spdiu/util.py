@@ -24,26 +24,6 @@ import xml.etree.ElementTree as ET
 from time import gmtime
 
 
-# Unified path handling
-def path(c, path, *args):
-    """Provide an absolute path for an operation, resolving config values.
-
-    Accepts a base path, and appends any other arguments to it as subdirectories.
-
-    If the path is relative, it is resolved in relation to spdiu.dirs.base.
-    """
-    cfg = c.config.spdiu
-    path = os.path.expanduser(path)
-
-    if not os.path.isabs(path):
-        path = os.path.join(os.path.expanduser(cfg.dirs.base), path)
-
-    for arg in args:
-        path = os.path.join(path, arg)
-
-    return path
-
-
 # File attributes
 def get_ts(dir_name):
     """Return a gmtime (seconds: float since epoch) timestamp for a directory."""
@@ -69,7 +49,10 @@ def read_dat(file_name):
 
 
 def write_dat(file_name, data):
-    """Write a python object into an SPD .dat file."""
+    """Write a python object into an SPD .dat file.
+
+    Formats the incoming json to minify separators.
+    """
     json_bin = str.encode(json.dumps(data, separators=(",", ":")))
 
     with gzip.open(file_name, "wb") as f:
@@ -129,3 +112,30 @@ def exists(path):
     Expands user (~) on supplied paths.
     """
     return os.path.exists(os.path.expanduser(path))
+
+
+# Unified path handling
+def path(c, path, *args):
+    """Provide an absolute path for an operation, resolving config values.
+
+    Accepts a base path, and appends any other arguments to it as subdirectories.
+
+    If the path is relative, it is resolved in relation to spdiu.dirs.base.
+    """
+    cfg = c.config.spdiu
+    path = os.path.expanduser(path)
+
+    if not os.path.isabs(path):
+        path = os.path.join(os.path.expanduser(cfg.dirs.base), path)
+
+    for arg in args:
+        path = os.path.join(path, arg)
+
+    return path
+
+
+# Unified slot/game selection
+def select(c, slot="", game="", file="", entity="", default="latest"):
+    """Parse command line arguments and return an object."""
+    # see spdiu.display.dump for the latest take
+    raise NotImplementedError

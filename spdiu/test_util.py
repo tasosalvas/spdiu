@@ -81,8 +81,8 @@ def test_path(mc: MockContext) -> None:
     """Test the path function."""
     c = mc
 
-    assert os.path.isabs(util.path(c, "shattered-pixel-dungeon"))
-    assert os.path.isabs(util.path(c, "~/.config", "shattered", "pixel"))
+    assert util.path(c, "shattered-pixel-dungeon").is_absolute()
+    assert util.path(c, "~/.config", "shattered", "pixel").is_absolute()
 
 
 def test_get_ts(tmp_path) -> None:

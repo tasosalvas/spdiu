@@ -26,7 +26,7 @@ Usage:
 'inv -h [task name]' for a task's full docstring.
 """
 
-import os
+from pathlib import Path
 
 from invoke import Collection, task
 
@@ -44,7 +44,7 @@ defaults = {
     "spdiu": {
         "dirs": {
             # Internal variable, the location of the script.
-            "base": os.path.dirname(os.path.realpath(__file__)),
+            "base": Path(__file__).parent.resolve(),
             "slots": "slots",
             "package": "packages",
             "game": "game",

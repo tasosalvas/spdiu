@@ -14,62 +14,62 @@ Parsing methods read and write game datafiles.
 File manipulation methods unify disk io into relevant operations.
 """
 
-import os
 import shutil
 
 import gzip
 import json
 import xml.etree.ElementTree as ET
 
+from pathlib import Path
 from time import gmtime
 
 
 # File attributes
-def get_ts(path_name):
+def get_ts(target: Path):
     """Return a gmtime (seconds: float since epoch) timestamp for a directory."""
-    return gmtime(os.stat(os.path.expanduser(path_name)).st_mtime)
+    return gmtime(target.stat().st_mtime)
 
 
 # Parsing
-def read_dat(file_name):
+def read_dat(file: Path):
     """Read an SPD .dat file into a python object."""
-    if not os.path.exists(file_name):
+    if not file.exists():
         print("The .dat file requested does not exist:")
-        print(file_name)
+        print(file)
         raise FileNotFoundError
 
     try:
-        with gzip.open(file_name, "rb") as f:
+        with gzip.open(file, "rb") as f:
             content = f.read()
     except gzip.BadGzipFile:
-        print(f'Trouble unpacking "{file_name}"')
+        print(f'Trouble unpacking "{file}"')
         raise
 
     return json.loads(content)
 
 
-def write_dat(file_name, data):
+def write_dat(file: Path, data):
     """Write a python object into an SPD .dat file.
 
     Formats the incoming json to minify separators.
     """
     json_bin = str.encode(json.dumps(data, separators=(",", ":")))
 
-    with gzip.open(file_name, "wb") as f:
+    with gzip.open(file, "wb") as f:
         f.write(json_bin)
 
 
-def read_xml(file_name):
+def read_xml(file: Path):
     """Read an xml file structured like SPD's settings.xml."""
     values = {}
-    root = ET.parse(file_name).getroot()
+    root = ET.parse(file).getroot()
     for i in root:
         values[i.attrib["key"]] = i.text
 
     return values
 
 
-def write_xml(file_name, data):
+def write_xml(file: Path, data):
     """Write an xml file structured like SPD's settings.xml."""
     xml_start = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -83,69 +83,55 @@ def write_xml(file_name, data):
         xml_lines.append(f'<entry key="{str(key)}">{str(val)}</entry>')
 
     xml_txt = "\n".join(xml_lines + xml_end)
-
-    with open(file_name, "w") as f:
-        f.write(xml_txt)
+    file.write_text(xml_txt)
 
 
 # Folder manipulation
-def replace(src_dir, dest_dir):
+def replace(src: Path, dest: Path):
     """Copy a directory tree to a destination, replacing anything there.
 
-    Expands user (~) on supplied paths.
     Raises `FileNotFoundError` if the source does not exist.
     """
-    src = os.path.expanduser(src_dir)
-    dest = os.path.expanduser(dest_dir)
-
     # Check if the source file exists
-    if not os.path.exists(src):
+    if not src.exists():
         raise FileNotFoundError
 
     # Make sure the path up to the destination exists
-    os.makedirs(dest, exist_ok=True)
+    dest.mkdir(parents=True, exist_ok=True)
     # This way prevents handling FileNotFound, and erases existing files.
     shutil.rmtree(dest)
     shutil.copytree(src, dest)
 
 
-def remove(directory):
-    """Ensure a directory tree is deleted.
-
-    Expands user (~) on supplied paths.
-    """
+def remove(directory: Path):
+    """Ensure a directory tree is deleted."""
     try:
-        shutil.rmtree(os.path.expanduser(directory))
+        shutil.rmtree(directory)
     except FileNotFoundError:
         pass
 
 
-def exists(path):
-    """Check if a specified file or directory exists.
-
-    Expands user (~) on supplied paths.
-    """
-    return os.path.exists(os.path.expanduser(path))
-
-
 # Unified path handling
-def path(c, path, *args):
+def path(c, base, *args) -> Path:
     """Provide an absolute path for an operation, resolving config values.
 
     Accepts a base path, and appends any other arguments to it as subdirectories.
-
     If the path is relative, it is resolved in relation to spdiu.dirs.base.
+
+    It can accept a Path or try to cast a provided str into one.
     """
     cfg = c.config.spdiu
-    path = os.path.expanduser(path)
 
-    if not os.path.isabs(path):
-        path = os.path.join(os.path.expanduser(cfg.dirs.base), path)
+    p = Path(base) if type(base) is str else base
+    p = p.expanduser()
+
+    if not p.is_absolute() and base != cfg.dirs.base:
+        p = path(c, cfg.dirs.base) / p
 
     for arg in args:
-        path = os.path.join(path, arg)
+        p = p / arg
 
-    return path
+    return p
 
 
 # Unified slot/game selection

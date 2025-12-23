@@ -17,6 +17,7 @@ from invoke import task, Collection
 from invoke.watchers import StreamWatcher
 
 from .. import util
+from ..util import path
 from ..model import Profile, Slots
 
 
@@ -31,8 +32,8 @@ def backup(c):
     Automatically called by load and clean.
     """
     cfg = c.config.spdiu
-    src = util.path(c, cfg.game.data)
-    dest = util.path(c, cfg.dirs.slots, "backup", cfg.backup_slot)
+    src = path(c, cfg.game.data)
+    dest = path(c, cfg.dirs.slots, "backup", cfg.backup_slot)
 
     try:
         util.replace(src, dest)

@@ -18,7 +18,7 @@ from invoke.config import Config
 from . import util
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture
 def mc() -> MockContext:
     """Provide a MockContext with a Config.
 
@@ -37,7 +37,7 @@ def mc() -> MockContext:
     )
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture
 def game_data() -> dict:
     """Provide a dict of game data."""
     return {
@@ -46,7 +46,38 @@ def game_data() -> dict:
     }
 
 
-def test_path(mc: MockContext):
+@pytest.fixture
+def settings_xml() -> str:
+    """Provide example settings.xml content.
+
+    Equivalent to settings_dict.
+    """
+    return "\n".join(
+        [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">',
+            "<properties>",
+            '<entry key="scale">3</entry>',
+            '<entry key="fullscreen">false</entry>',
+            "</properties>",
+            "",
+        ]
+    )
+
+
+@pytest.fixture
+def settings_dict() -> dict:
+    """Provide example parsed settings dictionary.
+
+    Equivalent to settings_xml.
+    """
+    return {
+        "scale": "3",
+        "fullscreen": "false",
+    }
+
+
+def test_path(mc: MockContext) -> None:
     """Test the path function."""
     c = mc
 
@@ -54,7 +85,7 @@ def test_path(mc: MockContext):
     assert os.path.isabs(util.path(c, "~/.config", "shattered", "pixel"))
 
 
-def test_get_ts(tmp_path):
+def test_get_ts(tmp_path) -> None:
     """Test retreiving a timestamp from a file."""
     old_time = 450000000  # Some time in 1984
     old_gmtime = gmtime(old_time)  # The expected result
@@ -75,7 +106,19 @@ def test_get_ts(tmp_path):
     assert util.get_ts(new_file) > old_gmtime
 
 
-def test_read_dat(tmp_path, game_data):
+def test_read_dat_bad_src(tmp_path) -> None:
+    """Test that bad and nonexistent files raise the proper exceptions."""
+    bad_gzip = tmp_path / "boo.dat"
+    bad_gzip.write_text("boo!")
+
+    with pytest.raises(FileNotFoundError):
+        util.read_dat(tmp_path / "missing.dat")
+
+    with pytest.raises(gzip.BadGzipFile):
+        util.read_dat(bad_gzip)
+
+
+def test_read_dat(tmp_path, game_data) -> None:
     """Test reading gzipped SPD .dat files."""
     json_bin = str.encode(json.dumps(game_data, separators=(",", ":")))
     df = tmp_path / "dummy.dat"
@@ -83,14 +126,12 @@ def test_read_dat(tmp_path, game_data):
     with gzip.open(df, "wb") as f:
         f.write(json_bin)
 
-    with pytest.raises(FileNotFoundError):
-        util.read_dat(tmp_path / "missing.dat")
     assert type(util.read_dat(df)) is dict
     assert util.read_dat(df).get("hero") is not None
     assert util.read_dat(df)["hero"]["HP"] == 130
 
 
-def test_write_dat(tmp_path, game_data):
+def test_write_dat(tmp_path, game_data) -> None:
     """Test writing gzipped .dat files."""
     df = tmp_path / "write.dat"
 
@@ -101,22 +142,69 @@ def test_write_dat(tmp_path, game_data):
     assert util.read_dat(df)["hero"]["HP"] == 130
 
 
-# def test_read_xml():
-#     """Test reading SPD Settings XML files."""
-#     pytest.fail("Test not ready yet")
+def test_read_xml(tmp_path, settings_xml) -> None:
+    """Test reading SPD Settings XML files."""
+    xf = tmp_path / "read.xml"
+    xf.write_text(settings_xml)
 
-# def test_write_xml():
-#     """Test writing SPD Settings XML files."""
-#     pytest.fail("Test not ready yet")
+    assert type(util.read_xml(xf)) is dict
+    assert util.read_xml(xf)["scale"] == "3"
+    assert util.read_xml(xf)["fullscreen"] == "false"
 
-# def test_replace():
-#     """Test replacing directory trees."""
-#     pytest.fail("Test not ready yet")
 
-# def test_remove():
-#     """Test removing directory trees."""
-#     pytest.fail("Test not ready yet")
+def test_write_xml(tmp_path, settings_dict) -> None:
+    """Test writing SPD Settings XML files."""
+    xf = tmp_path / "write.xml"
 
-# def test_exists():
-#     """Test path existence."""
-#     pytest.fail("Test not ready yet")
+    util.write_xml(xf, settings_dict)
+
+    assert type(util.read_xml(xf)) is dict
+    assert util.read_xml(xf)["scale"] == "3"
+    assert util.read_xml(xf)["fullscreen"] == "false"
+
+
+def test_replace_bad_src(tmp_path) -> None:
+    """Test replacing directory trees."""
+    bad_src = tmp_path / "nope"
+    dest = tmp_path / "yup"
+
+    with pytest.raises(FileNotFoundError):
+        util.replace(bad_src, dest)
+
+
+def test_replace(tmp_path) -> None:
+    """Test replacing directory trees."""
+    d_src = tmp_path / "a"
+    d_src.mkdir()
+
+    f_src = d_src / "src.txt"
+    f_src.write_text("source")
+
+    d_exists = tmp_path / "e"
+    d_exists.mkdir()
+
+    f_exists = tmp_path / "e" / "exists.txt"
+    f_exists.touch()
+
+    f_exists_src = d_exists / "src.txt"
+    f_exists_src.write_text("preexisting")
+
+    util.replace(d_src, d_exists)
+
+    assert f_exists_src.exists(), "File did not get copied."
+    assert not f_exists.exists(), "Old file not removed."
+    assert f_exists_src.read_text() == "source", "Content is not as expected."
+
+
+def test_remove(tmp_path) -> None:
+    """Test removing directory trees."""
+    d_top = tmp_path / "a"
+    d_nested = tmp_path / "a" / "b"
+    f = d_nested / "text.txt"
+
+    d_nested.mkdir(parents=True)
+    f.touch()
+
+    util.remove(d_top)
+
+    assert not d_top.exists()

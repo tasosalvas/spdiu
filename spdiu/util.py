@@ -43,7 +43,7 @@ def read_dat(file_name):
             content = f.read()
     except gzip.BadGzipFile:
         print(f'Trouble unpacking "{file_name}"')
-        return {}
+        raise
 
     return json.loads(content)
 
@@ -71,7 +71,21 @@ def read_xml(file_name):
 
 def write_xml(file_name, data):
     """Write an xml file structured like SPD's settings.xml."""
-    raise NotImplementedError
+    xml_start = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">',
+        "<properties>",
+    ]
+    xml_end = ["</properties>", ""]
+
+    xml_lines = xml_start
+    for key, val in data.items():
+        xml_lines.append(f'<entry key="{str(key)}">{str(val)}</entry>')
+
+    xml_txt = "\n".join(xml_lines + xml_end)
+
+    with open(file_name, "w") as f:
+        f.write(xml_txt)
 
 
 # Folder manipulation

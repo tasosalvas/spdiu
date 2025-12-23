@@ -9,7 +9,6 @@ By convention, where applicable:
 -g --game to pick a specific game in a slot
 """
 
-import os
 import re
 from time import strftime
 
@@ -49,11 +48,11 @@ def backup(c):
 def clean(c):
     """Remove all saved states, leave a backup of the active data folder."""
     cfg = c.config.spdiu
-    if not util.exists(util.path(c, cfg.game.data)):
+    if not path(c, cfg.game.data).exists():
         print("Aborting! There seems to be no active data folder.")
         return
 
-    s = Slots(util.path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
+    s = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
     for p in s.slots:
         util.remove(p.root_dir)
 
@@ -80,11 +79,11 @@ def save(c, slot=None):
         print("Aborting! Names can only contain alphanumeric characters.")
         return
 
-    src = cfg.game.data
-    dest = util.path(c, cfg.dirs.slots, "manual", slot)
-    bak = util.path(c, cfg.dirs.slots, "backup", slot)
+    src = path(c, cfg.game.data)
+    dest = path(c, cfg.dirs.slots, "manual", slot)
+    bak = path(c, cfg.dirs.slots, "backup", slot)
 
-    if util.exists(dest):
+    if dest.exists():
         util.replace(dest, bak)
         print(f"Previous save preserved as {cfg.i.bak} backup.{slot}")
 
@@ -117,30 +116,26 @@ def load(c, last=False, slot=None, game=None):
     unless the backup slot itself is being loaded.
     """
     cfg = c.config.spdiu
+    slot_path = path(c, cfg.dirs.slots)
 
     if last:
-        p = Slots(util.path(c, cfg.dirs.slots), ["manual", "auto"]).slots[0]
+        p = Slots(path(c, cfg.dirs.slots), ["manual", "auto"]).slots[0]
         # TODO: catch this exception sometime
         # print("No saves found. Make some with 'inv save [-s slot name]'")
         # return
 
     else:
         if slot is None:
-            p = Slots(util.path(c, cfg.dirs.slots), ["manual"]).get_slot(
-                cfg.default_slot
-            )
+            p = Slots(slot_path, ["manual"]).get_slot(cfg.default_slot)
 
         else:
-            p = Slots(
-                util.path(c, cfg.dirs.slots), ["manual", "auto", "backup"]
-            ).get_slot(slot)
+            p = Slots(slot_path, ["manual", "auto", "backup"]).get_slot(slot)
 
     if not p:
         print(f"Invalid slot name: {slot} - 'inv ls' to list existing slots.")
         return
 
-    ap_path = cfg.game.data
-
+    ap_path = path(c, cfg.game.data)
     # Load the requested profile and exit
     if game is None:
         if p.name != cfg.backup_slot:
@@ -148,13 +143,11 @@ def load(c, last=False, slot=None, game=None):
 
         util.replace(p.root_dir, ap_path)
 
-        print(f"State loaded! {cfg.i.disc_a} {p.name}")
+        print(f"State loaded! {cfg.i.disc_a} {p.group}.{p.name}")
         return
 
     # Get the instance of the requested game, build the destination path.
     g = p.get_game(game)
-    ag_path = os.path.join(ap_path, game)
-
     if not g:
         print("Game not found in slot.")
         print(f"'inv show -s {slot}' to list existing games.")
@@ -163,8 +156,9 @@ def load(c, last=False, slot=None, game=None):
     if p.name != cfg.backup_slot:
         backup(c)
 
+    ag_path = ap_path / game
     util.replace(g.root_dir, ag_path)
-    print(f"Game loaded! {cfg.i.disc_a} {p.name} {cfg.i.game} {game}")
+    print(f"Game loaded! {cfg.i.disc_a} {p.group}.{p.name} {cfg.i.game} {game}")
 
 
 # Autosaves
@@ -185,8 +179,8 @@ class AutoSaveWatcher(StreamWatcher):
         cfg = self.c.config.spdiu
 
         name = event.replace(" ", "")
-        dest = util.path(self.c, cfg.dirs.slots, "auto", name)
-        src = cfg.game.data
+        dest = path(self.c, cfg.dirs.slots, "auto", name)
+        src = path(self.c, cfg.game.data)
 
         util.replace(src, dest)
         print(f"{cfg.bullet_b}Autosave {cfg.i.auto} auto.{name}")
@@ -217,13 +211,13 @@ def watch(c):
 
     # split the arguments and escape spaces in the command
     smash = cfg.game.cmd.split(" -")
-    bin = smash[0].replace(" ", "\ ")
+    cmd_bin = smash[0].replace(" ", "\ ")
     args = smash[1:] if len(smash) > 1 else []
-    cmd = " -".join([bin] + args)
+    cmd = " -".join([cmd_bin] + args)
 
     w_out = AutoSaveWatcher(c)
 
-    with c.cd(util.path(c, cfg.dirs.game)):
+    with c.cd(path(c, cfg.dirs.game)):
         c.run(cmd, watchers=[w_out])
 
 
@@ -239,19 +233,16 @@ def ls(c):
     The slots are sorted by time, so the latest one is always last.
     """
     cfg = c.config.spdiu
-
     try:
-        path = util.path(c, cfg.game.data)
-        ap = Profile(path)
+        ap = Profile(path(c, cfg.game.data))
     except FileNotFoundError:
-        print(f"No active slot found at {path}.")
+        print(f"No active slot found at {cfg.game.data}.")
         return
 
     try:
-        path = util.path(c, cfg.dirs.slots)
-        s = Slots(path, ["manual", "auto", "backup"])
+        s = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
     except FileNotFoundError:
-        print(f"No slots data found in {path}.")
+        print(f"No slots data found in {cfg.dirs.slots}.")
         return
 
     # active save vars
@@ -286,8 +277,7 @@ def ls(c):
 
     print("\nActive slot:")
 
-    a_name = os.path.split(cfg.game.data)[-1]
-    print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {a_name}")
+    print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {ap.name}")
 
 
 ns.add_task(backup)

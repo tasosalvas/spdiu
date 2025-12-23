@@ -140,13 +140,13 @@ The Slots object provides access to _save slots_ (copies of the game's data) in 
 SPDIU uses it to maintain `backup`, `auto` and `manual` groups of slots in the `slots` directory.
 
 ```py
-from spdio import util
+from spdio.util import path
 from spdio.model import Slots
 
 @task
 def show_earliest_save(c):
     """Bring all of my saves in mind."""
-    s = Slots(util.path(cfg.slots), ['manual', 'auto'])
+    s = Slots(path(cfg.dirs.slots), ['manual', 'auto'])
     # Now each of the states in the folders is a Profile.
     p = Slots.slots[-1]  # they are ordered by mod time already.
 

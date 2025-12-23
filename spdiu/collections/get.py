@@ -3,10 +3,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """SPDIU Download and installation tasks."""
 
-import os
 import json
 import shutil
-import stat
 
 import urllib.request
 from zipfile import ZipFile, BadZipFile
@@ -14,6 +12,7 @@ from zipfile import ZipFile, BadZipFile
 from invoke import task, Collection
 
 from .. import util
+from ..util import path
 
 
 ns = Collection("get")
@@ -175,10 +174,10 @@ def install(c, version=None):
     platform = cfg.release.platform
     ext = cfg.release.extension
 
-    packages = util.path(c, cfg.dirs.package)
-    os.makedirs(packages, exist_ok=True)
+    packages = path(c, cfg.dirs.package)
+    packages.mkdir(parents=True, exist_ok=True)
 
-    install_path = util.path(c, cfg.dirs.game)
+    install_path = path(c, cfg.dirs.game)
 
     # Get latest from gh
     if cfg.release.gh_use_api and not version:
@@ -215,7 +214,7 @@ def install(c, version=None):
         d_name = d_url.split("/")[-1]
         print(d_url)
 
-    p_path = os.path.join(packages, d_name)
+    package_path = packages / d_name
 
     # Get ready to download
     def progress_hook(blocks, block_size, total):
@@ -230,10 +229,10 @@ def install(c, version=None):
         print(f" |>{bar}<| {current_mb:.2f}MB out of {total_mb:.2f}MB", end="\r")
 
     # Downloading
-    if os.path.exists(p_path):
+    if package_path.exists():
         print(f"{d_name} already exists in {cfg.dirs.package}.")
 
-    elif ext == "jar" and os.path.exists(os.path.join(install_path, d_name)):
+    elif ext == "jar" and (install_path / d_name).exists():
         print("This jar file is already installed, nothing to do.")
         return
 
@@ -241,21 +240,21 @@ def install(c, version=None):
         print(f"Downloading {d_name}...")
 
         try:
-            urllib.request.urlretrieve(d_url, p_path, progress_hook)
+            urllib.request.urlretrieve(d_url, package_path, progress_hook)
 
         except urllib.error.HTTPError:
             print(f"404: {d_url} not found.")
             return
 
         except urllib.error.ContentTooShortError:
-            os.remove(p_path)
+            package_path.unlink()
             print("Transfer failed, try again.")
             return
 
         print("Package downloaded. Great success!")
 
     # Pre-installation checks
-    if os.path.exists(install_path):
+    if install_path.exists():
         print("WARNING: Destination already exists.")
         print(install_path)
 
@@ -269,26 +268,25 @@ def install(c, version=None):
 
     # Installation, varying by package
     print(f"Installing {d_name}...")
-    os.makedirs(install_path, exist_ok=True)
+    install_path.mkdir(parents=True, exist_ok=True)
 
     if ext == "zip":
-        with ZipFile(p_path, "r") as z:
+        with ZipFile(package_path, "r") as z:
             try:
                 z.extractall(install_path)
                 print("Zip package extracted to the game folder.")
 
             except BadZipFile:
-                os.remove(p_path)
+                package_path.unlink()
                 print("Zip file is unreadable. Removed it, try again.")
 
         # Python's zipfile doesn't preserve permissions when extracting
         if platform.lower() == "linux":
-            binary = os.path.join(install_path, cfg.game.cmd)
-            permissions = stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH
-            os.chmod(binary, permissions)
+            binary = install_path / cfg.game.cmd
+            binary.chmod(0o755)
 
     elif ext == "jar":
-        shutil.move(p_path, install_path)
+        shutil.move(package_path, install_path)
         print("Jar package copied to the game folder.")
 
     print(f"{d_name} was successfully installed. Have a nice day!")

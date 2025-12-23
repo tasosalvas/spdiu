@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Classes that represent the user data of an SPD installation."""
 
-import os
+from pathlib import Path
 from operator import attrgetter
 
 from . import util
@@ -45,31 +45,29 @@ class DataDir:
 
     def set_dat(self, dat_file, contents):
         """Write a python object into a dat file."""
-        util.write_dat(os.path.join(self.root_dir, dat_file), contents)
+        util.write_dat(self.root_dir / dat_file, contents)
 
     def get_dat(self, dat_file):
         """Return the contents of a dat file as a python object."""
-        return util.read_dat(os.path.join(self.root_dir, dat_file))
+        return util.read_dat(self.root_dir / dat_file)
 
-    def __init__(self, base_dir):
+    def __init__(self, base_dir: Path):
         """Analyze the directory and bake some variables.
 
         The directory and all files contained are timestamped,
         and the newest time is kept as self.ts.
         """
-        self.root_dir = os.path.expanduser(base_dir)
-        self.name = os.path.split(base_dir)[1]
+        self.root_dir = base_dir
+        self.name = base_dir.name
 
-        self.dat_files = [
-            i for i in os.listdir(self.root_dir) if os.path.splitext(i)[1] == ".dat"
-        ]
+        self.dat_files = [i.name for i in self.root_dir.glob("*.dat")]
 
         # Get the newest timestamp between the directory and its files.
         ts_list = [util.get_ts(self.root_dir)]
 
-        for f in os.listdir(self.root_dir):
-            p = os.path.join(self.root_dir, f)
-            if not os.path.isdir(p):
+        for f in self.root_dir.iterdir():
+            p = self.root_dir / f
+            if not p.is_dir():
                 ts_list.append(util.get_ts(p))
 
         self.ts = sorted(ts_list, reverse=True)[0]
@@ -99,7 +97,7 @@ class Profile(DataDir):
     def get_settings(self):
         """Get the values from settings.xml as a dict."""
         try:
-            return util.read_xml(os.path.join(self.root_dir, "settings.xml"))
+            return util.read_xml(self.root_dir / "settings.xml")
 
         except FileNotFoundError:
             return {}
@@ -115,7 +113,7 @@ class Profile(DataDir):
     def __init__(self, base_dir):
         """Ensure the directory contains game data and create a Profile object."""
         super().__init__(base_dir)
-        self.group = os.path.split(os.path.split(self.root_dir)[0])[1]
+        self.group = self.root_dir.parent.name
 
         # Detect if this is a game data folder:
         # settings.xml appears at first launch
@@ -124,10 +122,10 @@ class Profile(DataDir):
             raise FileNotFoundError
 
         games = []
-        for i in os.listdir(self.root_dir):
-            i_path = os.path.join(self.root_dir, i)
+        for i in self.root_dir.iterdir():
+            i_path = self.root_dir / i
 
-            if not os.path.isdir(i_path):
+            if not i_path.is_dir():
                 continue
 
             try:
@@ -154,7 +152,7 @@ class Slots:
     slots contains all states as Profiles sorted by modification time.
     """
 
-    def get_slot(self, slot_name):
+    def get_slot(self, slot_name: str):
         """Return a Profile representing the save with the requested name.
 
         Accepts 'subdir.slot' syntax, falls back to default_subdir if omitted.
@@ -165,7 +163,7 @@ class Slots:
             slot = parts[1]
 
         else:
-            sd = self.default_subdir
+            sd = self.default_subdir.name
             slot = slot_name
 
         for p in self.slots:
@@ -174,28 +172,29 @@ class Slots:
 
         return None
 
-    def __init__(self, base_dir, subdirs=["manual"], default_subdir="manual"):
+    def __init__(self, base_dir: Path, subdirs=["manual"], default_subdir="manual"):
         """Initialize a Slots manager, loading every profile in subdirs.
 
-        Accepts a list of subdirs to construct its slots from.
+        Accepts a list of subdir names to construct its slots from.
+        Accepts a default subdir to direct implicit queries (not "subdir.slot")
         """
         self.name = "+".join(subdirs)
-        self.root_dir = os.path.expanduser(base_dir)
+        self.root_dir = base_dir
 
-        self.subdirs = [os.path.join(self.root_dir, i) for i in subdirs]
-        self.default_subdir = default_subdir
+        self.default_subdir = self.root_dir / default_subdir
+        self.subdirs = [self.root_dir / i for i in subdirs]
 
         slots = []
         for sd in self.subdirs:
             try:
-                saves = os.listdir(sd)
+                saves = sd.iterdir()
             except FileNotFoundError:
                 continue
 
             for i in saves:
                 try:
-                    i_path = os.path.join(sd, i)
-                    slots.append(Profile(i_path))
+                    slots.append(Profile(sd / i))
+
                 except FileNotFoundError:
                     continue
 

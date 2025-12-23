@@ -5,7 +5,12 @@
 Common domain specific reading and writing helpers.
 
 The idea is to abstract common operations, so they can be improved independently.
-All of them run os.path.expanduser on their supplied paths.
+
+util.path accepts path strings from config and returns Path objects.
+It also ensures they are absolute and that user paths are expanded.
+
+It requires context, so it's only really available to tasks.
+All other functions assume valid pathlib.Path objects.
 
 File attribute methods deal with getting timestamps.
 

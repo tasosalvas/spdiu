@@ -15,7 +15,7 @@ from time import strftime
 
 from invoke import Collection, task, terminals
 
-from .. import util
+from ..util import path
 from ..model import Profile, Slots
 
 
@@ -162,7 +162,7 @@ def dump(c, slot="", game="", file="", entity="", levels=None):
         p = Profile(cfg.game.data)
         selection = f"{cfg.i.disc_a} {p.name}"
     else:
-        s = Slots(util.path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
+        s = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
         p = s.get_slot(slot)
         selection = f"{cfg.i.disc_b} {p.name}"
 
@@ -293,12 +293,12 @@ def slot(c, slot=None, game=None):
         slot = cfg.default_slot
 
     if not slot:
-        s_dir = util.path(c, cfg.game.data)
+        s_dir = path(c, cfg.game.data)
         p = Profile(s_dir)
         print(f"Showing {cfg.i.disc_a} Active game data")
 
     else:
-        slots = Slots(util.path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
+        slots = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
         p = slots.get_slot(slot)
         print(f"Showing details for slot {cfg.i.disc_b} {slot}")
 

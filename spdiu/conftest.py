@@ -9,6 +9,7 @@ from invoke.context import MockContext
 from invoke.config import Config
 
 from . import util
+from .tasks import defaults as spdiu_defaults
 
 
 @pytest.fixture
@@ -18,21 +19,11 @@ def c(tmp_path) -> MockContext:
     `dirs.base` is set to tmp_path / base
     `game.date` is set to tmp_path / data
     """
-    return MockContext(
-        config=Config(
-            {
-                "spdiu": {
-                    "dirs": {
-                        "base": tmp_path / "base",
-                        "slots": "slots",
-                    },
-                    "game": {
-                        "data": tmp_path / "data",
-                    },
-                }
-            }
-        )
-    )
+    config_dict = spdiu_defaults
+    config_dict["spdiu"]["dirs"]["base"] = tmp_path / "base"
+    config_dict["spdiu"]["game"]["data"] = tmp_path / "data"
+
+    return MockContext(config=Config(config_dict))
 
 
 @pytest.fixture
@@ -131,7 +122,7 @@ def mock_slots(
     d_slots = util.path(c, cfg.dirs.slots)
 
     groups = ["manual", "backup"]
-    saves = ["default", "floor3", "floor12"]
+    saves = ["floor3", "floor12", "tengu"]
 
     for group in groups:
         d_group = d_slots / group

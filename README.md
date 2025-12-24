@@ -68,9 +68,10 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 
 `main` is usable, no need to wait, that's just for when I announce.
 
-- [ ] Migrate to pathlib, omg
+- [x] Migrate to pathlib, omg
 - [ ] data object summaries
-  - [x] Basic data mining with `recurse_dump()`
+  - [x] Very pretty data mining with `recurse_dump()`
+  - [x] `display.dump` provides full control with command line arguments
   - [ ] Some tidy setup for summary templating
   - [x] Parsing profiles (journal etc) in slots and providing summaries
   - [x] Parsing saved games in slots
@@ -92,9 +93,13 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
   - [ ] CONTRIBUTING document
 - [x] Pytest configured
 - [ ] base spdiu tests
-  - [ ] util
-  - [ ] model
-- [ ] collection tests
+  - [x] util
+  - [x] model
+  - [ ] cheats
+  - [ ] display
+  - [ ] get
+  - [ ] slots
+  - [x] github action and badge lol
 - [ ] tasks.py/configuration tests
 - [ ] Readme: Screenshots
 - [ ] Logo n stuff

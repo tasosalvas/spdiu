@@ -25,7 +25,7 @@ ns = Collection("slots")
 
 # File manipulation Tasks
 @task
-def backup(c):
+def backup(c) -> bool:
     """Create a backup of the active data.
 
     Automatically called by load and clean.
@@ -39,28 +39,30 @@ def backup(c):
 
     except FileNotFoundError:
         print("Aborting! There seems to be no active data folder.")
-        return
+        return False
 
     print(f"Active state backup created! {cfg.i.bak} backup.{cfg.backup_slot}")
+    return True
 
 
 @task(post=[backup])
-def clean(c):
+def clean(c) -> bool:
     """Remove all saved states, leave a backup of the active data folder."""
     cfg = c.config.spdiu
     if not path(c, cfg.game.data).exists():
         print("Aborting! There seems to be no active data folder.")
-        return
+        return False
 
     s = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
     for p in s.slots:
         util.remove(p.root_dir)
 
     print(f"{cfg.i.clean} {len(s.slots)} saved states deleted.")
+    return True
 
 
 @task
-def save(c, slot=None):
+def save(c, slot=None) -> bool:
     """Save a copy of the current savegame folder. -s [slot] to name a slot.
 
     Slot names can only be alphanumeric characters.
@@ -77,7 +79,7 @@ def save(c, slot=None):
 
     if slot and not slot.isalnum():
         print("Aborting! Names can only contain alphanumeric characters.")
-        return
+        return False
 
     src = path(c, cfg.game.data)
     dest = path(c, cfg.dirs.slots, "manual", slot)
@@ -91,12 +93,14 @@ def save(c, slot=None):
         util.replace(src, dest)
     except FileNotFoundError:
         print("No game data found to save!")
+        return False
 
     print(f"State saved! {cfg.i.disc_b} {slot}")
+    return True
 
 
 @task
-def load(c, last=False, slot=None, game=None):
+def load(c, last=False, slot=None, game=None) -> bool:
     """Load a save. -l for last save, -s [slot], -g [game] to only load a game.
 
     Slots provided with -s, --slot correspond to the manual saves,
@@ -119,10 +123,11 @@ def load(c, last=False, slot=None, game=None):
     slot_path = path(c, cfg.dirs.slots)
 
     if last:
-        p = Slots(path(c, cfg.dirs.slots), ["manual", "auto"]).slots[0]
-        # TODO: catch this exception sometime
-        # print("No saves found. Make some with 'inv save [-s slot name]'")
-        # return
+        try:
+            p = Slots(path(c, cfg.dirs.slots), ["manual", "auto"]).slots[0]
+        except IndexError:
+            print("No saves found. Make some with 'inv save [-s slot name]'")
+            return False
 
     else:
         if slot is None:
@@ -133,7 +138,7 @@ def load(c, last=False, slot=None, game=None):
 
     if not p:
         print(f"Invalid slot name: {slot} - 'inv ls' to list existing slots.")
-        return
+        return False
 
     ap_path = path(c, cfg.game.data)
     # Load the requested profile and exit
@@ -144,14 +149,14 @@ def load(c, last=False, slot=None, game=None):
         util.replace(p.root_dir, ap_path)
 
         print(f"State loaded! {cfg.i.disc_a} {p.group}.{p.name}")
-        return
+        return True
 
     # Get the instance of the requested game, build the destination path.
     g = p.get_game(game)
     if not g:
         print("Game not found in slot.")
         print(f"'inv show -s {slot}' to list existing games.")
-        return
+        return False
 
     if p.name != cfg.backup_slot:
         backup(c)
@@ -159,6 +164,7 @@ def load(c, last=False, slot=None, game=None):
     ag_path = ap_path / game
     util.replace(g.root_dir, ag_path)
     print(f"Game loaded! {cfg.i.disc_a} {p.group}.{p.name} {cfg.i.game} {game}")
+    return True
 
 
 # Autosaves
@@ -211,7 +217,7 @@ def watch(c):
 
     # split the arguments and escape spaces in the command
     smash = cfg.game.cmd.split(" -")
-    cmd_bin = smash[0].replace(" ", "\ ")
+    cmd_bin = smash[0].replace(" ", "\\ ")
     args = smash[1:] if len(smash) > 1 else []
     cmd = " -".join([cmd_bin] + args)
 
@@ -222,7 +228,7 @@ def watch(c):
 
 
 @task
-def ls(c):
+def ls(c) -> dict:
     """List all saved states chronologically.
 
     The disc icon signifies the latest data folder between all states.
@@ -236,14 +242,10 @@ def ls(c):
     try:
         ap = Profile(path(c, cfg.game.data))
     except FileNotFoundError:
-        print(f"No active slot found at {cfg.game.data}.")
-        return
+        print(f"No active slot found at {cfg.game.data}. Play a little!")
+        return False
 
-    try:
-        s = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
-    except FileNotFoundError:
-        print(f"No slots data found in {cfg.dirs.slots}.")
-        return
+    s = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
 
     # active save vars
     a_bullet = cfg.bullet_a
@@ -276,8 +278,12 @@ def ls(c):
         print(f"{bullet}{time} {disc} {prefix}{p.name}")
 
     print("\nActive slot:")
-
     print(a_bullet + strftime(cfg.time_format, ap.ts) + f" {a_disc} {ap.name}")
+
+    return {
+        "data": ap,
+        "slots": s,
+    }
 
 
 ns.add_task(backup)

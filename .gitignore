@@ -1,18 +1,9 @@
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
-/*
-!/tasks.py
-!/invoke.example.yaml
-!/local_tasks.example.py
-!/.gitignore
-!/README.md
-!/LICENSES
-!/LICENSE
-!/REUSE.toml
-!/spdiu/
-!/doc/
-!/uv.lock
-!/pyproject.toml
-!/.pre-commit-config.yaml
-!/.github/
+/tmp
+
 **/__pycache__
+
+.ruff_cache
+.pytest_cache
+.venv

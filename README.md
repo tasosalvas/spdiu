@@ -3,7 +3,7 @@
 # Shattered Pixel Dungeon Invoke Utility
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
-
+[![pytest](https://github.com/tasosalvas/spdiu/actions/workflows/main.yml/badge.svg?event=push)](https://github.com/tasosalvas/spdiu/actions/workflows/main.yml)
 
 > SPDIU is a collection of [Invoke](https://www.pyinvoke.org/) tasks that manage [Shattered Pixel Dungeon](https://shatteredpixel.com/) game data.
 

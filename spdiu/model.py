@@ -57,7 +57,7 @@ class DataDir:
         The directory and all files contained are timestamped,
         and the newest time is kept as self.ts.
         """
-        self.root_dir = base_dir
+        self.root_dir = Path(base_dir)
         self.name = base_dir.name
 
         self.dat_files = [i.name for i in self.root_dir.glob("*.dat")]
@@ -187,7 +187,8 @@ class Slots:
         slots = []
         for sd in self.subdirs:
             try:
-                saves = sd.iterdir()
+                saves = [i for i in sd.iterdir()]
+
             except FileNotFoundError:
                 continue
 

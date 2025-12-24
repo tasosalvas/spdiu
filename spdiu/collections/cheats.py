@@ -14,7 +14,7 @@ It defaults to the latest modified game if not supplied.
 from invoke import task, Collection
 
 from ..model import Profile, Item
-
+from ..util import path
 
 ns = Collection("cheats")
 
@@ -23,7 +23,7 @@ ns = Collection("cheats")
 def gold(c, game=None, number="10000"):
     """Set your Gold! -n --number [amount], default: 10000."""
     cfg = c.config.spdiu
-    ap = Profile(cfg.game.data)
+    ap = Profile(path(c, cfg.game.data))
 
     g = ap.get_game(game) if game else ap.games[0]
     gd = g.get_dat("game.dat")
@@ -41,7 +41,7 @@ def gold(c, game=None, number="10000"):
 def energy(c, game=None, number="1000"):
     """Set your Alchemical Energy! -n --number [amount], default: 1000."""
     cfg = c.config.spdiu
-    ap = Profile(cfg.game.data)
+    ap = Profile(path(c, cfg.game.data))
 
     g = ap.get_game(game) if game else ap.games[0]
     gd = g.get_dat("game.dat")
@@ -78,7 +78,7 @@ def bones(c, package="", hero="", display=False):
     Read through the task code, it's easy to adapt in your own local task.
     """
     cfg = c.config.spdiu
-    ap = Profile(cfg.game.data)
+    ap = Profile(path(c, cfg.game.data))
 
     namespace = ".".join((cfg.game.ns, "items"))
 
@@ -186,7 +186,7 @@ def consumables(c, game=None):
     Bullet indicators show whether a consumable is known or not.
     """
     cfg = c.config.spdiu
-    ap = Profile(cfg.game.data)
+    ap = Profile(path(c, cfg.game.data))
 
     g = ap.get_game(game) if game else ap.games[0]
     gd = g.get_dat("game.dat")

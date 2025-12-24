@@ -7,80 +7,16 @@ import pytest
 
 import os
 from time import gmtime
+from invoke import MockContext
 
 import gzip
 import json
-# import xml.etree.ElementTree as ET
-
-from invoke.context import MockContext
-from invoke.config import Config
 
 from . import util
 
 
-@pytest.fixture
-def mc() -> MockContext:
-    """Provide a MockContext with a Config.
-
-    Contains a dirs.base value used in normalizing paths.
-    """
-    return MockContext(
-        config=Config(
-            {
-                "spdiu": {
-                    "dirs": {
-                        "base": "~/mygames",
-                    }
-                }
-            }
-        )
-    )
-
-
-@pytest.fixture
-def game_data() -> dict:
-    """Provide a dict of game data."""
-    return {
-        "won": False,
-        "hero": {"HP": 130},
-    }
-
-
-@pytest.fixture
-def settings_xml() -> str:
-    """Provide example settings.xml content.
-
-    Equivalent to settings_dict.
-    """
-    return "\n".join(
-        [
-            '<?xml version="1.0" encoding="UTF-8"?>',
-            '<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">',
-            "<properties>",
-            '<entry key="scale">3</entry>',
-            '<entry key="fullscreen">false</entry>',
-            "</properties>",
-            "",
-        ]
-    )
-
-
-@pytest.fixture
-def settings_dict() -> dict:
-    """Provide example parsed settings dictionary.
-
-    Equivalent to settings_xml.
-    """
-    return {
-        "scale": "3",
-        "fullscreen": "false",
-    }
-
-
-def test_path(mc: MockContext) -> None:
+def test_path(c: MockContext, tmp_path) -> None:
     """Test the path function."""
-    c = mc
-
     assert util.path(c, "shattered-pixel-dungeon").is_absolute()
     assert util.path(c, "~/.config", "shattered", "pixel").is_absolute()
 
@@ -118,9 +54,9 @@ def test_read_dat_bad_src(tmp_path) -> None:
         util.read_dat(bad_gzip)
 
 
-def test_read_dat(tmp_path, game_data) -> None:
+def test_read_dat(tmp_path, game_data_dict) -> None:
     """Test reading gzipped SPD .dat files."""
-    json_bin = str.encode(json.dumps(game_data, separators=(",", ":")))
+    json_bin = str.encode(json.dumps(game_data_dict, separators=(",", ":")))
     df = tmp_path / "dummy.dat"
 
     with gzip.open(df, "wb") as f:
@@ -131,11 +67,11 @@ def test_read_dat(tmp_path, game_data) -> None:
     assert util.read_dat(df)["hero"]["HP"] == 130
 
 
-def test_write_dat(tmp_path, game_data) -> None:
+def test_write_dat(tmp_path, game_data_dict) -> None:
     """Test writing gzipped .dat files."""
     df = tmp_path / "write.dat"
 
-    util.write_dat(df, game_data)
+    util.write_dat(df, game_data_dict)
 
     assert type(util.read_dat(df)) is dict
     assert util.read_dat(df).get("hero") is not None

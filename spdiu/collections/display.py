@@ -159,7 +159,7 @@ def dump(c, slot="", game="", file="", entity="", levels=None):
     cfg = c.config.spdiu
 
     if not slot:
-        p = Profile(cfg.game.data)
+        p = Profile(path(c, cfg.game.data))
         selection = f"{cfg.i.disc_a} {p.name}"
     else:
         s = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])

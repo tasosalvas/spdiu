@@ -14,5 +14,5 @@
 !/uv.lock
 !/pyproject.toml
 !/.pre-commit-config.yaml
-
+!/.github/
 **/__pycache__

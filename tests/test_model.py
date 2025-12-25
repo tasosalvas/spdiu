@@ -8,8 +8,8 @@ import pytest
 import os
 import time
 
-from . import util
-from . import model
+from spdiu import util
+from spdiu import model
 
 
 class TestItem:

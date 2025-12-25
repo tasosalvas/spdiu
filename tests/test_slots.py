@@ -5,8 +5,8 @@
 
 import pytest  # noqa: F401
 
-from ..util import path
-from . import slots
+from spdiu.util import path
+from spdiu.collections import slots
 
 
 def test_backup_no_src(c, mock_slots) -> None:

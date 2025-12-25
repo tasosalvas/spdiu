@@ -49,6 +49,7 @@ docstring-code-format=true
 [tool.pytest]
 minversion = "9.0"
 strict = true
+pythonpath = ["src"]
 addopts = [
     "--import-mode=importlib",
     "-p no:legacypath",

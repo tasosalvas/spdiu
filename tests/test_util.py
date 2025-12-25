@@ -12,7 +12,7 @@ from invoke import MockContext
 import gzip
 import json
 
-from . import util
+from spdiu import util
 
 
 def test_path(c: MockContext, tmp_path) -> None:

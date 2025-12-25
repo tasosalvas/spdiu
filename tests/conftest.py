@@ -8,8 +8,8 @@ import pytest
 from invoke.context import MockContext
 from invoke.config import Config
 
-from . import util
-from .tasks import defaults as spdiu_defaults
+from spdiu import util
+from spdiu.tasks import defaults as spdiu_defaults
 
 
 @pytest.fixture

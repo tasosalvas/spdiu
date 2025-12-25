@@ -9,7 +9,7 @@ For example:
 games/spdiu-rearranged/
 ├── game/            # The installed SPD
 ├── spdiu/           # The spdiu python module
-├── invoke.yaml      # local user config
+├── spdiu.yaml      # local user config
 ├── local_tasks.py   # local user tasks
 └── tasks.py
 ```
@@ -76,9 +76,9 @@ $ inv info
 [
 | Shattered Pixel Dungeon Invoke Utility.
 |  [...]
-| 'inv -l' for a list of tasks.
-| 'inv -h [task name]' for a task's full docstring.
-| 'inv info -c' to display active SpdIU configuration.
+| 'siu -l' for a list of tasks.
+| 'siu -h [task name]' for a task's full docstring.
+| 'siu info -c' to display active SpdIU configuration.
 ]
 ```
 
@@ -99,5 +99,5 @@ They can be really helpful, as all our tasks are arguments to the `inv` command.
 # Further reading
 
 - The [Usage Guide](./usage.md) covers SpdIU's basic usage and some recipes to interact with the game data
-- The [Configuration manual](./configuration.md) covers overriding the default configuration in `invoke.yaml`, for adapting SpdIU to your preferences and having it run different SPD forks
+- The [Configuration manual](./configuration.md) covers overriding the default configuration in `spdiu.yaml`, for adapting SpdIU to your preferences and having it run different SPD forks
 - The [Tasks reference](./tasks.md) documents the available commands

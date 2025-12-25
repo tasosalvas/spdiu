@@ -108,6 +108,6 @@ $ inv show -a
 
 # Where to go from here
 
-- The [Configuration manual](./configuration.md) covers overriding the default configuration in `invoke.yaml`, for adapting SpdIU to your preferences and having it run different SPD forks
+- The [Configuration manual](./configuration.md) covers overriding the default configuration in `spdiu.yaml`, for adapting SpdIU to your preferences and having it run different SPD forks
 - The [Tasks reference](./tasks.md) documents the available commands
 - The [API manual](./api.md) explains how to write your own tasks

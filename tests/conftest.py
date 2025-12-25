@@ -9,7 +9,7 @@ from invoke.context import MockContext
 from invoke.config import Config
 
 from spdiu import util
-from spdiu.tasks import defaults as spdiu_defaults
+from spdiu.config import SpdIUConfig
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def c(tmp_path) -> MockContext:
     `dirs.base` is set to tmp_path / base
     `game.date` is set to tmp_path / data
     """
-    config_dict = spdiu_defaults
+    config_dict = SpdIUConfig.defaults
     config_dict["spdiu"]["dirs"]["base"] = tmp_path / "base"
     config_dict["spdiu"]["game"]["data"] = tmp_path / "data"
 

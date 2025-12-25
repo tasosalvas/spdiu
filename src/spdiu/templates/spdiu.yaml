@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Example configuration for Shattered Pixel Dungeon Invoke Utilities
-# Copy it to invoke.yaml and modify it to override default settings.
+# Copy it to spdiu.yaml and modify it to override default settings.
 
 # SpdIU config namespace:
 # At least one setting has to be set in it for merging to function correctly.

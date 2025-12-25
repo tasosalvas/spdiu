@@ -57,7 +57,7 @@ def energy(c, game=None, number="1000"):
 
 @task
 def bones(c, package="", hero="", display=False):
-    """Set your bones. 'inv -h cheat.bones' for options.
+    """Set your bones. 'siu -h cheat.bones' for options.
 
     -p, --package to pick your package, or you'll just get food.
 

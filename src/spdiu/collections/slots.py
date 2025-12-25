@@ -106,8 +106,8 @@ def load(c, last=False, slot=None, game=None) -> bool:
     Slots provided with -s, --slot correspond to the manual saves,
     while the other categories can be accessed with dot syntax,
 
-    i.e. 'inv load -s backup.bak' or 'auto.floor3'
-    'inv load -s mysave' is in effect equivalent 'inv load -s manual.mysave'.
+    i.e. 'siu load -s backup.bak' or 'auto.floor3'
+    'siu load -s mysave' is in effect equivalent 'siu load -s manual.mysave'.
 
     If -l, --last is provided, any slot named with -s is ignored.
     The task will look for the latest save in the manual and auto folders,
@@ -126,7 +126,7 @@ def load(c, last=False, slot=None, game=None) -> bool:
         try:
             p = Slots(path(c, cfg.dirs.slots), ["manual", "auto"]).slots[0]
         except IndexError:
-            print("No saves found. Make some with 'inv save [-s slot name]'")
+            print("No saves found. Make some with 'siu save [-s slot name]'")
             return False
 
     else:
@@ -137,7 +137,7 @@ def load(c, last=False, slot=None, game=None) -> bool:
             p = Slots(slot_path, ["manual", "auto", "backup"]).get_slot(slot)
 
     if not p:
-        print(f"Invalid slot name: {slot} - 'inv ls' to list existing slots.")
+        print(f"Invalid slot name: {slot} - 'siu ls' to list existing slots.")
         return False
 
     ap_path = path(c, cfg.game.data)
@@ -155,7 +155,7 @@ def load(c, last=False, slot=None, game=None) -> bool:
     g = p.get_game(game)
     if not g:
         print("Game not found in slot.")
-        print(f"'inv show -s {slot}' to list existing games.")
+        print(f"'siu show -s {slot}' to list existing games.")
         return False
 
     if p.name != cfg.backup_slot:

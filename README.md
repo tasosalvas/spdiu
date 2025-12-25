@@ -129,5 +129,5 @@ Python:
 
 
 Customization:
-- Configuration overrides can be set in an `invoke.yaml` in the project folder
+- Configuration overrides can be set in an `spdiu.yaml` in the project folder
 - Local user tasks can be defined in a `local_tasks.py`.

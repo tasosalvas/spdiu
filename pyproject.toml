@@ -24,6 +24,7 @@ dev = [
 
 [project.scripts]
 siu = "spdiu.cli:main"
+spdiu = "spdiu.cli:main"
 
 
 [build-system]

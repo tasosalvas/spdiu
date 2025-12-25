@@ -162,12 +162,12 @@ def releases(c, search=""):
 
 @task
 def install(c, version=None):
-    """Download the game and install it. 'inv -h' this for more options.
+    """Download the game and install it. 'siu -h' this for more options.
 
     -v, --version [release] to request a version.
     If a version is not supplied and not pinned in config, it gets the latest.
 
-    See invoke.yaml.example for configuring the task to download different SPD forks.
+    See spdiu.yaml.example for configuring the task to download different SPD forks.
     """
     cfg = c.config.spdiu
     version = version if version else cfg.release.version

@@ -285,7 +285,7 @@ def _summarize_record(record):
     print(title_line)
 
 
-@task
+@task(default=True)
 def slot(c, slot=None, game=None):
     """Display details for a save slot. -s [slot] or -a for the active data."""
     cfg = c.config.spdiu

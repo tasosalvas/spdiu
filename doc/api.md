@@ -79,7 +79,7 @@ TODO: Until then, see the sneaky example above.
 
 # Accessing configuration
 
-The [Configuration Manual](./configuration.md) goes over configuring an instance from `invoke.yaml`.
+The [Configuration Manual](./configuration.md) goes over configuring an instance from `spdiu.yaml`.
 
 When the `inv` command runs, these values override the `invoke.Collection` defaults defined in `tasks.py`.
 
@@ -106,7 +106,7 @@ def config_where(c):
 
 In it, there's the invoke [config](https://docs.pyinvoke.org/en/stable/api/config.html) object (Invoke [concepts/Configuration](https://docs.pyinvoke.org/en/stable/concepts/configuration.html) guide, for the newly acquainted).
 
-`c.config` contains the configuration for this run, taking into account the defaults for the collection and like a bunch of layers of system and user configuration, including our `invoke.yaml`.
+`c.config` contains the configuration for this run, taking into account the defaults for the collection and like a bunch of layers of system and user configuration, including our `spdiu.yaml`.
 
 All of SpdIU's tasks that deal with config begin with `cfg = c.config.spdiu`, then access the values as `cfg.value.value` with dot syntax.
 

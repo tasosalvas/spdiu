@@ -4,9 +4,9 @@
 
 `inv info -c` displays all configuration variables as seen by the tasks.
 
-The provided [invoke.yaml.example](./invoke.yaml.example) documents all available utility-specific configuration options, and will update together with the app.
+The provided [spdiu.yaml.example](./spdiu.yaml.example) documents all available utility-specific configuration options, and will update together with the app.
 
-You may copy it to `invoke.yaml` and edit it, or just set the values you want:
+You may copy it to `spdiu.yaml` and edit it, or just set the values you want:
 ```yaml
 spdiu:
   default_slot: 'mysave'
@@ -107,7 +107,7 @@ The version check is just a substring search on the download URL, as are the `ex
 
 Setting more of them can help narrow down a release to a specific package.
 
-Setting `spdiu.version` on your `invoke.yaml` will **pin** your preferred version, so that `get.install` does not get the latest one, but the one you specified instead.
+Setting `spdiu.version` on your `spdiu.yaml` will **pin** your preferred version, so that `get.install` does not get the latest one, but the one you specified instead.
 
 You can still manually install a different version by `inv get.install -v [version]`
 
@@ -121,7 +121,7 @@ spdiu/
 ├── slots/          # Saved games
 ├── game/           # Game binary installation
 ├── packages/       # Downloaded game packages
-├── invoke.yaml     # Local user configuration
+├── spdiu.yaml     # Local user configuration
 ├── local_tasks.py  # Local user tasks
 └── tasks.py        # SpdIU entry point
 ```
@@ -154,12 +154,12 @@ Any relative path will be appended to the `base` dir, while absolute paths will 
 Overall, the default configuration ensures a copy of spdiu keeps to its own folder, with the exception of dealing with the game's active data.
 
 
-# How the `invoke.yaml` works
+# How the `spdiu.yaml` works
 
 SpdIU uses [invoke's config system](https://docs.pyinvoke.org/en/stable/concepts/configuration.html) to allow the user to override the defaults it ships with. Specifically:
 
 - The _Collection configuration_, defined near the top of `tasks.py`, contains the default values
-- A project-level `invoke.yaml` may contain user overrides
+- A project-level `spdiu.yaml` may contain user overrides
 - All SpdIU configuration is contained in the `spdiu:` mapping
 
 All other config levels Invoke supports may be used, this is just the setup assumed in this documentation, and used when testing and developing SpdIU.

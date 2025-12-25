@@ -1,11 +1,11 @@
 <!-- Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com> -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later                    -->
-# SPDIU Usage guide
+# SpdIU Usage guide
 
-> Follow the [Installation manual](./installation.md) to get SPDIU. This guide assumes you have a working installation.
+> Follow the [Installation manual](./installation.md) to get SpdIU. This guide assumes you have a working installation.
 
 
-SPDIU is meant to live in a terminal you keep open while you play.
+SpdIU is meant to live in a terminal you keep open while you play.
 
 
 ```sh
@@ -23,7 +23,7 @@ This guide is intended to be an introduction, and it will be kept accurate, but 
 ```sh
 $ inv info
 > ["Basic tips and reminders for common commands."]
-# With '-c' it can also list your active SPDIU configuration
+# With '-c' it can also list your active SpdIU configuration
 
 $ inv -l
 > ["Lists all available tasks with a short help text"]
@@ -38,7 +38,7 @@ Anyway, here we go.
 # Installing the game
 
 `inv get.install` will get the latest version of [00-Evan/shattered-pixel-dungeon](https://github.com/00-Evan/shattered-pixel-dungeon) installed.
-- The executable will be inside the SPDIU `game` folder
+- The executable will be inside the SpdIU `game` folder
 - The package downloaded will be in the `packages` folder
 
 See the documentation on [Game installation configuration](./configuration.md#game-installation) for loading different SPD flavors.
@@ -108,6 +108,6 @@ $ inv show -a
 
 # Where to go from here
 
-- The [Configuration manual](./configuration.md) covers overriding the default configuration in `invoke.yaml`, for adapting SPDIU to your preferences and having it run different SPD forks
+- The [Configuration manual](./configuration.md) covers overriding the default configuration in `invoke.yaml`, for adapting SpdIU to your preferences and having it run different SPD forks
 - The [Tasks reference](./tasks.md) documents the available commands
 - The [API manual](./api.md) explains how to write your own tasks

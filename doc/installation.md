@@ -1,8 +1,8 @@
 <!-- Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com> -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later                    -->
-# SPDIU Installation Manual
+# SpdIU Installation Manual
 
-The intended way to install SPDIU is to keep an instance of it for every flavor of SPD you want it to manage.
+The intended way to install SpdIU is to keep an instance of it for every flavor of SPD you want it to manage.
 
 For example:
 ```sh
@@ -19,19 +19,19 @@ games/spdiu-rearranged/
 
 A nice, comfortable **terminal** and **font**. Ideally something that can show _ligatures_ and _emojis_.
 
-> SPDIU is developed and enjoyed on [kitty](https://sw.kovidgoyal.net/kitty/), `zsh`, with [FiraCode](https://github.com/tonsky/FiraCode).
+> SpdIU is developed and enjoyed on [kitty](https://sw.kovidgoyal.net/kitty/), `zsh`, with [FiraCode](https://github.com/tonsky/FiraCode).
 
 
-[git](https://git-scm.com/) is the easiest way to get _SPDIU_. Maybe even contribute to it.
+[git](https://git-scm.com/) is the easiest way to get _SpdIU_. Maybe even contribute to it.
 
 > I will be releasing `.zip` packages on minor versions, but we're in the terminal anyway.
 >
-> `git` is fun and a nice skill to pick up. SPDIU is just a bunch of scripts that work off a single directory.
+> `git` is fun and a nice skill to pick up. SpdIU is just a bunch of scripts that work off a single directory.
 
 
 [Python](https://www.python.org/) and [Invoke](https://pyinvoke.org) need to be installed on your system.
 
-> SPDIU tries to keep external requirements to a minimum.
+> SpdIU tries to keep external requirements to a minimum.
 > - Python is preferred to calling Linux commands, in hope of keeping things portable
 > - Invoke is the only non-standard dependency, handling the shell and configuration
 >
@@ -42,7 +42,7 @@ A nice, comfortable **terminal** and **font**. Ideally something that can show _
 
 ## on Linux
 
-SPDIU is developed and tested on [Debian](https://www.debian.org/). The installation process should be identical for any `.deb` based distribution, and very similar for other package managers.
+SpdIU is developed and tested on [Debian](https://www.debian.org/). The installation process should be identical for any `.deb` based distribution, and very similar for other package managers.
 
 First, **install `git` and `pipx`**. The `pipx` package should pull enough python
 ```sh
@@ -68,7 +68,7 @@ $ git clone git@github.com:tasosalvas/spdiu.git shattered
 
 Repeat this in a different folder when you want to install another SPD fork.
 
-Assuming the `inv` command has been installed, calling it from the folder containing `tasks.py` should get you the SPDIU tasks.
+Assuming the `inv` command has been installed, calling it from the folder containing `tasks.py` should get you the SpdIU tasks.
 
 ```sh
 $ cd spdiu
@@ -78,7 +78,7 @@ $ inv info
 |  [...]
 | 'inv -l' for a list of tasks.
 | 'inv -h [task name]' for a task's full docstring.
-| 'inv info -c' to display active SPDIU configuration.
+| 'inv info -c' to display active SpdIU configuration.
 ]
 ```
 
@@ -98,6 +98,6 @@ They can be really helpful, as all our tasks are arguments to the `inv` command.
 
 # Further reading
 
-- The [Usage Guide](./usage.md) covers SPDIU's basic usage and some recipes to interact with the game data
-- The [Configuration manual](./configuration.md) covers overriding the default configuration in `invoke.yaml`, for adapting SPDIU to your preferences and having it run different SPD forks
+- The [Usage Guide](./usage.md) covers SpdIU's basic usage and some recipes to interact with the game data
+- The [Configuration manual](./configuration.md) covers overriding the default configuration in `invoke.yaml`, for adapting SpdIU to your preferences and having it run different SPD forks
 - The [Tasks reference](./tasks.md) documents the available commands

@@ -3,7 +3,7 @@
 /tmp
 
 **/__pycache__
-
+**/*.egg-info
 .ruff_cache
 .pytest_cache
 .venv

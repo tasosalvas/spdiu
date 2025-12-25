@@ -1,6 +1,6 @@
 <!-- Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com> -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later                    -->
-# SPDIU Configuration Manual
+# SpdIU Configuration Manual
 
 `inv info -c` displays all configuration variables as seen by the tasks.
 
@@ -20,9 +20,9 @@ Different flavors of SPD distribute the game in different ways, and keep their o
 
 > They also are applications from third party developers that might mess up your computer. We do not review them.
 >
-> SPDIU's code is available, and so is that of the downloaded projects. Whether you came to trust each game (and using SPDIU to install it) blindly or after carefully auditing the source, the responsibility is yours.
+> SpdIU's code is available, and so is that of the downloaded projects. Whether you came to trust each game (and using SpdIU to install it) blindly or after carefully auditing the source, the responsibility is yours.
 
-SPDIU's `get.install` aims to be flexible enough to get you any of them, but you might have to sweat for it.
+SpdIU's `get.install` aims to be flexible enough to get you any of them, but you might have to sweat for it.
 
 
 ## Automatic release detection
@@ -69,7 +69,7 @@ The template gets evaluated as a python f-string, with access to the variables l
 
 You can change the variables or expression to whatever you need to point to, and any fields not on the filename itself are not going to matter once the download is done.
 
-Now we can move on to configuring SPDIU to work on the game.
+Now we can move on to configuring SpdIU to work on the game.
 
 
 ## Game configuration
@@ -123,7 +123,7 @@ spdiu/
 ├── packages/       # Downloaded game packages
 ├── invoke.yaml     # Local user configuration
 ├── local_tasks.py  # Local user tasks
-└── tasks.py        # SPDIU entry point
+└── tasks.py        # SpdIU entry point
 ```
 
 This is controlled by the `spdiu.dirs` dictionary / mapping.
@@ -143,7 +143,7 @@ spdiu:
     game: '~/games/spd'
 ```
 
-The `base` dir is the absolute filename (after user expansion) where the SPDIU instance is installed. It defaults to the detecting the location of the `tasks.py` file.
+The `base` dir is the absolute filename (after user expansion) where the SpdIU instance is installed. It defaults to the detecting the location of the `tasks.py` file.
 
 Any relative path will be appended to the `base` dir, while absolute paths will be used as they are.
 
@@ -156,13 +156,13 @@ Overall, the default configuration ensures a copy of spdiu keeps to its own fold
 
 # How the `invoke.yaml` works
 
-SPDIU uses [invoke's config system](https://docs.pyinvoke.org/en/stable/concepts/configuration.html) to allow the user to override the defaults it ships with. Specifically:
+SpdIU uses [invoke's config system](https://docs.pyinvoke.org/en/stable/concepts/configuration.html) to allow the user to override the defaults it ships with. Specifically:
 
 - The _Collection configuration_, defined near the top of `tasks.py`, contains the default values
 - A project-level `invoke.yaml` may contain user overrides
-- All SPDIU configuration is contained in the `spdiu:` mapping
+- All SpdIU configuration is contained in the `spdiu:` mapping
 
-All other config levels Invoke supports may be used, this is just the setup assumed in this documentation, and used when testing and developing SPDIU.
+All other config levels Invoke supports may be used, this is just the setup assumed in this documentation, and used when testing and developing SpdIU.
 
 
 # What's next

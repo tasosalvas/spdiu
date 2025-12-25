@@ -2,7 +2,7 @@
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-SPDIU Cheats task collection.
+SpdIU Cheats task collection.
 
 These tasks all work on the active game data.
 Make a save before using them.

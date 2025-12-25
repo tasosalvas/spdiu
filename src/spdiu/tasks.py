@@ -4,7 +4,7 @@
 """
 Shattered Pixel Dungeon Invoke Utility.
 
-This file is the entry point to the SPDIU task collections:
+This file is the entry point to the SpdIU task collections:
 
 'slots', imported at the root namespace:
   Tasks for saving, loading, and managing save slots.
@@ -39,7 +39,7 @@ from spdiu.collections.slots import save, load, backup, clean, watch, ls
 from spdiu.collections import get, display, cheats
 
 
-# Default SPDIU configuration. Override values in invoke.yaml.
+# Default SpdIU configuration. Override values in invoke.yaml.
 defaults = {
     "spdiu": {
         "dirs": {
@@ -49,7 +49,7 @@ defaults = {
             "package": "packages",
             "game": "game",
         },
-        # SPDIU config
+        # SpdIU config
         "default_slot": "default",
         "backup_slot": "bak",
         ## Game release info, used to download the game
@@ -111,7 +111,7 @@ def info(c, config=False, help=None):
     It displays the docstring of a task collection.
 
     -h, --help [collection] displays the collection's docstring instead.
-    -c, --config displays the active SPDIU configuration.
+    -c, --config displays the active SpdIU configuration.
 
     It supplements invoke core's 'inv -h' flag, which supplies task docstrings.
     """
@@ -119,7 +119,7 @@ def info(c, config=False, help=None):
         cfg = c.config.spdiu
         d_cfg = defaults["spdiu"]
 
-        print("Active SPDIU configuration:")
+        print("Active SpdIU configuration:")
         print(f"{cfg.bullet_b}: default | {cfg.bullet_a}: overridden\n")
 
         for k, v in cfg.items():
@@ -137,11 +137,11 @@ def info(c, config=False, help=None):
             return
 
     print(__doc__)
-    print("'inv info -c' to display active SPDIU configuration.")
+    print("'inv info -c' to display active SpdIU configuration.")
     return
 
 
-# SPDIU root namespace
+# SpdIU root namespace
 ns = Collection()
 ns.configure(defaults)
 ns.add_task(info)

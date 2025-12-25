@@ -2,7 +2,7 @@
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-SPDIU Display task collection.
+SpdIU Display task collection.
 
 Tasks that query and display game data.
 

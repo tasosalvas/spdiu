@@ -22,8 +22,17 @@ dev = [
     "ruff>=0.14.10",
 ]
 
+[project.scripts]
+siu = "spdiu.cli:main"
+
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
 [tool.uv]
-package = false
+package = true
+
 
 [tool.ruff.lint]
 extend-select = [

@@ -2,7 +2,7 @@
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """
-SPDIU Saving and Loading task collection.
+SpdIU Saving and Loading task collection.
 
 By convention, where applicable:
 -s --slot is used to load a save slot by name

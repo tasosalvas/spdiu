@@ -1,6 +1,6 @@
 <!-- Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com> -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later                    -->
-# SPDIU's Philosophy and Goals
+# SpdIU's Philosophy and Goals
 
 I love Pixel Dungeon and SPD as free software cultural staples now spanning decades. I think they're worth nerding out on, and the abundance of forks sharing the same core makes these recipes applicable to many of them with very little effort.
 
@@ -10,7 +10,7 @@ Currently the project is _developed_ for my own use, more during playtime than w
 
 - I can make **no promises of frequent updates**, but I hope to develop and maintain this code in a way that allows the user to adapt to future changes in the games through configuration
 
-SPDIU is _published_ more with the intention to be educational than to achieve any specific function. Following that:
+SpdIU is _published_ more with the intention to be educational than to achieve any specific function. Following that:
 
 - **Form** matters. For this project it's more important to do it properly than to get the thing to work at all. This includes complying with FOSS standards and following best practices for any tools involved
 - **Readability** is a primary goal. This includes having a structure that can be easily reasoned about, but also allows a user peeking into the source to quickly audit the part they're interested in without digging into layers of architecture

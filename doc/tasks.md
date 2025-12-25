@@ -1,8 +1,8 @@
 <!-- Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com> -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later                    -->
-# SPDIU Task Collections Reference
+# SpdIU Task Collections Reference
 
-The tasks available in SPDIU are categorized into Python modules in `spdiu.collections`.
+The tasks available in SpdIU are categorized into Python modules in `spdiu.collections`.
 
 They are either imported as part of the base commands, or _namespaced_ in their own category.
 
@@ -13,7 +13,7 @@ For example:
 
 ## Interactive help
 
-SPDIU's `info` task and invoke's interactive help system make it easy to get code documentation to the terminal.
+SpdIU's `info` task and invoke's interactive help system make it easy to get code documentation to the terminal.
 
 - `inv -h task` provides **help text** for each _task_, are the Python docstrings of the functions themselves
 - `inv info -h collection` **info text** for each collection is the docstring of the module itself
@@ -61,11 +61,11 @@ Provides tasks related to getting information, primarily related to installing t
 
 
 # tasks.py
-> This is the main entry point for SPDIU.
+> This is the main entry point for SpdIU.
 
 The `inv` command reads this. It contains the default configuration, merges it with your user config, loads all the collections, and contains only one task of its own:
 
-- `info` task provides introductory documentation, `-c` displays config, `-h` provides overviews of the SPDIU collections
+- `info` task provides introductory documentation, `-c` displays config, `-h` provides overviews of the SpdIU collections
 
 It will also load your own collections if you place them at `local_tasks.py`.
 

@@ -1,6 +1,6 @@
 <!-- Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com> -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later                    -->
-# The SPDIU API Manual
+# The SpdIU API Manual
 
 Just place a `local_tasks.py` in your SPDIO folder, and they will be loaded as invoke commands in the `u` namespace.
 
@@ -15,10 +15,10 @@ The `spdiu.util` module provides common utilities for working with the game's da
 
 # Adding your own tasks
 
-The utility of some of the functionality of SPDIU, such as unpacking save data, is not the couple of lines it prints by default, but the fact that it makes the contents of a save available as Python objects.
+The utility of some of the functionality of SpdIU, such as unpacking save data, is not the couple of lines it prints by default, but the fact that it makes the contents of a save available as Python objects.
 
 Some obligatory links:
-- The [Invoke documentation](https://docs.pyinvoke.org/en/stable/getting-started.html), for usage not covered in SPDIU's documentation and examples
+- The [Invoke documentation](https://docs.pyinvoke.org/en/stable/getting-started.html), for usage not covered in SpdIU's documentation and examples
 - The [Python documentation](https://docs.python.org), the main and most important reference while we're working with it
 
 [local_tasks.py.example](./local_tasks.py.example) contains an annotated demo, which experienced users might find enough to get started. [tasks.py](./tasks.py) itself is meant to be easy to read and borrow things from.
@@ -41,11 +41,11 @@ This file is now a _task collection_. An implicit one, since it contains a funct
 
 ## Implicit namespaces
 
-SPDIU needs `tasks.py` as an entry point and updates are going to overwrite it with a newer version, so a `local_tasks.py` meant for your own tasks will be imported if found.
+SpdIU needs `tasks.py` as an entry point and updates are going to overwrite it with a newer version, so a `local_tasks.py` meant for your own tasks will be imported if found.
 
 The above file will be automatically turned into a task collection and imported with a default namespace of `u` (for "user"), so our task will be included and can be ran with `inv u.explosion`.
 
-If a `collection_name` variable is set in `local_tasks`, `tasks.py` will call it by than name instead. Note that future SPDIU collections might use obvious short names too, so if you can live with the default it might be more convenient to keep it.
+If a `collection_name` variable is set in `local_tasks`, `tasks.py` will call it by than name instead. Note that future SpdIU collections might use obvious short names too, so if you can live with the default it might be more convenient to keep it.
 
 
 ## Explicit namespaces
@@ -69,7 +69,7 @@ ns.add_task(greeting)
 
 You might want to use this option if you're importing more collections from your local tasks, as it will allow you to structure them just the way you want them.
 
-The Invoke [namespace](https://docs.pyinvoke.org/en/stable/concepts/namespaces.html) documentation can help you take full advantage of this, and [SPDIU's tasks.py](../tasks.py) should serve as a good working example.
+The Invoke [namespace](https://docs.pyinvoke.org/en/stable/concepts/namespaces.html) documentation can help you take full advantage of this, and [SpdIU's tasks.py](../tasks.py) should serve as a good working example.
 
 
 # Accessing CLI arguments
@@ -108,16 +108,16 @@ In it, there's the invoke [config](https://docs.pyinvoke.org/en/stable/api/confi
 
 `c.config` contains the configuration for this run, taking into account the defaults for the collection and like a bunch of layers of system and user configuration, including our `invoke.yaml`.
 
-All of SPDIU's tasks that deal with config begin with `cfg = c.config.spdiu`, then access the values as `cfg.value.value` with dot syntax.
+All of SpdIU's tasks that deal with config begin with `cfg = c.config.spdiu`, then access the values as `cfg.value.value` with dot syntax.
 
 
 # The `spdiu` module
 
 ## `spdiu.collections`
 
-This submodule contains SPDIU's invoke task collections, documented at the [Task Collections Reference](./tasks.md).
+This submodule contains SpdIU's invoke task collections, documented at the [Task Collections Reference](./tasks.md).
 
-Tasks are the user-facing side of SPDIU.
+Tasks are the user-facing side of SpdIU.
 - They print out what steps they're taking and try to have it look nice
 - Their docstrings are focused towards the end user on the terminal
 
@@ -137,7 +137,7 @@ This submodule contains classes that model the core concepts of the module. Curr
 
 The Slots object provides access to _save slots_ (copies of the game's data) in one or multiple directories.
 
-SPDIU uses it to maintain `backup`, `auto` and `manual` groups of slots in the `slots` directory.
+SpdIU uses it to maintain `backup`, `auto` and `manual` groups of slots in the `slots` directory.
 
 ```py
 from spdio.util import path

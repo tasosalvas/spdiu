@@ -5,7 +5,7 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 [![pytest](https://github.com/tasosalvas/spdiu/actions/workflows/main.yml/badge.svg?event=push)](https://github.com/tasosalvas/spdiu/actions/workflows/main.yml)
 
-> SPDIU is a collection of [Invoke](https://www.pyinvoke.org/) tasks that manage [Shattered Pixel Dungeon](https://shatteredpixel.com/) game data.
+> SpdIU is a collection of [Invoke](https://www.pyinvoke.org/) tasks that manage [Shattered Pixel Dungeon](https://shatteredpixel.com/) game data.
 
 It's a library of tricks to make your SPD CLI experience as comfortable as the rest of your awesome terminal!
 
@@ -20,14 +20,14 @@ It's a library of tricks to make your SPD CLI experience as comfortable as the r
 - [Usage guide](./doc/usage.md)
 - [Task Collections reference](./doc/tasks.md)
 - [API manual](./doc/api.md)
-- [About SPDIU](./doc/about.md)
+- [About SpdIU](./doc/about.md)
 
 
 # What does it do?
 
 ## Save and Load the game
 
-SPDIU keeps a directory of save slots, containing copies of the game's full data folder.
+SpdIU keeps a directory of save slots, containing copies of the game's full data folder.
 
 - `inv save` and `load` are all the commands you need to save-scum your way to 9-challenge
 - Safety backups give you a chance to un-wreck your save if you fat-finger it
@@ -54,7 +54,7 @@ Create an issue if you know of an SPD fork hosted elsewhere, and we'll try to en
 
 ## Install flavors and remixes
 
-With just a bit of configuration, you can use SPDIU to download any of the SPD forks available in the wild!
+With just a bit of configuration, you can use SpdIU to download any of the SPD forks available in the wild!
 
 
 # Changelog
@@ -87,7 +87,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
     - [ ] Cheats and save editing
   - [x] Task Collections
   - [x] API
-    - [ ] The SPDIU object model cont
+    - [ ] The SpdIU object model cont
   - [ ] About
     - [ ] Standards and specifications
   - [ ] CONTRIBUTING document
@@ -98,7 +98,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
   - [ ] cheats
   - [ ] display
   - [ ] get
-  - [ ] slots
+  - [x] slots
   - [x] github action and badge lol
 - [ ] tasks.py/configuration tests
 - [ ] Readme: Screenshots
@@ -112,7 +112,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
   - [ ] Cloning the SPD code to get the complete mob and item lists for journal
   - [ ] Adapting the process for digging into SPD forks
   - [ ] Templating a starter codebase for a fork from SPD source, documenting best practices
-- [ ] Automatic SPDIU presets for remix installations, uh like a mod manager?
+- [ ] Automatic SpdIU presets for remix installations, uh like a mod manager?
 - [ ] Controlling the game?
 - [ ] Memory stuff?
 - [ ] releasing in pypi

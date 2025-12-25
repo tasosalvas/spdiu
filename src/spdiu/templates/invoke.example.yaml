@@ -4,7 +4,7 @@
 # Example configuration for Shattered Pixel Dungeon Invoke Utilities
 # Copy it to invoke.yaml and modify it to override default settings.
 
-# SPDIU config namespace:
+# SpdIU config namespace:
 # At least one setting has to be set in it for merging to function correctly.
 # Otherwise you're just overriding the defaults with an empty dictionary.
 spdiu:
@@ -31,7 +31,7 @@ spdiu:
     # I'm not a huge fan or anything.
     # I'll be happy to add support other distributors if I had an example.
 
-    # If true, SPDIU uses the github api, ignoring the release_template.
+    # If true, SpdIU uses the github api, ignoring the release_template.
     gh_use_api: true
     # The developer and project names, as they appear on its github url.
     project: Hoto-Mocha/Re-ARranged-Pixel-Dungeon
@@ -53,7 +53,7 @@ spdiu:
     #tag_name: null
 
     # Set this to pin your version to a specific one, ignoring updates.
-    # Otherwise SPDIU can figure out the latest.
+    # Otherwise SpdIU can figure out the latest.
     #version: null
 
     # If all else fails, we have the template.

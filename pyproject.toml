@@ -10,7 +10,13 @@ authors = [
 license = "AGPL-3.0-or-later"
 license-files = ["LICENSES/*.txt"]
 readme = "README.md"
+
 requires-python = ">=3.11"
+dependencies = [
+    "invoke>=2.2.1",
+]
+
+keywords = ["shattered-pixel-dungeon", "remix", "save", "cheat", "datamining"]
 
 # https://pypi.org/classifiers/
 classifiers = [
@@ -25,10 +31,6 @@ classifiers = [
     "Topic :: Games/Entertainment :: Role-Playing",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
-]
-
-dependencies = [
-    "invoke>=2.2.1",
 ]
 
 

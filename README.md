@@ -77,7 +77,7 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [ ] More doc
 
 
-## [0.0.1] 2025-12-26
+## [0.1.0] 2025-12-26
 
 > ho ho ho: first release
 

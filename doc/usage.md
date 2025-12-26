@@ -10,6 +10,9 @@ SpdIU is meant to live in a terminal you keep open while you play.
 
 ```sh
 $ cd ~/games/spdiu
+# Create a tasks.py file
+# to initialize this SpdIU directory.
+$ siu --install
 ```
 
 The tasks load when there's a `tasks.py` in our current or parent directory.

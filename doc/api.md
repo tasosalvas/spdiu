@@ -14,74 +14,27 @@ The `spdiu.util` module provides common utilities for working with the game's da
 
 
 # Adding your own tasks
+The `tasks.py` file created in your initialized SpdIU directories is more than a way to initialize an SpdIU folder.
 
-The utility of some of the functionality of SpdIU, such as unpacking save data, is not the couple of lines it prints by default, but the fact that it makes the contents of a save available as Python objects.
+The utility of some of the functionality of SpdIU, such as unpacking save data, is not just the couple of lines it prints by default, but the fact that it makes the contents of a save available as Python objects.
 
 Some obligatory links:
 - The [Invoke documentation](https://docs.pyinvoke.org/en/stable/getting-started.html), for usage not covered in SpdIU's documentation and examples
 - The [Python documentation](https://docs.python.org), the main and most important reference while we're working with it
-
-[local_tasks.py.example](./local_tasks.py.example) contains an annotated demo, which experienced users might find enough to get started. [tasks.py](./tasks.py) itself is meant to be easy to read and borrow things from.
-
-> After version `1.0.0`, potentially breaking changes will only happen on major releases (i.e. `2.0.0`) and all API changes will be listed on the [changelog](../README.md#changelog).
-
-A quick tour of a working `local_tasks.py`:
-```py
-#!/usr/bin/env python
-from invoke import task
-
-@task
-def explosion(c):
-    """A nice docstring is easy to show off in Invoke."""
-    print(f"KABOOM!")
-```
-
-This file is now a _task collection_. An implicit one, since it contains a function decorated as a `@task`.
-
-
-## Implicit namespaces
-
-SpdIU needs `tasks.py` as an entry point and updates are going to overwrite it with a newer version, so a `local_tasks.py` meant for your own tasks will be imported if found.
-
-The above file will be automatically turned into a task collection and imported with a default namespace of `u` (for "user"), so our task will be included and can be ran with `siu u.explosion`.
-
-If a `collection_name` variable is set in `local_tasks`, `tasks.py` will call it by than name instead. Note that future SpdIU collections might use obvious short names too, so if you can live with the default it might be more convenient to keep it.
-
-
-## Explicit namespaces
-
-Finally, if a collection is _explicitly_ declared and `tasks.py` detects an `ns` variable in your module, it is imported as it is, ignoring the `collection_name` variable above and using the one declared in it instead.
-
-```py
-from invoke import task, Collection
-
-# Create a new collection named "my"
-ns = Collection("ai")
-
-@task
-def greeting(c, human="person"):
-    """It's only an example but we don't like skipping docstrings."""
-    print(f"Well, hello there, {person}.")
-
-# an explicit collection needs its tasks added to it.
-ns.add_task(greeting)
-```
-
-You might want to use this option if you're importing more collections from your local tasks, as it will allow you to structure them just the way you want them.
-
-The Invoke [namespace](https://docs.pyinvoke.org/en/stable/concepts/namespaces.html) documentation can help you take full advantage of this, and [SpdIU's tasks.py](../tasks.py) should serve as a good working example.
+- The [Invoke namespace documentation](https://docs.pyinvoke.org/en/stable/concepts/namespaces.html) can be helpful in adjusting your namespaces to access just the tasks you need.
+- Finally, [SpdIU's main collection](../spdiu/spdiu.py) and [sub-collections](../spdiu/collections) should serve as good working examples.
 
 
 # Accessing CLI arguments
 
-TODO: Until then, see the sneaky example above.
+> TODO: Until then, see the above invoke links or the spdiu source.
 
 
 # Accessing configuration
 
 The [Configuration Manual](./configuration.md) goes over configuring an instance from `spdiu.yaml`.
 
-When the `inv` command runs, these values override the `invoke.Collection` defaults defined in `tasks.py`.
+When the `siu` command runs, these values override the `invoke.Collection` defaults defined in `tasks.py`.
 
 
 ```py
@@ -176,4 +129,4 @@ Parent class of Profile and Game, represents a directory with `.dat` files, whic
 
 ## `spdiu.util`
 
-Provides a single place to handle paths, operations on files and folders
+Provides a single place to handle paths, filesystem operations on files and folders, and readers and writers for the game's data formats.

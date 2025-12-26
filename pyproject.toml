@@ -16,12 +16,13 @@ dependencies = [
     "invoke>=2.2.1",
 ]
 
-keywords = ["shattered-pixel-dungeon", "remix", "save", "cheat", "datamining"]
+keywords = ["shattered-pixel-dungeon", "remix", "download", "play", "save", "cheat", "inspect"]
 
 # https://pypi.org/classifiers/
 classifiers = [
     "Environment :: Console",
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
+    # "Development Status :: 4 - Beta",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: OS Independent",

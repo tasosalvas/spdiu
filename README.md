@@ -3,7 +3,7 @@
 # Shattered Pixel Dungeon Invoke Utility
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
-[![pytest](https://github.com/tasosalvas/spdiu/actions/workflows/main.yml/badge.svg?event=push)](https://github.com/tasosalvas/spdiu/actions/workflows/main.yml)
+[![pytest](https://github.com/tasosalvas/spdiu/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tasosalvas/spdiu/actions/workflows/test.yml)
 
 > SpdIU is a collection of [Invoke](https://www.pyinvoke.org/) tasks that manage [Shattered Pixel Dungeon](https://shatteredpixel.com/) game data.
 
@@ -33,18 +33,6 @@ SpdIU keeps a directory of save slots, containing copies of the game's full data
 - Safety backups give you a chance to un-wreck your save if you fat-finger it
 
 
-## Display Profile and Game data
-
-Get overviews of every single thing stored in your save data.
-
-
-## Cheat like it's 1989
-
-Βless your next run with one out of a selection of care packages, or downright edit in that upgraded armor you wanted.
-
-It's your game, after all!
-
-
 ## Check for updates or download older versions
 
 On github releases, just pick your version.
@@ -57,6 +45,18 @@ Create an issue if you know of an SPD fork hosted elsewhere, and we'll try to en
 With just a bit of configuration, you can use SpdIU to download any of the SPD forks available in the wild!
 
 
+## Display Profile and Game data
+
+Get overviews of every single thing stored in your save data.
+
+
+## Cheat like it's 1989
+
+Βless your next run with one out of a selection of care packages, or downright edit in that upgraded armor you wanted.
+
+It's your game, after all!
+
+
 # Changelog
 
 The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and roughly tries to abide with [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/).
@@ -64,70 +64,36 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 
 ## [Unrelased]
 
-### Planned before the first release
+> ...and currently a work in progress.
 
-`main` is usable, no need to wait, that's just for when I announce.
-
-- [x] Migrate to pathlib, omg
-- [ ] data object summaries
-  - [x] Very pretty data mining with `recurse_dump()`
-  - [x] `display.dump` provides full control with command line arguments
-  - [ ] Some tidy setup for summary templating
-  - [x] Parsing profiles (journal etc) in slots and providing summaries
-  - [x] Parsing saved games in slots
-  - [ ] Providing game summaries
-- [ ] Expand doc
-  - [x] Installation
-  - [x] Configuration
-  - [ ] Usage guide
-    - [x] Interactive help
-    - [x] Saves, backups
-    - [ ] the autosave watcher
-    - [x] Displaying game data
-    - [ ] Cheats and save editing
-  - [x] Task Collections
-  - [x] API
-    - [ ] The SpdIU object model cont
-  - [ ] About
-    - [ ] Standards and specifications
-  - [ ] CONTRIBUTING document
-- [x] Pytest configured
-- [ ] base spdiu tests
-  - [x] util
-  - [x] model
-  - [ ] cheats
-  - [ ] display
-  - [ ] get
+- [ ] Full pytest coverage on the current collections
   - [x] slots
-  - [x] github action and badge lol
-- [ ] tasks.py/configuration tests
-- [ ] Readme: Screenshots
-- [ ] Logo n stuff
+  - [ ] get (hrm)
+  - [ ] display
+  - [ ] cheats
+- [ ] A bit of logo n stuff
+- [ ] Game entity summaries
+- [ ] Better templates for tasks and config
+- [ ] More doc
 
 
-### Ideas for 2.0.0
+## [0.0.1] 2025-12-26
 
-- [ ] Checking for self updates? nah?
-- [ ] Do stuff with SPD code
-  - [ ] Cloning the SPD code to get the complete mob and item lists for journal
-  - [ ] Adapting the process for digging into SPD forks
-  - [ ] Templating a starter codebase for a fork from SPD source, documenting best practices
-- [ ] Automatic SpdIU presets for remix installations, uh like a mod manager?
-- [ ] Controlling the game?
-- [ ] Memory stuff?
-- [ ] releasing in pypi
-- [ ] installing as a custom command
-- [ ] fancier output?
-- [ ] Sphinx for modules? Can we do it in markdown?
+> ho ho ho: first release
 
 
 ### Added
 
-Python:
-- The `spdiu.util` module provides helpers for common file operations
-- The `spdiu.model` module holds class representations of `Slots` containing `Profile` and `Game` data.
+- The `s[pd]iu` executable, customized wrapper for `inv[oke]`
+- The SpdIU task collections:
+  - `slots` manages saved states
+  - `display` allows inspecting game data
+  - `get` downloads and installs the game or forks
+  - `cheats` identifies consumables, edits gold and energy, sets bones
+- `tasks.py` deployment allows custom user tasks per game
+- `spdiu.yaml` local config allows customizing every single bit of state
+- _pre-commit_: ruff lint and format, whitespace fixes, REUSE
+- _pytest_: Smoke test, classes and low level functions covered
 
 
-Customization:
-- Configuration overrides can be set in an `spdiu.yaml` in the project folder
-- Local user tasks can be defined in a `local_tasks.py`.
+[0.0.1]: https://github.com/tasosalvas/spdiu/releases/tag/v0.0.1

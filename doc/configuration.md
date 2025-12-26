@@ -4,7 +4,7 @@
 
 `siu info -c` displays all configuration variables as seen by the tasks.
 
-The provided [spdiu.yaml.example](./spdiu.yaml.example) documents all available utility-specific configuration options, and will update together with the app.
+The provided [spdiu.yaml.example](./spdiu/templates/spdiu.yaml.example) documents all available utility-specific configuration options, and will update together with the app.
 
 You may copy it to `spdiu.yaml` and edit it, or just set the values you want:
 ```yaml
@@ -121,8 +121,7 @@ spdiu/
 ├── slots/          # Saved games
 ├── game/           # Game binary installation
 ├── packages/       # Downloaded game packages
-├── spdiu.yaml     # Local user configuration
-├── local_tasks.py  # Local user tasks
+├── spdiu.yaml      # Local user configuration
 └── tasks.py        # SpdIU entry point
 ```
 
@@ -143,7 +142,9 @@ spdiu:
     game: '~/games/spd'
 ```
 
-The `base` dir is the absolute filename (after user expansion) where the SpdIU instance is installed. It defaults to the detecting the location of the `tasks.py` file.
+The `base` dir is the absolute filename (after user expansion) where the SpdIU instance is installed. It defaults to detecting the location of the `tasks.py` file.
+
+> You can set it in `spdiu.yaml`, but moving that directory will require manually editing it again, as it will override the detection that `tasks.py` does.
 
 Any relative path will be appended to the `base` dir, while absolute paths will be used as they are.
 

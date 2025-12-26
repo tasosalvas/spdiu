@@ -36,9 +36,8 @@ class SpdIU(Program):
             i_value = self.args.install.value
 
             p = Path(i_value).resolve() if type(i_value) is str else Path.cwd()
-
-            target = p / "tasks.py"
-            self.generate_tasks_py(target)
+            self.generate_tasks_py(p)
+            self.generate_spdio_yaml(p)
             raise Exit
 
     # NOTE: Overloaded method from invoke.Program 2.2.1,
@@ -93,13 +92,28 @@ class SpdIU(Program):
     def print_tasks_py_help(self) -> None:
         """Print help regarding configuring a base dir for an SpdIU instance."""
         print("Seems like you are not in an initialized SpdIU folder.")
+        print("siu --install will initialize the current one,")
+        print("siu --install [target] will initialize the one provided.")
         # TODO: tasks.py explanation, doc link
 
-    def generate_tasks_py(self, file_path) -> None:
+    def generate_tasks_py(self, path: Path) -> None:
         """Generate a tasks.py from spdiu/templates/tasks.py."""
+        path.mkdir(parents=True, exist_ok=True)
+
         src = Path(__file__).parent / "templates" / "tasks.py"
-        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path = path / "tasks.py"
         file_path.write_text(src.read_text())
+
+        print(f"Generated {file_path}")
+
+    def generate_spdio_yaml(self, path: Path) -> None:
+        """Generate a tasks.py from spdiu/templates/tasks.py."""
+        path.mkdir(parents=True, exist_ok=True)
+        # src = Path(__file__).parent / "templates" / "spdiu.yaml"
+
+        file_path = path / "spdiu.yaml"
+        file_path.touch()
+
         print(f"Generated {file_path}")
 
     def __init__(self, *args, invoke_version: str, **kwargs):

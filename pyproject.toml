@@ -36,8 +36,8 @@ classifiers = [
 
 
 [project.urls]
-Github = "https://github.com/tasosalvas/spdiu"
-Issues = "https://github.com/tasosalvas/spdiu/issues"
+PyPi = "https://pypi.org/project/spdiu/"
+Github = "https://github.com/tasosalvas/spdiu/"
 
 
 [project.scripts]

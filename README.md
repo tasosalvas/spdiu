@@ -2,10 +2,10 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later                    -->
 # Shattered Pixel Dungeon Invoke Utility
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://github.com/tasosalvas/spdiu/LICENSES/AGPL-3.0-or-later.txt)
 [![pytest](https://github.com/tasosalvas/spdiu/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/tasosalvas/spdiu/actions/workflows/test.yml)
 
-> SpdIU is a collection of [Invoke](https://www.pyinvoke.org/) tasks that manage [Shattered Pixel Dungeon](https://shatteredpixel.com/) game data.
+> [SpdIU](https://pypi.org/project/spdiu/) is a collection of [Invoke](https://www.pyinvoke.org/) tasks that manage [Shattered Pixel Dungeon](https://shatteredpixel.com/) game data.
 
 It's a library of tricks to make your SPD CLI experience as comfortable as the rest of your awesome terminal!
 
@@ -15,12 +15,12 @@ It's a library of tricks to make your SPD CLI experience as comfortable as the r
 
 # Documentation
 
-- [Installation](./doc/installation.md)
-- [Configuration](./doc/configuration.md)
-- [Usage guide](./doc/usage.md)
-- [Task Collections reference](./doc/tasks.md)
-- [API manual](./doc/api.md)
-- [About SpdIU](./doc/about.md)
+- [Installation](https://github.com/tasosalvas/spdiu/doc/installation.md)
+- [Configuration](https://github.com/tasosalvas/spdiu/doc/configuration.md)
+- [Usage guide](https://github.com/tasosalvas/spdiu/doc/usage.md)
+- [Task Collections reference](https://github.com/tasosalvas/spdiu/doc/tasks.md)
+- [API manual](https://github.com/tasosalvas/spdiu/doc/api.md)
+- [About SpdIU](https://github.com/tasosalvas/spdiu/doc/about.md)
 
 
 # What does it do?

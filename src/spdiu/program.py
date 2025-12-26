@@ -6,26 +6,39 @@
 from pathlib import Path
 
 from invoke import Program, Argument, Collection
-from invoke.util import debug
+from invoke.util import debug, helpline
 from invoke.exceptions import Exit, CollectionNotFound
 
 
 class SpdIU(Program):
-    """SpdIU Invoke wrapper."""
+    """SpdIU Invoke wrapper. Aims at theming the output without breaking anything."""
 
     def core_args(self):
         """Add SpdIU's extra flags to core args."""
         core_args = super().core_args()
+
+        update_args = [
+            Argument(
+                names=("list-format", "F"),
+                help="Change the task list format. spdiu (default) | flat | nested | json",
+                default="spdiu",
+            ),
+        ]
+
         extra_args = [
             Argument(
                 names=("install", "i"),
                 kind=str,
                 default="",
                 optional=True,
-                help="Install SpdIU instance files in the current folder.",
+                help="Initialize a folder as a SpdIU instance.",
             ),
         ]
-        return core_args + extra_args
+
+        up_names = [i.name for i in update_args]
+        core_args = [i for i in core_args if i.name not in up_names]
+
+        return core_args + update_args + extra_args
 
     def parse_core(self, argv) -> None:
         """Add SpdIU's base path installation to core args."""
@@ -44,11 +57,7 @@ class SpdIU(Program):
     # in order to expand the "can't find collection" text.
     # TODO: Maybe check once in a while for changes.
     def load_collection(self) -> None:
-        """
-        Load a task collection based on parsed core args, or die trying.
-
-        .. versionadded:: 1.0
-        """
+        """Load a task collection based on parsed core args, or die nagging."""
         start = self.args["search-root"].value
         loader = self.loader_class(  # type: ignore
             config=self.config, start=start
@@ -70,6 +79,69 @@ class SpdIU(Program):
 
             raise Exit("Can't find any collection named {!r}!".format(e.name))
 
+    def _make_spdiu_pairs(self, coll: "Collection", ancestors=None) -> list:
+        """Recurse into collection tasks and return names and help strings.
+
+        Returns [("task", (optional) "help"), ] for printing task lists.
+        """
+        if ancestors is None:
+            ancestors = []
+        pairs = []
+        indent = len(ancestors) * self.indent
+        # ancestor_path = ".".join(x for x in ancestors)
+        for name, task in sorted(coll.tasks.items()):
+            is_default = name == coll.default
+            # Start with just the name and just the aliases, no prefixes or
+            # dots.
+            displayname = name
+            aliases = list(map(coll.transform, sorted(task.aliases)))
+            # If displaying a sub-collection (or if we are displaying a given
+            # namespace/root), tack on some dots to make it clear these names
+            # require dotted paths to invoke.
+            if ancestors or self.list_root:
+                displayname = ".{}".format(displayname)
+                aliases = [".{}".format(x) for x in aliases]
+
+            # mark the default task in the collection.
+            prefix = indent
+            if is_default:
+                displayname += "🚏"
+
+            # Generate full name and help columns and add to pairs.
+            alias_str = " ({})".format(", ".join(aliases)) if aliases else ""
+            full = prefix + displayname + alias_str
+            pairs.append((full, helpline(task)))
+        # Determine whether we're at max-depth or not
+        truncate = self.list_depth and (len(ancestors) + 1) >= self.list_depth
+        for name, subcoll in sorted(coll.collections.items()):
+            displayname = name
+            if ancestors or self.list_root:
+                displayname = ".{}".format(displayname)
+            if truncate:
+                tallies = [
+                    "{} {}".format(len(getattr(subcoll, attr)), attr)
+                    for attr in ("tasks", "collections")
+                    if getattr(subcoll, attr)
+                ]
+                displayname += " [{}]".format(", ".join(tallies))
+
+            pairs.append((indent + displayname, helpline(subcoll)))
+            # Recurse, if not already at max depth
+            if not truncate:
+                recursed_pairs = self._make_spdiu_pairs(
+                    coll=subcoll, ancestors=ancestors + [name]
+                )
+                pairs.extend(recursed_pairs)
+        return pairs
+
+    def list_spdiu(self) -> None:
+        """Format a task list, SpdIU style. Alternative to _nested and _flat.
+
+        -F, --list-format STRING in the terminal defaults to this in spdiu.
+        """
+        pairs = self._make_spdiu_pairs(self.scoped_collection)
+        self.display_with_columns(pairs=pairs)
+
     def print_version(self) -> None:
         """Print the version of SpdIU and the underlying Invoke."""
         print(f"SpdIU {self.version} running on Invoke {self.invoke_version}")
@@ -90,10 +162,10 @@ class SpdIU(Program):
         self.print_version()
 
     def print_tasks_py_help(self) -> None:
-        """Print help regarding configuring a base dir for an SpdIU instance."""
-        print("Seems like you are not in an initialized SpdIU folder.")
+        """Print help for configuring a base dir as an SpdIU instance."""
+        print("Seems like you are not in an initialized SpdIU folder.", "\n")
         print("siu --install will initialize the current one,")
-        print("siu --install [target] will initialize the one provided.")
+        print("siu --install [target] will initialize the one provided.", "\n")
         # TODO: tasks.py explanation, doc link
 
     def generate_tasks_py(self, path: Path) -> None:
@@ -102,8 +174,8 @@ class SpdIU(Program):
 
         src = Path(__file__).parent / "templates" / "tasks.py"
         file_path = path / "tasks.py"
-        file_path.write_text(src.read_text())
 
+        file_path.write_text(src.read_text())
         print(f"Generated {file_path}")
 
     def generate_spdio_yaml(self, path: Path) -> None:
@@ -116,7 +188,9 @@ class SpdIU(Program):
 
         print(f"Generated {file_path}")
 
-    def __init__(self, *args, invoke_version: str, **kwargs):
+    def __init__(self, *args, invoke_version: str = "", **kwargs):
         """Add SpdIU variables."""
         self.invoke_version = invoke_version if invoke_version else "unknown"
+
         super().__init__(*args, **kwargs)
+        self.list_format = "spdiu"

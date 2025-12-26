@@ -15,12 +15,12 @@ It's a library of tricks to make your SPD CLI experience as comfortable as the r
 
 # Documentation
 
-- [Installation](https://github.com/tasosalvas/spdiu/doc/installation.md)
-- [Configuration](https://github.com/tasosalvas/spdiu/doc/configuration.md)
-- [Usage guide](https://github.com/tasosalvas/spdiu/doc/usage.md)
-- [Task Collections reference](https://github.com/tasosalvas/spdiu/doc/tasks.md)
-- [API manual](https://github.com/tasosalvas/spdiu/doc/api.md)
-- [About SpdIU](https://github.com/tasosalvas/spdiu/doc/about.md)
+- [Installation](https://github.com/tasosalvas/spdiu/blob/main/doc/installation.md)
+- [Configuration](https://github.com/tasosalvas/spdiu/blob/main/doc/configuration.md)
+- [Usage guide](https://github.com/tasosalvas/spdiu/blob/main/doc/usage.md)
+- [Task Collections reference](https://github.com/tasosalvas/spdiu/blob/main/doc/tasks.md)
+- [API manual](https://github.com/tasosalvas/spdiu/blob/main/doc/api.md)
+- [About SpdIU](https://github.com/tasosalvas/spdiu/blob/main/doc/about.md)
 
 
 # What does it do?

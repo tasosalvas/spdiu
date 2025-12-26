@@ -96,4 +96,4 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - _pytest_: Smoke test, classes and low level functions covered
 
 
-[0.0.1]: https://github.com/tasosalvas/spdiu/releases/tag/v0.0.1
+[0.1.0]: https://github.com/tasosalvas/spdiu/releases/tag/v0.1.0

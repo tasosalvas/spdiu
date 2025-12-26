@@ -10,3 +10,8 @@ from spdiu.cli import __version__
 def test_version() -> None:
     """Test that the module's version is the one on pyproject."""
     assert __version__ == metadata.version("spdiu")
+
+
+# smoke test mode
+if __name__ == "__main__":
+    test_version()

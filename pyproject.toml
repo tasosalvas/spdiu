@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 [project]
 name = "spdiu"
-version = "0.1.1"
+version = "0.1.2"
 description = "A collection of Invoke tasks that manage Shattered Pixel Dungeon game data."
 authors = [
     {name = "Tasos Alvas", email = "tasos.alvas@qwertyuiopia.com"}

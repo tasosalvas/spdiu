@@ -285,23 +285,32 @@ def _summarize_record(record):
     print(title_line)
 
 
-@task(default=True)
+@task(default=True, optional=["slot"])
 def slot(c, slot=None, game=None):
-    """Display details for a save slot. -s [slot] or -a for the active data."""
-    cfg = c.config.spdiu
-    if slot is None:
-        slot = cfg.default_slot
+    """Display details for the active profile. -s [slot] for save slots.
 
-    if not slot:
+    -s, --slot without a value displays the default manual save slot.
+    -s [group].[slot] can access slots with dot syntax, i.e. -s auto.floor3.
+    """
+    cfg = c.config.spdiu
+
+    if slot is None:
         s_dir = path(c, cfg.game.data)
         p = Profile(s_dir)
         print(f"Showing {cfg.i.disc_a} Active game data")
 
-    else:
+    if slot is True:
+        slot = f"manual.{cfg.default_slot}"
+
+    if slot:
         slots = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
         p = slots.get_slot(slot)
-        print(f"Showing details for slot {cfg.i.disc_b} {slot}")
 
+    if not p:
+        print(f"There doesn't seem to be a {slot} slot.")
+        return False
+
+    print(f"Showing details for slot {cfg.i.disc_b} {slot}")
     print("\nProfile information:")
 
     # Settings

@@ -77,6 +77,12 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [ ] More doc
 
 
+### Fixed
+
+- [x] `siu display` / `display.slot` argument handling
+- [x] PyPi front page README.md links correctly point to github now
+
+
 ## [0.1.0] 2025-12-26
 
 > ho ho ho: first release

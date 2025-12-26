@@ -43,7 +43,7 @@ This file is now a _task collection_. An implicit one, since it contains a funct
 
 SpdIU needs `tasks.py` as an entry point and updates are going to overwrite it with a newer version, so a `local_tasks.py` meant for your own tasks will be imported if found.
 
-The above file will be automatically turned into a task collection and imported with a default namespace of `u` (for "user"), so our task will be included and can be ran with `inv u.explosion`.
+The above file will be automatically turned into a task collection and imported with a default namespace of `u` (for "user"), so our task will be included and can be ran with `siu u.explosion`.
 
 If a `collection_name` variable is set in `local_tasks`, `tasks.py` will call it by than name instead. Note that future SpdIU collections might use obvious short names too, so if you can live with the default it might be more convenient to keep it.
 

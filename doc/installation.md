@@ -72,7 +72,7 @@ Assuming the `inv` command has been installed, calling it from the folder contai
 
 ```sh
 $ cd spdiu
-$ inv info
+$ siu info
 [
 | Shattered Pixel Dungeon Invoke Utility.
 |  [...]
@@ -87,7 +87,7 @@ $ inv info
 Adding this line to your `~/.bashrc` will enable shell autocompletions for invoke.
 ```sh
 if [ -x "$(command -v inv)" ]; then
-    eval "$(inv --print-completion-script bash)"
+    eval "$(siu --print-completion-script bash)"
 fi
 ```
 

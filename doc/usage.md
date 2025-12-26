@@ -21,14 +21,14 @@ Being in `~/games/spdiu/bin/bar/foo` would also work.
 This guide is intended to be an introduction, and it will be kept accurate, but the complete description of each task and its parameters is meant to be accessed through invoke's help system.
 
 ```sh
-$ inv info
+$ siu info
 > ["Basic tips and reminders for common commands."]
 # With '-c' it can also list your active SpdIU configuration
 
-$ inv -l
+$ siu -l
 > ["Lists all available tasks with a short help text"]
 
-$ inv -h save
+$ siu -h save
 > ["Full description and parameters of the 'save' task"]
 ```
 
@@ -37,7 +37,7 @@ Anyway, here we go.
 
 # Installing the game
 
-`inv get.install` will get the latest version of [00-Evan/shattered-pixel-dungeon](https://github.com/00-Evan/shattered-pixel-dungeon) installed.
+`siu get.install` will get the latest version of [00-Evan/shattered-pixel-dungeon](https://github.com/00-Evan/shattered-pixel-dungeon) installed.
 - The executable will be inside the SpdIU `game` folder
 - The package downloaded will be in the `packages` folder
 
@@ -49,11 +49,11 @@ See the documentation on [Game installation configuration](./configuration.md#ga
 The game automatically saves when taking certain actions, such as changing floors. The easiest way to force a save is to quit to menu. Afterwards you can use the script to back that state up.
 
 ```sh
-$ inv save
+$ siu save
 > State saved! 💿 default
 
 # Save slots can have alphanumeric names.
-$ inv save -s goo
+$ siu save -s goo
 > State saved! 💿 goo
 ```
 
@@ -62,12 +62,12 @@ Save slots by default are kept in a `saves` directory next to your active game d
 Loading can be done while the game is on the main menu, unless your character just died, in which case you will need to restart SPD for it to look up the loaded game.
 
 ```sh
-$ inv load
+$ siu load
 > Active state backup created! 💾 bak
 > State loaded! 📀 default
 
 # oops
-$ inv load -s bak
+$ siu load -s bak
 > State loaded! 📀 bak
 ```
 
@@ -76,7 +76,7 @@ Loading preserves the active data it substituted in the special `backup_slot`, i
 You can also selectively load a game, while keeping the player profile untouched.
 
 ```sh
-$ inv load -g game1
+$ siu load -g game1
 > Active state backup created! 💾 bak
 > Game loaded! 📀 default 🕹️ game1
 ```
@@ -84,14 +84,14 @@ $ inv load -g game1
 You can list save slots with `ls`.
 
 ```sh
-$ inv ls
+$ siu ls
 > Displaying 3 save slots, oldest to newest:
 > [...]
 ```
 And you can clean up after you're done.
 
 ```sh
-$ inv clean
+$ siu clean
 > 🧹 3 saved states deleted.
 > Active state backup created! 💾 bak
 ```
@@ -100,7 +100,7 @@ $ inv clean
 # Displaying game data
 
 ```sh
-$ inv show -a
+$ siu show -a
 > Showing 📀 Active game data
 > [...]
 ```

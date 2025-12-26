@@ -2,7 +2,7 @@
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later                    -->
 # SpdIU Configuration Manual
 
-`inv info -c` displays all configuration variables as seen by the tasks.
+`siu info -c` displays all configuration variables as seen by the tasks.
 
 The provided [spdiu.yaml.example](./spdiu.yaml.example) documents all available utility-specific configuration options, and will update together with the app.
 
@@ -99,9 +99,9 @@ spdiu:
 
 # Selecting and pinning versions
 
-By default, on a github-hosted project such as SPD, `inv get.install` will request the latest release and pick the appropriate package.
+By default, on a github-hosted project such as SPD, `siu get.install` will request the latest release and pick the appropriate package.
 
-`inv get install -v [version]` will instead look into the project's releases and find a package from the version you requested. If there is an unambiguous one, it will install it.
+`siu get install -v [version]` will instead look into the project's releases and find a package from the version you requested. If there is an unambiguous one, it will install it.
 
 The version check is just a substring search on the download URL, as are the `extension`, `platform`, `version` and `tag_name` variables in the `spdiu.release` configuration.
 
@@ -109,7 +109,7 @@ Setting more of them can help narrow down a release to a specific package.
 
 Setting `spdiu.version` on your `spdiu.yaml` will **pin** your preferred version, so that `get.install` does not get the latest one, but the one you specified instead.
 
-You can still manually install a different version by `inv get.install -v [version]`
+You can still manually install a different version by `siu get.install -v [version]`
 
 
 # Directory structure

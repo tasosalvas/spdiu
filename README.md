@@ -29,7 +29,7 @@ It's a library of tricks to make your SPD CLI experience as comfortable as the r
 
 SpdIU keeps a directory of save slots, containing copies of the game's full data folder.
 
-- `inv save` and `load` are all the commands you need to save-scum your way to 9-challenge
+- `siu save` and `load` are all the commands you need to save-scum your way to 9-challenge
 - Safety backups give you a chance to un-wreck your save if you fat-finger it
 
 

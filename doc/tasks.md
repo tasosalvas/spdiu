@@ -7,16 +7,16 @@ The tasks available in SpdIU are categorized into Python modules in `spdiu.colle
 They are either imported as part of the base commands, or _namespaced_ in their own category.
 
 For example:
-- `save` is the imported _task_ `slots.save`, and can be ran by `inv save`
-- `bones` is `cheats.bones`, and gets ran by `inv cheats.bones` from the imported _collection_.
+- `save` is the imported _task_ `slots.save`, and can be ran by `siu save`
+- `bones` is `cheats.bones`, and gets ran by `siu cheats.bones` from the imported _collection_.
 
 
 ## Interactive help
 
 SpdIU's `info` task and invoke's interactive help system make it easy to get code documentation to the terminal.
 
-- `inv -h task` provides **help text** for each _task_, are the Python docstrings of the functions themselves
-- `inv info -h collection` **info text** for each collection is the docstring of the module itself
+- `siu -h task` provides **help text** for each _task_, are the Python docstrings of the functions themselves
+- `siu info -h collection` **info text** for each collection is the docstring of the module itself
 
 The `info` task looks in `spdiu.collections`, so you can still get documentation on modules that are not imported in a namespace.
 

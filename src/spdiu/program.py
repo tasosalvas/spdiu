@@ -53,11 +53,11 @@ class SpdIU(Program):
             self.generate_spdio_yaml(p)
             raise Exit
 
-    # NOTE: Overloaded method from invoke.Program 2.2.1,
-    # in order to expand the "can't find collection" text.
-    # TODO: Maybe check once in a while for changes.
     def load_collection(self) -> None:
-        """Load a task collection based on parsed core args, or die nagging."""
+        """Load a task collection based on parsed core args, or die nagging.
+
+        Overloaded to expand the "can't find collection" text.
+        """
         start = self.args["search-root"].value
         loader = self.loader_class(  # type: ignore
             config=self.config, start=start
@@ -79,6 +79,7 @@ class SpdIU(Program):
 
             raise Exit("Can't find any collection named {!r}!".format(e.name))
 
+    # Task list display
     def _make_spdiu_pairs(self, coll: "Collection", ancestors=None) -> list:
         """Recurse into collection tasks and return names and help strings.
 
@@ -88,13 +89,17 @@ class SpdIU(Program):
             ancestors = []
         pairs = []
         indent = len(ancestors) * self.indent
+
         # ancestor_path = ".".join(x for x in ancestors)
+
         for name, task in sorted(coll.tasks.items()):
             is_default = name == coll.default
             # Start with just the name and just the aliases, no prefixes or
             # dots.
             displayname = name
+
             aliases = list(map(coll.transform, sorted(task.aliases)))
+
             # If displaying a sub-collection (or if we are displaying a given
             # namespace/root), tack on some dots to make it clear these names
             # require dotted paths to invoke.
@@ -102,30 +107,50 @@ class SpdIU(Program):
                 displayname = ".{}".format(displayname)
                 aliases = [".{}".format(x) for x in aliases]
 
+            # NOTE: blank emoji: both _space and _cancel fix alignment in kitty.
+            # I think probably any 0-width character would, and that it works
+            # because it takes up no space but gets counted as a second character.
+            i_b = self.config.spdiu.i["_space"]
+
             # mark the default task in the collection.
-            prefix = indent
+            i_t = self.config.spdiu.i["task"]
+            prefix = indent + f"{i_t}{i_b} "
+
+            i_d = self.config.spdiu.i["default"]
             if is_default:
-                displayname += "🚏"
+                displayname += f" {i_d}{i_b}"
 
             # Generate full name and help columns and add to pairs.
-            alias_str = " ({})".format(", ".join(aliases)) if aliases else ""
+            alias_str = f" ({', '.join(aliases)})" if aliases else ""
+
             full = prefix + displayname + alias_str
             pairs.append((full, helpline(task)))
+
         # Determine whether we're at max-depth or not
         truncate = self.list_depth and (len(ancestors) + 1) >= self.list_depth
+
         for name, subcoll in sorted(coll.collections.items()):
             displayname = name
+
             if ancestors or self.list_root:
                 displayname = ".{}".format(displayname)
+
             if truncate:
                 tallies = [
                     "{} {}".format(len(getattr(subcoll, attr)), attr)
                     for attr in ("tasks", "collections")
                     if getattr(subcoll, attr)
                 ]
+
                 displayname += " [{}]".format(", ".join(tallies))
 
-            pairs.append((indent + displayname, helpline(subcoll)))
+            # silly blank line hack
+            pairs.append(("", ""))
+
+            i_c = self.config.spdiu.i["collection"]
+            prefix = indent + f"{i_c}{i_b}{i_b} "
+            pairs.append((prefix + displayname, helpline(subcoll)))
+
             # Recurse, if not already at max depth
             if not truncate:
                 recursed_pairs = self._make_spdiu_pairs(
@@ -134,33 +159,75 @@ class SpdIU(Program):
                 pairs.extend(recursed_pairs)
         return pairs
 
+    def task_list_opener(self, extra: str = "") -> str:
+        """Generate the intro text to task list help."""
+        root = self.list_root
+        depth = self.list_depth
+
+        i_c = self.config.spdiu.i["collection"]
+        specifier = " {} {}".format(i_c, root) if root else ""
+
+        tail = ""
+        if depth or extra:
+            depthstr = "depth={}".format(depth) if depth else ""
+            joiner = "; " if (depth and extra) else ""
+            tail = " ({}{}{})".format(depthstr, joiner, extra)
+
+        i_t = self.config.spdiu.i["task"]
+        text = "Available{} {} tasks{}".format(specifier, i_t, tail)
+        return text
+
     def list_spdiu(self) -> None:
         """Format a task list, SpdIU style. Alternative to _nested and _flat.
 
-        -F, --list-format STRING in the terminal defaults to this in spdiu.
+        -F, --list-format STRING in the terminal defaults to this in SpdIU.
         """
+        # These are used by flat/nested too, overloading them only here.
+        self.leading_indent_width = 1
+        self.leading_indent = " " * self.leading_indent_width
+        self.indent_width = 1
+        self.indent = " " * self.indent_width
+        self.col_padding = 2
+
         pairs = self._make_spdiu_pairs(self.scoped_collection)
-        self.display_with_columns(pairs=pairs)
 
-    def print_version(self) -> None:
-        """Print the version of SpdIU and the underlying Invoke."""
-        print(f"SpdIU {self.version} running on Invoke {self.invoke_version}")
+        i_d = self.config.spdiu.i["default"]
+        extra = f"{i_d}: default"
 
+        self.display_with_columns(pairs=pairs, extra=extra)
+
+    # Help system
     def print_help(self) -> None:
-        """Print SpdIU's usage and documentation."""
+        """Print s[pd]iu's usage and documentation.
+
+        The generic response to -h, --help.
+        """
         usage_suffix = "task1 [--task1-opts] ... taskN [--taskN-opts]"
+
         if self.namespace is not None:
             usage_suffix = "<subcommand> [--subcommand-opts] ..."
+
         print("Usage: {} [--core-opts] {}".format(self.binary, usage_suffix))
         print("")
         print("Core options:")
         print("")
+
         self.print_columns(self.initial_context.help_tuples())
+
         if self.namespace is not None:
             self.list_tasks()
 
         self.print_version()
 
+    def print_task_help(self, name: str) -> None:
+        """Print help for a specific task."""
+        return super().print_task_help(name)
+
+    def print_version(self) -> None:
+        """Print the version of SpdIU and the underlying Invoke."""
+        print(f"SpdIU {self.version} running on Invoke {self.invoke_version}")
+
+    # Folder instance initialization
     def print_tasks_py_help(self) -> None:
         """Print help for configuring a base dir as an SpdIU instance."""
         print("Seems like you are not in an initialized SpdIU folder.", "\n")
@@ -190,7 +257,5 @@ class SpdIU(Program):
 
     def __init__(self, *args, invoke_version: str = "", **kwargs):
         """Add SpdIU variables."""
-        self.invoke_version = invoke_version if invoke_version else "unknown"
-
         super().__init__(*args, **kwargs)
-        self.list_format = "spdiu"
+        self.invoke_version = invoke_version if invoke_version else "unknown"

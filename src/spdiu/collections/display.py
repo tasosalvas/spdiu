@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""
-SpdIU Display task collection.
+"""SpdIU Display task collection.
 
 Tasks that query and display game data.
 
@@ -315,25 +314,25 @@ def slot(c, slot=None, game=None):
 
     # Settings
     settings = p.get_settings()
-    print(f"{cfg.bullet_b}{len(settings)} options set.")
+    print(f"{cfg.s.bullet_b}{len(settings)} options set.")
 
     # Badges
     badges = p.get_dat("badges.dat")
     if badges:
-        print(f"{cfg.bullet_b}{len(badges['badges'])} badges and related unlocks.")
+        print(f"{cfg.s.bullet_b}{len(badges['badges'])} badges and related unlocks.")
 
     # Bones
     bones = p.get_dat("bones.dat")
     if bones:
         if "hero_class" not in bones:
-            print(f"{cfg.bullet_b}No character bones are set to spawn.")
+            print(f"{cfg.s.bullet_b}No character bones are set to spawn.")
 
         else:
             hero = bones["hero_class"]
             lvl = bones["level"]
             br = bones["branch"]
 
-            print(f"{cfg.bullet_a}{hero} bones at level {lvl}, branch {br}.")
+            print(f"{cfg.s.bullet_a}{hero} bones at level {lvl}, branch {br}.")
 
     # Journal
     journal = p.get_dat("journal.dat")
@@ -346,14 +345,14 @@ def slot(c, slot=None, game=None):
         # bestiary_encounters <list> [int] bestiary encounter count
 
         b_seen = len(journal["bestiary_seen"])
-        print(f"{cfg.bullet_b}Bestiary: {b_seen} mobs seen.")
+        print(f"{cfg.s.bullet_b}Bestiary: {b_seen} mobs seen.")
 
         # catalog_uses <list> 297 values.
         # catalog_seen <list> 297 values.
         # catalog_classes <list> 297 values.
 
         c_seen = len(journal["catalog_seen"])
-        print(f"{cfg.bullet_b}Catalog: {c_seen} items seen.")
+        print(f"{cfg.s.bullet_b}Catalog: {c_seen} items seen.")
 
         # documents <dict>
         # {<str> CATEGORY: {<str> note name: <int> 1 unread or 2 read }}.
@@ -361,7 +360,7 @@ def slot(c, slot=None, game=None):
         for k, v in journal["documents"].items():
             doc_count += len(v)
 
-        print(f"{cfg.bullet_b}{doc_count} tutorials and notes discovered.")
+        print(f"{cfg.s.bullet_b}{doc_count} tutorials and notes discovered.")
 
     # Rankings
     ranks = p.get_dat("rankings.dat")
@@ -371,7 +370,7 @@ def slot(c, slot=None, game=None):
         # total <int>: total games played
         total = int(ranks["total"])
 
-        print(f"{cfg.bullet_a}{won} games won out of {total} played.")
+        print(f"{cfg.s.bullet_a}{won} games won out of {total} played.")
 
         # records <list> [dict Rankings$Record]
         # latest <int> index of latest game in 'records'
@@ -380,11 +379,11 @@ def slot(c, slot=None, game=None):
         if "latest" not in ranks:
             return
 
-        print(f"{cfg.bullet_a}{len(ranks['records'])} stored ranking records.")
+        print(f"{cfg.s.bullet_a}{len(ranks['records'])} stored ranking records.")
 
         latest = ranks["records"][int(ranks["latest"])]
 
-        print(f"{cfg.bullet_b}Latest run:")
+        print(f"{cfg.s.bullet_b}Latest run:")
         print("    ", end="")
 
         _summarize_record(latest)
@@ -397,7 +396,7 @@ def slot(c, slot=None, game=None):
         if "latest_daily" not in ranks:
             return
 
-        print(f"{cfg.bullet_b}Latest daily:")
+        print(f"{cfg.s.bullet_b}Latest daily:")
         print("    ", end="")
 
         _summarize_record(ranks["latest_daily"])
@@ -405,7 +404,7 @@ def slot(c, slot=None, game=None):
     print(f"\n{cfg.i.game} {len(p.games)} games found:")
 
     for g in reversed(p.games):
-        bullet = cfg.bullet_a if g == p.games[0] else cfg.bullet_b
+        bullet = cfg.s.bullet_a if g == p.games[0] else cfg.s.bullet_b
         time = strftime(cfg.time_format, g.ts)
         print(f"{bullet} {time} {cfg.i.game} {g.name}")
 

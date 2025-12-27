@@ -6,6 +6,8 @@
 from pathlib import Path
 from invoke.config import Config, merge_dicts
 
+from spdiu.styles import icons, strings
+
 
 class SpdIUConfig(Config):
     """SpdIU Invoke Config wrapper.
@@ -47,33 +49,12 @@ class SpdIUConfig(Config):
                 "cmd": "bin/Shattered Pixel Dungeon",
                 "ns": "com.shatteredpixel.shatteredpixeldungeon",
             },
-            # Fancy decorations
+            # Config-overridable styles.
             "time_format": "🗓️ %Y %b %d 🕰️ %H:%M:%S",
-            "bullet_a": " ||> ",
-            "bullet_b": "  |> ",
-            # Icons
-            "i": {
-                "disc_a": "📀",
-                "disc_b": "💿",
-                "bak": "💾",
-                "auto": "🤖",
-                "game": "🕹️",
-                "data": "🗂️",
-                "clean": "🧹",
-                "package": "📦",
-                "fork": "🍽️",
-                "unknown": "👽",
-                "warning": "☢️",
-                "inspect": "🔎",
-                # data types
-                "dict": "📖",
-                "list": "📋",
-                "int": "🧮",
-                "float": "🍕",
-                "str": "🔤",
-                "bool": "💡",
-                "NoneType": "🫙",
-            },
+            # Emojis used in terminal output
+            "i": icons,
+            # ASCII strings used in terminal output
+            "s": strings,
         }
     }
 

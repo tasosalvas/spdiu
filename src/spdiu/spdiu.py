@@ -57,10 +57,10 @@ def info(c, config=False, help=None):
         d_cfg = SpdIUConfig.defaults["spdiu"]
 
         print("Active SpdIU configuration:")
-        print(f"{cfg.bullet_b}: default | {cfg.bullet_a}: overridden\n")
+        print(f"{cfg.s.bullet_b}: default | {cfg.s.bullet_a}: overridden\n")
 
         for k, v in cfg.items():
-            bullet = cfg.bullet_b if d_cfg[k] == v else cfg.bullet_a
+            bullet = cfg.s.bullet_b if d_cfg[k] == v else cfg.s.bullet_a
             print(f"{bullet}{k}: {v}")
 
         return

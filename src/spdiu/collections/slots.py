@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""
-SpdIU Saving and Loading task collection.
+"""SpdIU Saving and Loading task collection.
 
 By convention, where applicable:
 -s --slot is used to load a save slot by name
@@ -189,7 +188,7 @@ class AutoSaveWatcher(StreamWatcher):
         src = path(self.c, cfg.game.data)
 
         util.replace(src, dest)
-        print(f"{cfg.bullet_b}Autosave {cfg.i.auto} auto.{name}")
+        print(f"{cfg.s.bullet_b}Autosave {cfg.i.auto} auto.{name}")
 
     def submit(self, stream):
         """Autosave if a pattern is matched.
@@ -248,7 +247,7 @@ def ls(c) -> dict:
     s = Slots(path(c, cfg.dirs.slots), ["manual", "auto", "backup"])
 
     # active save vars
-    a_bullet = cfg.bullet_a
+    a_bullet = cfg.s.bullet_a
     a_disc = cfg.i.disc_a
 
     # Calculate latest save
@@ -257,12 +256,12 @@ def ls(c) -> dict:
 
         # adjust the active save display
         if ap.ts <= latest.ts:
-            a_bullet = cfg.bullet_b
+            a_bullet = cfg.s.bullet_b
             a_disc = cfg.i.disc_b
 
     print(f"Displaying {len(s.slots)} save slots, oldest to newest:")
     for p in reversed(s.slots):
-        bullet = cfg.bullet_a if p == latest else cfg.bullet_b
+        bullet = cfg.s.bullet_a if p == latest else cfg.s.bullet_b
 
         if p.group == "backup":
             disc = cfg.i.bak

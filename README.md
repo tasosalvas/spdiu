@@ -77,6 +77,12 @@ The project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and 
 - [ ] More doc
 
 
+### Added
+
+- [x] `spdiu.styles` contains emojis and ascii string bits for output. They can be overridden by configuring fields in the `c.config.spdiu.i` and `.s` dicts.
+- [x] Task lists now make use of those emojis.
+
+
 ### Fixed
 
 - [x] `siu display` / `display.slot` argument handling

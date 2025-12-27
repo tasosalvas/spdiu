@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""
-SpdIU Cheats task collection.
+"""SpdIU Cheats task collection.
 
 These tasks all work on the active game data.
 Make a save before using them.
@@ -197,14 +196,14 @@ def consumables(c, game=None):
     scrolls = {k: v for k, v in labels.items() if "ScrollOf" in k}
 
     print(f"{cfg.i.disc_a} {ap.name} {cfg.i.game} {g.name}")
-    print(f"{cfg.bullet_a}: known | {cfg.bullet_b}: not known")
+    print(f"{cfg.s.bullet_a}: known | {cfg.s.bullet_b}: not known")
 
     print(f"\n {cfg.i.data} Potions")
     for k, v in potions.items():
         iclass = k.split("_")[0]
         known = gd[iclass + "_known"]
         name = iclass[len("PotionOf") :]
-        bullet = cfg.bullet_a if known else cfg.bullet_b
+        bullet = cfg.s.bullet_a if known else cfg.s.bullet_b
 
         print(f"{bullet}{name}: {v}")
 
@@ -213,7 +212,7 @@ def consumables(c, game=None):
         iclass = k.split("_")[0]
         known = gd[iclass + "_known"]
         name = iclass[len("RingOf") :]
-        bullet = cfg.bullet_a if known else cfg.bullet_b
+        bullet = cfg.s.bullet_a if known else cfg.s.bullet_b
 
         print(f"{bullet}{name}: {v}")
 
@@ -222,7 +221,7 @@ def consumables(c, game=None):
         iclass = k.split("_")[0]
         known = gd[iclass + "_known"]
         name = iclass[len("ScrollOf") :]
-        bullet = cfg.bullet_a if known else cfg.bullet_b
+        bullet = cfg.s.bullet_a if known else cfg.s.bullet_b
 
         print(f"{bullet}{name}: {v}")
 

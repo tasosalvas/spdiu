@@ -144,3 +144,59 @@ def select(c, slot="", game="", file="", entity="", default="latest"):
     """Parse command line arguments and return an object."""
     # see spdiu.display.dump for the latest take
     raise NotImplementedError
+
+
+def resolve_color(color_name: str, color_dict) -> str:
+    """Look up a color in the provided dict until you get hex.
+
+    Will keep looking if the result is another name.
+    """
+    color = color_dict.get(color_name)
+    if not color:
+        return ""
+    elif color[0] == "#":
+        return color
+    else:
+        return resolve_color(color, color_dict)
+
+
+def hex_to_ansi(hex_color: str) -> str:
+    """Return a color string usable in ansi escape sequences."""
+    color = hex_color.lstrip("#")
+    rgb_str = (color[0:2], color[2:4], color[4:6])
+    rgb_dec = [str(int(c, 16)) for c in rgb_str]
+    return ";".join(rgb_dec)
+
+
+def apply_color(text, foreground: str = "", background: str = ""):
+    """Return a string colorized by the hex color provided.
+
+    Values starting with "#" will be converted to the appropriate ANSI escape sequence.
+    Otherwise they'll be looked up in the 'spdiu.c' color list.
+    """
+    if not foreground and not background:
+        return text
+
+    spec = "2"  # Truecolor. 5 would be 256 color.
+    color = ""
+    if foreground:
+        color += f"\x1b[38;{spec};{hex_to_ansi(foreground)}m"
+
+    if background:
+        color += f"\x1b[48;{spec};{hex_to_ansi(background)}m"
+
+    escape = "\x1b[0m"
+    return color + text + escape
+
+
+def color(c, text, fg_color_name: str = "", bg_color_name: str = "") -> str:
+    """Return a colorized string by the color names provided.
+
+    This is the simple one to use in tasks.
+    """
+    cfg = c.config.spdiu
+    colors = cfg.c
+
+    return apply_color(
+        text, resolve_color(fg_color_name, colors), resolve_color(bg_color_name, colors)
+    )

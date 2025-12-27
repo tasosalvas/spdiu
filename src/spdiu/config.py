@@ -6,7 +6,7 @@
 from pathlib import Path
 from invoke.config import Config, merge_dicts
 
-from spdiu.styles import icons, strings
+from spdiu.styles import icons, strings, colors
 
 
 class SpdIUConfig(Config):
@@ -55,6 +55,7 @@ class SpdIUConfig(Config):
             "i": icons,
             # ASCII strings used in terminal output
             "s": strings,
+            "c": colors,
         }
     }
 

@@ -9,6 +9,8 @@ from invoke import Program, Argument, Collection
 from invoke.util import debug, helpline
 from invoke.exceptions import Exit, CollectionNotFound
 
+from spdiu.util import resolve_color, apply_color
+
 
 class SpdIU(Program):
     """SpdIU Invoke wrapper. Aims at theming the output without breaking anything."""
@@ -96,7 +98,9 @@ class SpdIU(Program):
             is_default = name == coll.default
             # Start with just the name and just the aliases, no prefixes or
             # dots.
-            displayname = name
+
+            t_col = resolve_color("task", self.config.spdiu.c)
+            displayname = apply_color(name, t_col)
 
             aliases = list(map(coll.transform, sorted(task.aliases)))
 
@@ -110,7 +114,10 @@ class SpdIU(Program):
             # NOTE: blank emoji: both _space and _cancel fix alignment in kitty.
             # I think probably any 0-width character would, and that it works
             # because it takes up no space but gets counted as a second character.
-            i_b = self.config.spdiu.i["_space"]
+            i_space = self.config.spdiu.i["_space"]
+            i_cancel = self.config.spdiu.i["_cancel"]
+
+            i_b = i_space
 
             # mark the default task in the collection.
             i_t = self.config.spdiu.i["task"]
@@ -118,7 +125,7 @@ class SpdIU(Program):
 
             i_d = self.config.spdiu.i["default"]
             if is_default:
-                displayname += f" {i_d}{i_b}"
+                displayname += f" {i_d}{i_cancel}"
 
             # Generate full name and help columns and add to pairs.
             alias_str = f" ({', '.join(aliases)})" if aliases else ""
@@ -130,7 +137,8 @@ class SpdIU(Program):
         truncate = self.list_depth and (len(ancestors) + 1) >= self.list_depth
 
         for name, subcoll in sorted(coll.collections.items()):
-            displayname = name
+            c_col = resolve_color("collection", self.config.spdiu.c)
+            displayname = apply_color(name, c_col)
 
             if ancestors or self.list_root:
                 displayname = ".{}".format(displayname)
@@ -148,7 +156,7 @@ class SpdIU(Program):
             pairs.append(("", ""))
 
             i_c = self.config.spdiu.i["collection"]
-            prefix = indent + f"{i_c}{i_b}{i_b} "
+            prefix = indent + f"{i_c}{i_b} "
             pairs.append((prefix + displayname, helpline(subcoll)))
 
             # Recurse, if not already at max depth

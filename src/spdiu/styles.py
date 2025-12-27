@@ -26,7 +26,7 @@ icons = {
     # actions
     "clean": "🧹",
     "inspect": "🔎",
-    # data types
+    # data types (type.__name__)
     "dict": "📖",
     "list": "📋",
     "int": "🧮",
@@ -39,4 +39,19 @@ icons = {
 strings = {
     "bullet_a": " ||> ",
     "bullet_b": "  |> ",
+}
+
+colors = {
+    # reference
+    "black": "#202020",
+    "white": "#d0d0d0",
+    "green": "#7e8d50",
+    "red": "#ac4142",
+    "yellow": "#e5b566",
+    "blue": "#6c99ba",
+    "magenta": "#9e4e85",
+    "cyan": "#7dd5cf",
+    # concepts
+    "task": "yellow",
+    "collection": "red",
 }

@@ -34,6 +34,7 @@ from spdiu.collections.slots import save, load, backup, clean, watch, ls
 
 # The rest of the collections
 from spdiu import collections
+from spdiu.util import color
 
 __name__ = "spdiu"
 ns = Collection(__name__)
@@ -70,7 +71,8 @@ def info(c, config=False, help=None):
             print(getattr(collections, help).__doc__)
             return
         else:
-            print(f"Collection {help} not found. 'siu info' for general help.")
+            c_name = color(c, help, "collection")
+            print(f"Collection {c_name} not found. 'siu info' for general help.")
             return
 
     print(__doc__)

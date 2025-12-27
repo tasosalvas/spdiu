@@ -44,7 +44,7 @@ strings = {
 colors = {
     # reference
     "black": "#202020",
-    "white": "#d0d0d0",
+    "grey": "#808080",
     "green": "#7e8d50",
     "red": "#ac4142",
     "yellow": "#e5b566",
@@ -54,4 +54,7 @@ colors = {
     # concepts
     "task": "yellow",
     "collection": "red",
+    "alias": "cyan",
+    "ancestor": "blue",
+    "separator": "grey",
 }

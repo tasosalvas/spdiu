@@ -192,11 +192,14 @@ def apply_color(text, foreground: str = "", background: str = ""):
 def color(c, text, fg_color_name: str = "", bg_color_name: str = "") -> str:
     """Return a colorized string by the color names provided.
 
-    This is the simple one to use in tasks.
+    Also accepts a raw config object, so it can be used without context.
     """
-    cfg = c.config.spdiu
-    colors = cfg.c
+    if "spdiu" in c:
+        cfg = c.spdiu
+    else:
+        cfg = c.config.spdiu
 
+    colors = cfg.c
     return apply_color(
         text, resolve_color(fg_color_name, colors), resolve_color(bg_color_name, colors)
     )

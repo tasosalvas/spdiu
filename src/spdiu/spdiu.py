@@ -30,7 +30,7 @@ from invoke import task, Collection
 from spdiu.config import SpdIUConfig
 
 # collections imported at the root namespace
-from spdiu.collections.slots import save, load, backup, clean, watch, ls
+from spdiu.collections.slots import save, load, clean, watch, ls
 
 # The rest of the collections
 from spdiu import collections
@@ -86,9 +86,8 @@ ns.add_task(info)
 ns.add_collection(collections.display)
 
 # spdiu.collections.slots tasks
-ns.add_task(save)
+ns.add_task(save, default=True)
 ns.add_task(load)
-ns.add_task(backup)
 ns.add_task(clean)
 ns.add_task(watch)
 ns.add_task(ls)

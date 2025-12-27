@@ -5,11 +5,11 @@
 
 from pathlib import Path
 
-from invoke import Program, Argument, Collection
+from invoke import Program, Argument, Collection, terminals
 from invoke.util import debug, helpline
 from invoke.exceptions import Exit, CollectionNotFound
 
-from spdiu.util import resolve_color, apply_color
+from spdiu.util import color
 
 
 class SpdIU(Program):
@@ -82,98 +82,296 @@ class SpdIU(Program):
             raise Exit("Can't find any collection named {!r}!".format(e.name))
 
     # Task list display
-    def _make_spdiu_pairs(self, coll: "Collection", ancestors=None) -> list:
+    def _make_spdiu_items(self, coll: "Collection", ancestors=None) -> list:
         """Recurse into collection tasks and return names and help strings.
 
         Returns [("task", (optional) "help"), ] for printing task lists.
         """
         if ancestors is None:
             ancestors = []
-        pairs = []
-        indent = len(ancestors) * self.indent
 
-        # ancestor_path = ".".join(x for x in ancestors)
+        items = []
+        task_items = []
+        collection_items = []
+
+        dot = color(self.config, ".", "separator")
+
+        icon_default = self.config.spdiu.i.default
+        icon_task = self.config.spdiu.i.task
+        icon_collection = self.config.spdiu.i.collection
 
         for name, task in sorted(coll.tasks.items()):
-            is_default = name == coll.default
-            # Start with just the name and just the aliases, no prefixes or
-            # dots.
-
-            t_col = resolve_color("task", self.config.spdiu.c)
-            displayname = apply_color(name, t_col)
+            item = {
+                "op": "task",
+                "name": name.strip(),
+                "ancestors": ancestors,
+                "help": helpline(task).strip(),
+                "first": False,
+                "last": False,
+            }
 
             aliases = list(map(coll.transform, sorted(task.aliases)))
+            subcollection = bool(ancestors or self.list_root)
 
-            # If displaying a sub-collection (or if we are displaying a given
-            # namespace/root), tack on some dots to make it clear these names
-            # require dotted paths to invoke.
-            if ancestors or self.list_root:
-                displayname = ".{}".format(displayname)
-                aliases = [".{}".format(x) for x in aliases]
+            str_title = color(self.config, name, "task")
+            len_title = len(name)
 
-            # NOTE: blank emoji: both _space and _cancel fix alignment in kitty.
-            # I think probably any 0-width character would, and that it works
-            # because it takes up no space but gets counted as a second character.
-            i_space = self.config.spdiu.i["_space"]
-            i_cancel = self.config.spdiu.i["_cancel"]
+            if subcollection:
+                str_title = dot + str_title
+                len_title += 1
 
-            i_b = i_space
+            str_title = f"{icon_task} {str_title}"
+            len_title += 3
 
-            # mark the default task in the collection.
-            i_t = self.config.spdiu.i["task"]
-            prefix = indent + f"{i_t}{i_b} "
+            if name == coll.default:
+                str_title += f" {icon_default}"
+                len_title += 3
 
-            i_d = self.config.spdiu.i["default"]
-            if is_default:
-                displayname += f" {i_d}{i_cancel}"
+            len_alias = 0
+            if aliases:
+                len_alias += sum([len(i) for i in aliases])
+                aliases = [color(self.config, i, "alias") for i in aliases]
 
-            # Generate full name and help columns and add to pairs.
-            alias_str = f" ({', '.join(aliases)})" if aliases else ""
+            if aliases and subcollection:
+                aliases = [dot + i for i in aliases]
+                len_alias += len(item["aliases"])
 
-            full = prefix + displayname + alias_str
-            pairs.append((full, helpline(task)))
+            str_alias = f" ({', '.join(aliases)})" if aliases else ""
+            len_alias += 3 if aliases else 0
+            len_alias += (len(aliases) - 1) * 2 if len(aliases) > 1 else 0
+
+            item["str_title"] = str_title
+            item["len_title"] = len_title
+            item["str_aliases"] = str_alias
+            item["len_aliases"] = len_alias
+
+            item["len_long"] = len_title + len_alias
+            item["len_short"] = max(len_title, len_alias)
+
+            task_items.append(item)
+            items.append(item)
 
         # Determine whether we're at max-depth or not
         truncate = self.list_depth and (len(ancestors) + 1) >= self.list_depth
 
         for name, subcoll in sorted(coll.collections.items()):
-            c_col = resolve_color("collection", self.config.spdiu.c)
-            displayname = apply_color(name, c_col)
+            item = {
+                "op": "collection",
+                "name": name.strip(),
+                "ancestors": ancestors,
+                "subcollections": len(subcoll.collections),
+                "help": helpline(subcoll).strip(),
+                "first": False,
+                "last": False,
+            }
 
-            if ancestors or self.list_root:
-                displayname = ".{}".format(displayname)
+            str_title = color(self.config, item["name"], "collection")
+            len_title = len(item["name"])
 
+            str_title = f"{str_title} {icon_collection}"
+            len_title += 3
+
+            len_ancestors = 0
+            if ancestors:
+                len_ancestors += sum([len(i) for i in item["ancestors"]])
+                ancestors = [color(self.config, i, "ancestor") for i in ancestors]
+
+            str_ancestors = dot.join(ancestors) + " " if ancestors else ""
+            len_ancestors += 1 if ancestors else 0
+            len_ancestors += len(ancestors) - 1 if len(ancestors) > 1 else 0
+
+            str_truncate = ""
+            len_truncate = 0
             if truncate:
-                tallies = [
-                    "{} {}".format(len(getattr(subcoll, attr)), attr)
-                    for attr in ("tasks", "collections")
-                    if getattr(subcoll, attr)
-                ]
+                tallies = []
+                for attr in ("tasks", "collections"):
+                    if getattr(subcoll, attr):
+                        tally = str(len(getattr(subcoll, attr)))
+                        len_truncate += len(attr) + tally
 
-                displayname += " [{}]".format(", ".join(tallies))
+                        attr_col = "task" if attr == "task" else "collection"
 
-            # silly blank line hack
-            pairs.append(("", ""))
+                        name = color(self.config, attr, attr_col)
+                        t_icon = icon_task if attr == "task" else icon_collection
 
-            i_c = self.config.spdiu.i["collection"]
-            prefix = indent + f"{i_c}{i_b} "
-            pairs.append((prefix + displayname, helpline(subcoll)))
+                        tallies.append(f"{tally} {t_icon} {name}")
+                        len_truncate += 4  # 2 spaces 1 emoji
+
+                str_truncate += f" [{', '.join(tallies)}]"
+                len_truncate += 5 if len(tallies) == 2 else 3
+
+            item["str_ancestors"] = str_ancestors
+            item["len_ancestors"] = len_ancestors
+            item["str_title"] = str_title
+            item["len_title"] = len_title
+            item["str_truncate"] = str_truncate
+            item["len_truncate"] = len_truncate
+
+            item["len_long"] = len_ancestors + len_title + len_truncate
+            item["len_short"] = max(len_ancestors, len_title, len_truncate)
+
+            collection_items.append(item)
+            items.append(item)
 
             # Recurse, if not already at max depth
             if not truncate:
-                recursed_pairs = self._make_spdiu_pairs(
+                recursed_items = self._make_spdiu_items(
                     coll=subcoll, ancestors=ancestors + [name]
                 )
-                pairs.extend(recursed_pairs)
-        return pairs
+                items.extend(recursed_items)
+
+        if task_items:
+            task_items[0]["first"] = True
+            task_items[-1]["last"] = True
+
+        if collection_items:
+            collection_items[0]["first"] = True
+            collection_items[-1]["last"] = True
+
+        return items
+
+    def display_with_items(self, lines, extra: str = "") -> None:
+        """Output option dicts to the terminal.
+
+        These are equivalent to the (option, text) tuples used by invoke,
+        but they only contain values and defer rendering to this.
+
+        Alternative to display_with_colums that solves or side-steps
+        its alignment issues with control characters.
+        """
+        print(self.task_list_opener(extra=extra))
+        print()
+        root = self.list_root
+
+        cols, rows = terminals.pty_size()
+
+        def center_text(text, pad=" ", length=0):
+            """Centers a line in the terminal.
+
+            Accepts a canonical length to avoid miscounts with ansi chars.
+            If length is left at 0, it uses len(text).
+            """
+            cols = terminals.pty_size()[0]
+
+            if not length:
+                length = len(text)
+
+            if length >= cols:
+                return text
+            else:
+                indent = int((cols - length) / 2) * pad
+                return indent + text
+
+        breadcrumb = []
+        for item in lines:
+            lead_width = self.leading_indent_width
+            indent_width = self.indent_width * len(item["ancestors"])
+            indent = ""
+            borders = lead_width
+
+            if item["op"] == "task":
+                if item["ancestors"]:
+                    borders = len(item["ancestors"])
+                    indent += "│" * (borders - 1)
+
+                    # discontinue extending the collection line
+                    # if it's the last on its list.
+                    last_parent = breadcrumb[-1]["last"]
+                    indent += " " if last_parent else "│"
+
+                    if item["last"] and not breadcrumb[-1]["subcollections"]:
+                        indent += "└"
+                    else:
+                        indent += "├"
+
+                    cap = ">"
+                    pad = (indent_width - len(indent) - len(cap)) * "-"
+                    indent += pad + cap
+
+                else:
+                    indent = " " * lead_width
+
+                title = item["str_title"]
+                aliases = item["str_aliases"]
+
+                print(indent + title + aliases, end=self.col_padding * " ")
+
+                # len_pad = len(indent) + self.col_padding
+                # len_text = item['len_long']
+
+                print(item["help"])
+
+                if breadcrumb and item["last"]:
+                    del breadcrumb[-1]
+
+            elif item["op"] == "collection":
+                if item["ancestors"]:
+                    borders = len(item["ancestors"])
+                    indent = "│" * borders
+
+                if item["first"] and not item["last"]:
+                    print(indent)
+                    indent += "╒"
+                elif item["last"]:
+                    print(indent + "│")
+                    indent += "╘"
+                else:
+                    print(indent + "│")
+                    indent += "╞"
+
+                indent += "╤"
+
+                # if item['subcollections'] > 0:
+
+                post_indent = "|>"
+
+                ancestors = item["str_ancestors"]
+                title = item["str_title"]
+                truncate = item["str_truncate"]
+
+                long = item["len_long"] + len(item["help"]) + 1
+
+                margin = borders + len(indent) + len(post_indent)
+                space = cols - margin
+
+                if space > long:
+                    text = post_indent + ancestors + title + truncate
+                    text += f" {item['help']}"
+
+                    len_text = long + len(post_indent)
+                    str_text = center_text(text, pad="═", length=len_text)
+
+                    print(indent + str_text)
+
+                else:
+                    print(ancestors)
+                    print(title + truncate)
+                    print(item["help"])
+
+                breadcrumb.append(item)
+
+            else:
+                lpad = (lead_width + indent_width) * " "
+                print(lpad + item["name"])
+                print(lpad + item["help"])
+
+        default = self.scoped_collection.default
+        if default:
+            specific = ""
+            if root:
+                specific = " '{}'".format(root)
+                default = ".{}".format(default)
+
+            # TODO: trim/prefix dots
+            print("Default{} task: {}\n".format(specific, default))
 
     def task_list_opener(self, extra: str = "") -> str:
-        """Generate the intro text to task list help."""
+        """Generate the intro line to task list help."""
         root = self.list_root
         depth = self.list_depth
 
         i_c = self.config.spdiu.i["collection"]
-        specifier = " {} {}".format(i_c, root) if root else ""
+        specifier = f" {i_c} {color(self.config, root, 'collection')}" if root else ""
 
         tail = ""
         if depth or extra:
@@ -182,7 +380,9 @@ class SpdIU(Program):
             tail = " ({}{}{})".format(depthstr, joiner, extra)
 
         i_t = self.config.spdiu.i["task"]
-        text = "Available{} {} tasks{}".format(specifier, i_t, tail)
+        tasks = f"{i_t} {color(self.config, 'tasks', 'task')}"
+
+        text = f"Available{specifier} {tasks}{tail}"
         return text
 
     def list_spdiu(self) -> None:
@@ -190,19 +390,21 @@ class SpdIU(Program):
 
         -F, --list-format STRING in the terminal defaults to this in SpdIU.
         """
+        lines = self._make_spdiu_items(self.scoped_collection)
+
         # These are used by flat/nested too, overloading them only here.
         self.leading_indent_width = 1
         self.leading_indent = " " * self.leading_indent_width
-        self.indent_width = 1
-        self.indent = " " * self.indent_width
-        self.col_padding = 2
 
-        pairs = self._make_spdiu_pairs(self.scoped_collection)
+        self.indent_width = 2
+        self.indent = " " * self.indent_width
+
+        self.col_padding = 2
 
         i_d = self.config.spdiu.i["default"]
         extra = f"{i_d}: default"
 
-        self.display_with_columns(pairs=pairs, extra=extra)
+        self.display_with_items(lines=lines, extra=extra)
 
     # Help system
     def print_help(self) -> None:

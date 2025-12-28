@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """siu: SpdIU's Invoke Program."""
 
+import textwrap
 from pathlib import Path
 
 from invoke import Program, Argument, Collection, terminals
@@ -149,7 +150,15 @@ class SpdIU(Program):
             item["len_short"] = max(len_title, len_alias)
 
             task_items.append(item)
-            items.append(item)
+
+        longest = max([i["len_long"] for i in task_items])
+        longest_short = max([i["len_short"] for i in task_items])
+
+        for i in task_items:
+            i["longest"] = longest
+            i["longest_short"] = longest_short
+
+        items.extend(task_items)
 
         # Determine whether we're at max-depth or not
         truncate = self.list_depth and (len(ancestors) + 1) >= self.list_depth
@@ -160,7 +169,7 @@ class SpdIU(Program):
                 "name": name.strip(),
                 "ancestors": ancestors,
                 "subcollections": len(subcoll.collections),
-                "help": helpline(subcoll).strip(),
+                "help": helpline(subcoll).strip() if helpline(subcoll) else "",
                 "first": False,
                 "last": False,
             }
@@ -228,6 +237,12 @@ class SpdIU(Program):
             collection_items[0]["first"] = True
             collection_items[-1]["last"] = True
 
+            longest = max([i["len_long"] for i in collection_items])
+            longest_short = max([i["len_short"] for i in collection_items])
+
+        for i in collection_items:
+            i["longest"] = longest
+            i["longest_short"] = longest_short
         return items
 
     def display_with_items(self, lines, extra: str = "") -> None:
@@ -242,7 +257,6 @@ class SpdIU(Program):
         print(self.task_list_opener(extra=extra))
         print()
         root = self.list_root
-
         cols, rows = terminals.pty_size()
 
         def center_text(text, pad=" ", length=0):
@@ -264,50 +278,103 @@ class SpdIU(Program):
 
         breadcrumb = []
         for item in lines:
+            ancestors = item["ancestors"]
+            if len(breadcrumb) > len(ancestors):
+                breadcrumb = breadcrumb[: len(ancestors)]
+
             lead_width = self.leading_indent_width
-            indent_width = self.indent_width * len(item["ancestors"])
+            indent_width = lead_width + self.indent_width * len(ancestors)
+
+            # The columns the box wiring takes
+            borders = lead_width + len(item["ancestors"])
+            # The string building the wiring.
             indent = ""
-            borders = lead_width
+            # An equivalent indent with no connections to the line
+            help_indent = ""
 
             if item["op"] == "task":
-                if item["ancestors"]:
-                    borders = len(item["ancestors"])
-                    indent += "│" * (borders - 1)
+                if ancestors:
+                    # All but the direct ancestor are lines.
+                    if len(ancestors) >= 2:
+                        back_wires = "│" * (len(ancestors) - 2)
+                        indent += back_wires
+                        help_indent += back_wires
 
                     # discontinue extending the collection line
-                    # if it's the last on its list.
-                    last_parent = breadcrumb[-1]["last"]
-                    indent += " " if last_parent else "│"
+                    # if the parent has no more siblings.
+                    parent_is_last = breadcrumb[-1]["last"]
+                    parent_has_subs = bool(breadcrumb[-1]["subcollections"])
+                    if parent_is_last and not parent_has_subs:
+                        collection_wire = " "
+                    else:
+                        collection_wire = "│"
 
-                    if item["last"] and not breadcrumb[-1]["subcollections"]:
+                    indent += collection_wire
+                    help_indent += collection_wire
+
+                    if item["last"] and not parent_has_subs:
                         indent += "└"
+                        help_indent += " "
                     else:
                         indent += "├"
+                        help_indent += "│"
 
                     cap = ">"
-                    pad = (indent_width - len(indent) - len(cap)) * "-"
+                    pad = "-" * (indent_width - len(indent) - len(cap) - 1)
                     indent += pad + cap
 
+                # only first level loose tasks
                 else:
-                    indent = " " * lead_width
+                    indent = " " * indent_width
 
-                title = item["str_title"]
-                aliases = item["str_aliases"]
+                # sizin things up, time for indents to be pads.
+                max_title_size = int(indent_width + item["longest"] + self.col_padding)
 
-                print(indent + title + aliases, end=self.col_padding * " ")
+                # Biggest layout
+                title_long = indent
+                title_long += f"{item['str_title']}{item['str_aliases']}"
+                title_long += " " * (max_title_size - item["len_long"])
 
-                # len_pad = len(indent) + self.col_padding
-                # len_text = item['len_long']
+                help_title_indent = help_indent + " " * (max_title_size)
+                # cramped title help line
+                help_title_width = cols - max_title_size
+                # full width help line
+                help_page_width = cols - indent_width - self.col_padding
 
-                print(item["help"])
+                # Wrapping the first help line.
+                help_str = item["help"] if item["help"] else ""
+                first_wrap = textwrap.wrap(help_str, width=help_title_width)
+                for line in first_wrap:
+                    help_first = line
+                    break
 
-                if breadcrumb and item["last"]:
-                    del breadcrumb[-1]
+                help_lines = []
+                # if the rest can fit in a single short line, let it.
+                if len(first_wrap) == 2:
+                    help_lines.append(help_title_indent + first_wrap[1])
+
+                # if it would take two, it could fit in a single long line.
+                elif len(first_wrap) > 2:
+                    rest = help_str[len(help_lines[0]) :]
+                    rest_wrap = textwrap.wrap(rest, width=help_page_width)
+
+                    for line in rest_wrap:
+                        help_lines.append(help_indent + line)
+
+                print(title_long + help_first)
+
+                for line in help_lines:
+                    print(line)
 
             elif item["op"] == "collection":
-                if item["ancestors"]:
-                    borders = len(item["ancestors"])
-                    indent = "│" * borders
+                if ancestors:
+                    # All but the direct ancestor are lines.
+                    if len(ancestors) > 0:
+                        back_wires = "│" * (len(ancestors) - 1)
+                        indent += back_wires
+                        help_indent += back_wires
+
+                # if item['subcollections'] > 0:
 
                 if item["first"] and not item["last"]:
                     print(indent)
@@ -320,10 +387,7 @@ class SpdIU(Program):
                     indent += "╞"
 
                 indent += "╤"
-
-                # if item['subcollections'] > 0:
-
-                post_indent = "|>"
+                post_indent = "|> "
 
                 ancestors = item["str_ancestors"]
                 title = item["str_title"]
@@ -339,7 +403,7 @@ class SpdIU(Program):
                     text += f" {item['help']}"
 
                     len_text = long + len(post_indent)
-                    str_text = center_text(text, pad="═", length=len_text)
+                    str_text = center_text(text, pad="-", length=len_text)
 
                     print(indent + str_text)
 
@@ -397,7 +461,6 @@ class SpdIU(Program):
         self.leading_indent = " " * self.leading_indent_width
 
         self.indent_width = 2
-        self.indent = " " * self.indent_width
 
         self.col_padding = 2
 

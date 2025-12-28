@@ -1,18 +1,27 @@
 # Copyright (C) 2025 Tasos Alvas <tasos.alvas@qwertyuiopia.com>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-**/__pycache__
-**/*.egg-info
-.ruff_cache
-.pytest_cache
-.venv
-/tmp
-
 # Spdiu instance files
 /spdiu.yaml
 /tasks.py
 /slots
 /game
 
-# I like to keep a symlink to the invoke source.
+# Spdiu dev local folder
 /invoke
+/tmp
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# linting and tests
+.ruff_cache
+.pytest_cache

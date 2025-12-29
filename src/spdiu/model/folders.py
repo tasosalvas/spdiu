@@ -6,36 +6,9 @@
 from pathlib import Path
 from operator import attrgetter
 
-from . import util
+from .. import util
 
 
-# Game data representation classes
-class Item:
-    """An inventory item with an initialized dict."""
-
-    def __init__(self, itemdict={}):
-        """Construct a valid item dict, then overload its values with itemdict."""
-        self.item = {
-            "cursedKnown": True,
-            "quantity": 1,
-            "levelKnown": False,
-            "cursed": False,
-            "level": 0,
-            "uses_left_to_id": 10,
-            "__className": "com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor",
-            "kept_lost": False,
-            "curse_infusion_bonus": False,
-            "augment": "NONE",
-            "glyph_hardened": False,
-            "mastery_potion_bonus": False,
-            "available_uses": 5,
-        }
-
-        for k, v in itemdict.items():
-            self.item[k] = v
-
-
-# Save directory management classes
 class DataDir:
     """A directory of game data. Inherited by Profile and Game.
 

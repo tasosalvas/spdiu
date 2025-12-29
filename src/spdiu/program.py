@@ -53,7 +53,7 @@ class SpdIU(Program):
 
             p = Path(i_value).resolve() if type(i_value) is str else Path.cwd()
             self.generate_tasks_py(p)
-            self.generate_spdio_yaml(p)
+            self.generate_spdiu_yaml(p)
             raise Exit
 
     def load_collection(self) -> None:
@@ -62,9 +62,7 @@ class SpdIU(Program):
         Overloaded to expand the "can't find collection" text.
         """
         start = self.args["search-root"].value
-        loader = self.loader_class(  # type: ignore
-            config=self.config, start=start
-        )
+        loader = self.loader_class(config=self.config, start=start)
         coll_name = self.args.collection.value
 
         try:
@@ -151,14 +149,15 @@ class SpdIU(Program):
 
             task_items.append(item)
 
-        longest = max([i["len_long"] for i in task_items])
-        longest_short = max([i["len_short"] for i in task_items])
+        if task_items:
+            longest = max([i["len_long"] for i in task_items])
+            longest_short = max([i["len_short"] for i in task_items])
 
-        for i in task_items:
-            i["longest"] = longest
-            i["longest_short"] = longest_short
+            for i in task_items:
+                i["longest"] = longest
+                i["longest_short"] = longest_short
 
-        items.extend(task_items)
+            items.extend(task_items)
 
         # Determine whether we're at max-depth or not
         truncate = self.list_depth and (len(ancestors) + 1) >= self.list_depth
@@ -168,6 +167,7 @@ class SpdIU(Program):
                 "op": "collection",
                 "name": name.strip(),
                 "ancestors": ancestors,
+                "tasks": len(subcoll.tasks),
                 "subcollections": len(subcoll.collections),
                 "help": helpline(subcoll).strip() if helpline(subcoll) else "",
                 "first": False,
@@ -185,7 +185,7 @@ class SpdIU(Program):
                 len_ancestors += sum([len(i) for i in item["ancestors"]])
                 ancestors = [color(self.config, i, "ancestor") for i in ancestors]
 
-            str_ancestors = dot.join(ancestors) + " " if ancestors else ""
+            str_ancestors = dot.join(ancestors) + dot if ancestors else ""
             len_ancestors += 1 if ancestors else 0
             len_ancestors += len(ancestors) - 1 if len(ancestors) > 1 else 0
 
@@ -259,60 +259,33 @@ class SpdIU(Program):
         root = self.list_root
         cols, rows = terminals.pty_size()
 
-        def center_text(text, pad=" ", length=0):
-            """Centers a line in the terminal.
-
-            Accepts a canonical length to avoid miscounts with ansi chars.
-            If length is left at 0, it uses len(text).
-            """
-            cols = terminals.pty_size()[0]
-
-            if not length:
-                length = len(text)
-
-            if length >= cols:
-                return text
-            else:
-                indent = int((cols - length) / 2) * pad
-                return indent + text
-
         breadcrumb = []
         for item in lines:
             ancestors = item["ancestors"]
+            # Trim extra collections we may have just exited.
             if len(breadcrumb) > len(ancestors):
                 breadcrumb = breadcrumb[: len(ancestors)]
 
             lead_width = self.leading_indent_width
             indent_width = lead_width + self.indent_width * len(ancestors)
 
-            # The columns the box wiring takes
-            borders = lead_width + len(item["ancestors"])
             # The string building the wiring.
             indent = ""
-            # An equivalent indent with no connections to the line
-            help_indent = ""
-
             if item["op"] == "task":
-                if ancestors:
-                    # All but the direct ancestor are lines.
-                    if len(ancestors) >= 2:
-                        back_wires = "│" * (len(ancestors) - 2)
-                        indent += back_wires
-                        help_indent += back_wires
+                help_indent = ""
 
-                    # discontinue extending the collection line
-                    # if the parent has no more siblings.
-                    parent_is_last = breadcrumb[-1]["last"]
-                    parent_has_subs = bool(breadcrumb[-1]["subcollections"])
-                    if parent_is_last and not parent_has_subs:
-                        collection_wire = " "
-                    else:
-                        collection_wire = "│"
+                # First level loose tasks don't need wiring.
+                if not ancestors:
+                    indent = " " * indent_width
 
-                    indent += collection_wire
-                    help_indent += collection_wire
+                else:
+                    for p in breadcrumb:
+                        indent += " " if p["last"] else "│"
 
-                    if item["last"] and not parent_has_subs:
+                    help_indent = indent
+
+                    parent = breadcrumb[-1]
+                    if item["last"] and not parent["subcollections"]:
                         indent += "└"
                         help_indent += " "
                     else:
@@ -322,10 +295,6 @@ class SpdIU(Program):
                     cap = ">"
                     pad = "-" * (indent_width - len(indent) - len(cap) - 1)
                     indent += pad + cap
-
-                # only first level loose tasks
-                else:
-                    indent = " " * indent_width
 
                 # sizin things up, time for indents to be pads.
                 max_title_size = int(indent_width + item["longest"] + self.col_padding)
@@ -368,26 +337,37 @@ class SpdIU(Program):
 
             elif item["op"] == "collection":
                 if ancestors:
-                    # All but the direct ancestor are lines.
-                    if len(ancestors) > 0:
-                        back_wires = "│" * (len(ancestors) - 1)
-                        indent += back_wires
-                        help_indent += back_wires
+                    for p in breadcrumb:
+                        if p["last"]:
+                            indent += " "
+                        else:
+                            indent += "│"
 
-                # if item['subcollections'] > 0:
+                intro_indent = indent
 
-                if item["first"] and not item["last"]:
-                    print(indent)
+                # Collection line
+                if root and not ancestors:
+                    indent += ":"
+                    intro_indent += " "
+                elif item["first"] and not item["last"]:
                     indent += "╒"
+                    intro_indent += " "
                 elif item["last"]:
-                    print(indent + "│")
                     indent += "╘"
+                    intro_indent += "│"
                 else:
-                    print(indent + "│")
                     indent += "╞"
+                    intro_indent += "│"
 
-                indent += "╤"
-                post_indent = "|> "
+                # Children line
+                children = bool(item["subcollections"] or item["tasks"])
+                if children:
+                    indent += "╤"
+                else:
+                    indent += "═"
+
+                post_cap = ":<>: " if item["tasks"] else ":--: "
+                post_indent = "═" * (len(indent) - 3) + post_cap
 
                 ancestors = item["str_ancestors"]
                 title = item["str_title"]
@@ -395,17 +375,15 @@ class SpdIU(Program):
 
                 long = item["len_long"] + len(item["help"]) + 1
 
-                margin = borders + len(indent) + len(post_indent)
+                margin = len(indent) + len(post_indent)
                 space = cols - margin
 
                 if space > long:
                     text = post_indent + ancestors + title + truncate
                     text += f" {item['help']}"
 
-                    len_text = long + len(post_indent)
-                    str_text = center_text(text, pad="-", length=len_text)
-
-                    print(indent + str_text)
+                    print(intro_indent)
+                    print(indent + text)
 
                 else:
                     print(ancestors)
@@ -419,15 +397,17 @@ class SpdIU(Program):
                 print(lpad + item["name"])
                 print(lpad + item["help"])
 
+        # Print default task line
         default = self.scoped_collection.default
         if default:
             specific = ""
+
             if root:
                 specific = " '{}'".format(root)
                 default = ".{}".format(default)
 
             # TODO: trim/prefix dots
-            print("Default{} task: {}\n".format(specific, default))
+            print("Default{} task: {}".format(specific, default))
 
     def task_list_opener(self, extra: str = "") -> str:
         """Generate the intro line to task list help."""
@@ -518,7 +498,7 @@ class SpdIU(Program):
         file_path.write_text(src.read_text())
         print(f"Generated {file_path}")
 
-    def generate_spdio_yaml(self, path: Path) -> None:
+    def generate_spdiu_yaml(self, path: Path) -> None:
         """Generate a tasks.py from spdiu/templates/tasks.py."""
         path.mkdir(parents=True, exist_ok=True)
         # src = Path(__file__).parent / "templates" / "spdiu.yaml"

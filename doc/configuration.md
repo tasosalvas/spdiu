@@ -132,7 +132,7 @@ This is controlled by the `spdiu.dirs` dictionary / mapping.
 spdiu:
   dirs:
     # core paths
-    base: ~/my-spdio-data  # but why?
+    base: ~/my-spdiu-data  # but why?
 
     # functionality-specific paths
     slots: my_saves
